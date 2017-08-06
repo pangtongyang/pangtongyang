@@ -2,9 +2,14 @@
 
     package="lbcy.com.cn.blacklibrary">
 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+
     <application android:allowBackup="true" android:label="@string/app_name"
         android:supportsRtl="true">
 
+        <service android:name="com.huichenghe.bleControl.Ble.BluetoothLeService" />
     </application>
 
 </manifest>
