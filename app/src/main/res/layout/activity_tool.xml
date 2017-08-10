@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentStart="true">
+
+    <RelativeLayout
+
+        android:id="@+id/activity_tool"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp"
+        tools:context="com.huichenghe.cositeasdk.ToolActivity">
+
+
+        <Button
+            android:id="@+id/getdevice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="查找设备" />
+
+        <Button
+            android:id="@+id/settime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/getdevice"
+            android:text="设置时间" />
+
+        <Button
+            android:id="@+id/getdaydate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/settime"
+            android:text="获取全天数据" />
+
+        <Button
+            android:id="@+id/getbatter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/getdaydate"
+            android:text="获取电量" />
+
+
+        <Button
+            android:id="@+id/getsleepdata"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/getbatter"
+            android:text="睡眠数据" />
+
+        <Button
+            android:id="@+id/isshow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/getsleepdata"
+            android:text="隐藏界面" />
+
+        <Button
+            android:id="@+id/geteachhouedata"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/isshow"
+            android:text="获取每个小时的卡路里和步数" />
+
+        <Button
+            android:id="@+id/geteachsleep"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/geteachhouedata"
+            android:text="获取睡眠数据" />
+
+        <Button
+            android:id="@+id/qqremain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/geteachsleep"
+            android:text="qq提醒" />
+        <Button
+            android:id="@+id/phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/qqremain"
+            android:text="电话提醒" />
+        <TextView
+            android:id="@+id/heartrate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/phone"
+            android:text="当前心率：" />
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/heartrate"
+            android:text="数据：" />
+
+
+    </RelativeLayout>
+</ScrollView>

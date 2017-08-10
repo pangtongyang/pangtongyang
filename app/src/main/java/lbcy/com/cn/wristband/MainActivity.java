@@ -1,5 +1,8 @@
 package lbcy.com.cn.wristband;
 
+import android.Manifest;
+import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,14 +14,15 @@ import com.huichenghe.bleControl.Ble.BleScanUtils;
 import com.huichenghe.bleControl.Ble.LocalDeviceEntity;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
-import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.ble.DeviceConnect;
 import lbcy.com.cn.blacklibrary.manager.DeviceConnectManager;
-import lbcy.com.cn.blacklibrary.manager.DeviceManager;
-import lbcy.com.cn.wristband.utils.ToastUtils;
+import lbcy.com.cn.wristband.manager.PermissionManager;
+import lbcy.com.cn.wristband.test.ToolActivity;
+import lbcy.com.cn.wristband.utils.DialogUtil;
+import lbcy.com.cn.wristband.utils.ToastUtil;
+
+import static lbcy.com.cn.wristband.global.Consts.REQUEST_CODE_ASK_LOCATION_PERMISSIONS;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,7 +43,10 @@ public class MainActivity extends AppCompatActivity {
         manager.registerReceiverForAllEvent(new DeviceConnect() {
             @Override
             public void connect() {
-                ToastUtils.toast("连接成功！");
+                ToastUtil.toast("连接成功！");
+                Intent intet = new Intent(MainActivity.this, ToolActivity.class);
+                startActivity(intet);
+                MainActivity.this.finish();
             }
 
             @Override
@@ -72,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         mDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -86,4 +94,5 @@ public class MainActivity extends AppCompatActivity {
         manager.unregisterReceiver();
         BleScanUtils.getBleScanUtilsInstance(getApplicationContext()).stopScan();
     }
+
 }

@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-feature android:name="android.hardware.location.gps" />
 
     <application
         android:name=".app.BaseApplication"
@@ -15,6 +18,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
+
+        </activity>
+        <activity android:name=".test.ToolActivity"/>
+        <activity android:name=".test.ConnectionExampleActivity"/>
+        <activity android:name=".test.RxAndroidBleText">
+
+        </activity>
+        <activity android:name=".test.BlackScanTest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

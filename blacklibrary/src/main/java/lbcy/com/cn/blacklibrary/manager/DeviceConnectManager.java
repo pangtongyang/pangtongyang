@@ -34,8 +34,8 @@ public class DeviceConnectManager {
     private DeviceConnect mDevice1; //设备扫描
     private ArrayList mData = new ArrayList();
     private final int CLOSE_NOTE_NOT_CONNECT = 1;
+    Intent bleConnect;
 
-    ProgressDialog dialog;
 
     public DeviceConnectManager(Context context) {
         mContext = context;
@@ -61,8 +61,9 @@ public class DeviceConnectManager {
         public void onReceive(Context context, final Intent intent) {
             switch (intent.getAction()) {   // 设备已连接的广播
                 case DeviceConfig.DEVICE_CONNECTE_AND_NOTIFY_SUCESSFUL:
-                    mDevice.connect();
-                    dialog.dismiss();
+                    if (BluetoothLeService.getInstance().isConnectedDevice()) {
+                        mDevice.connect();
+                    }
 //                    closeProgressDialog();  关闭弹窗
 //                    String deName = LocalDataSaveTool.getInstance(MainActivity.this).readSp(DeviceConfig.DEVICE_NAME);
 //                    Intent intet = new Intent(MainActivity.this, ToolActivity.class);
@@ -74,14 +75,20 @@ public class DeviceConnectManager {
     };
 
     public void startService() {
-        Intent intent = new Intent(mContext, BluetoothLeService.class);
+        bleConnect = new Intent(mContext, BluetoothLeService.class);
         if (BluetoothLeService.getInstance() == null) {
-            mContext.startService(intent);
+            mContext.startService(bleConnect);
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void stopService() {
+        if (BluetoothLeService.getInstance() != null) {
+            BluetoothLeService.getInstance().stopService(bleConnect);
         }
     }
 
@@ -151,8 +158,7 @@ public class DeviceConnectManager {
         BleScanUtils.getBleScanUtilsInstance(mContext).stopScan();
         LocalDeviceEntity deviceEntity = (LocalDeviceEntity) mData.get(position);// 获取设备实体类
 //        showProgressDialog("" + deviceEntity.getName());  开启弹窗
-        dialog = ProgressDialog.show(mContext, "消息", "设备连接中");
-        dialog.show();
+        Toast.makeText(mContext, "设备连接中", Toast.LENGTH_SHORT).show();
         if (BluetoothLeService.getInstance() != null) {
 
             BluetoothLeService.getInstance().connect(deviceEntity);
@@ -166,6 +172,22 @@ public class DeviceConnectManager {
         }
     }
 
+    public void selectRxAndroidBleDevice(String name, String macAddress) {
+        LocalDeviceEntity deviceEntity = new LocalDeviceEntity(name, macAddress, -50, null);// 获取设备实体类
+        Toast.makeText(mContext, "设备连接中", Toast.LENGTH_SHORT).show();
+        if (BluetoothLeService.getInstance() != null) {
+
+            BluetoothLeService.getInstance().connect(deviceEntity);
+
+            Message msg = mHandler.obtainMessage();
+            msg.what = CLOSE_NOTE_NOT_CONNECT;
+            msg.obj = deviceEntity;
+            mHandler.sendMessageDelayed(msg, 12000);
+        } else {
+            Toast.makeText(mContext, "黑色手环服务未初始化！", Toast.LENGTH_LONG).show();
+        }
+    }
+
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -173,7 +195,6 @@ public class DeviceConnectManager {
                 case CLOSE_NOTE_NOT_CONNECT:
                     if (!BluetoothLeService.getInstance().isDeviceConnected((LocalDeviceEntity) msg.obj)) {
 //                    closeProgressDialog();  关闭弹窗
-                        dialog.dismiss();
                         Toast.makeText(mContext, "连接超时", Toast.LENGTH_SHORT).show();
                     }
                     break;

@@ -53,4 +53,98 @@ public interface DeviceController {
      * @param name 姓名
      */
     void isPhoneRemind(boolean isCalled, String phoneNum, String name);
+
+    /**
+     * 设置同步时间
+     * @param callback 回调函数
+     */
+    void synTime(DataCallback callback);
+
+    /**
+     * 设置时间格式
+     * @param is24 true -> 24， false -> 12
+     * @param callback 回调函数
+     */
+    void setTimeStyle(boolean is24, DataCallback callback);
+
+    /**
+     * 清除设备信息
+     */
+    void factoryReset();
+
+    /**
+     * 获取实时心率
+     * @param context 对应页面上下文
+     * @param callback 回调函数，返回心率16进制值
+     */
+    void startHeartRateListener(Context context, DataCallback callback);
+
+    /**
+     * 睡眠和运动目标设置
+     * @param stepTarget 运动步数
+     * @param sleepTimes 睡眠目标，睡多久
+     * @param sleepHour 开始休息时间，小时
+     * @param sleepMinute 开始休息时间，分钟
+     */
+    void setTarget(int stepTarget, int sleepTimes, int sleepHour, int sleepMinute);
+
+    /**
+     * 心率监测频率
+     * @param time 表示时间填10表示10分钟监测一次，30就是30分钟一次
+     */
+    void setHeartRateFreq(int time);
+
+    /**
+     * 设置心率预警值（超过预警值手环就会震动报警）
+     * @param maxHR 心率最大值
+     * @param minHR 心率最小值
+     */
+    void setHeartRateWarning(int maxHR, int minHR);
+
+    /**
+     * 设置手环参数
+     * 必须设置这些参数。手环用于计算步数，疲劳度等，设置计步参数
+     * @param hei 身高（175）cm
+     * @param wei 体重(65)kg
+     * @param gen 性别0表示男，1表示女
+     * @param bir 年龄（1991-04-12）
+     */
+    void setBodyItem(String hei, String wei, String gen, String bir);
+
+    /**
+     * 关闭开启手环界面
+     * @param isOpen true就是界面显示 false就是隐藏界面
+     * @param position 要显示或关闭的第几个界面
+     *（0：步数，1：心率，2：运动检测，3：里程，4，卡路里，5设置）
+     */
+    void setDeviceMenuState(boolean isOpen, int position);
+
+    /**
+     * 批量设置手环界面是否开启
+     * @param data boolean数组
+     *（0：步数，1：心率，2：运动检测，3：里程，4，卡路里，5设置）
+     */
+    void setAllMenuState(boolean []data);
+
+    /**
+     * 来电提醒设置
+     * @param time 延迟时间，1s
+     */
+    void ringDelay(int time);
+
+    /**
+     * 久坐提醒
+     * @param number 久坐提醒条目数，从0开始
+     * @param isOpen 1表示开启 0表示关闭
+     * @param beginTime 开启时间”10:30”
+     * @param endTime 结束时间”16:30”
+     * @param duration 间隔时间 30/60/90/120(可设置4个值)
+     */
+    void setSitRemind(int number, int isOpen, String beginTime, String endTime, int duration);
+
+    /**
+     * 删除久坐提醒
+     * @param number 删除第几条久坐提醒
+     */
+    void deleteSitRemind(int number);
 }

@@ -6,11 +6,14 @@ android {
     defaultConfig {
         applicationId "lbcy.com.cn.wristband"
         minSdkVersion 19
-        targetSdkVersion 22
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         multiDexEnabled = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        jackOptions {
+            enabled true
+        }
     }
     sourceSets {
         main {
@@ -29,6 +32,15 @@ android {
         javaMaxHeapSize "4g"
 
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+configurations.all {
+    resolutionStrategy.force 'com.google.code.findbugs:jsr305:1.3.9'
 }
 
 dependencies {
@@ -38,9 +50,22 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'no.nordicsemi.android.support.v18:scanner:0.1.1'
+
     compile 'com.android.support:multidex:1.0.1'
     //支持包用于5.0以下系统
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    //Butterknife
+    compile 'com.jakewharton:butterknife:8.8.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
+    //easypermission
+    compile 'pub.devrel:easypermissions:0.4.3'
+    //rxandroidble
+    compile 'com.polidea.rxandroidble:rxandroidble:1.3.3'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'com.trello:rxlifecycle:1.0'
+    compile 'com.trello:rxlifecycle-components:1.0'
+
     testCompile 'junit:junit:4.12'
     compile project(':blacklibrary')
     compile project(':purplelibrary')

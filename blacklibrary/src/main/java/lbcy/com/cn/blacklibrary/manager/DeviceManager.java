@@ -1,19 +1,36 @@
 package lbcy.com.cn.blacklibrary.manager;
 
+import android.bluetooth.BluetoothGatt;
 import android.content.Context;
 import android.util.Log;
 
 import com.huichenghe.bleControl.Ble.BleDataForBattery;
 import com.huichenghe.bleControl.Ble.BleDataForDayData;
 import com.huichenghe.bleControl.Ble.BleDataForEachHourData;
+import com.huichenghe.bleControl.Ble.BleDataForFactoryReset;
+import com.huichenghe.bleControl.Ble.BleDataForHRWarning;
+import com.huichenghe.bleControl.Ble.BleDataForRingDelay;
+import com.huichenghe.bleControl.Ble.BleDataForSettingArgs;
+import com.huichenghe.bleControl.Ble.BleDataForSettingParams;
 import com.huichenghe.bleControl.Ble.BleDataForSleepData;
+import com.huichenghe.bleControl.Ble.BleDataForTarget;
+import com.huichenghe.bleControl.Ble.BleDataforSyn;
 import com.huichenghe.bleControl.Ble.BleForFindDevice;
 import com.huichenghe.bleControl.Ble.BleForPhoneAndSmsRemind;
+import com.huichenghe.bleControl.Ble.BleForSitRemind;
+import com.huichenghe.bleControl.Ble.BleGattHelperListener;
+import com.huichenghe.bleControl.Ble.BleReadDeviceMenuState;
+import com.huichenghe.bleControl.Ble.BluetoothLeService;
 import com.huichenghe.bleControl.Ble.DataSendCallback;
+import com.huichenghe.bleControl.Ble.LocalDeviceEntity;
+import com.huichenghe.bleControl.BleGattHelper;
+import com.huichenghe.bleControl.Entity.sitRemindEntity;
 import com.huichenghe.bleControl.Utils.FormatUtils;
 
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.ctl.DeviceController;
+
+import static lbcy.com.cn.blacklibrary.utils.Util.getDataBinString;
 
 /**
  * Created by chenjie on 2017/8/6.
@@ -116,6 +133,7 @@ public class DeviceManager implements DeviceController {
 
             }
         });
+        BleDataForBattery.getmCurrentBattery();
         BleDataForBattery.getInstance().getBatteryPx();
     }
 
@@ -125,12 +143,16 @@ public class DeviceManager implements DeviceController {
             @Override
             public void sendSuccess(byte[] receiveData) {
                 callback.OnSuccess(receiveData);
-//                int step1 = FormatUtils.byte2Int(receveData, 4);
-//                int step2 = FormatUtils.byte2Int(receveData, 8);
-//                int step3 = FormatUtils.byte2Int(receveData, 12);
-//                int step4 = FormatUtils.byte2Int(receveData, 16);
-//                int step9 = FormatUtils.byte2Int(receveData, 36);
-//                showdatastring("第一小时步数：" + step1 + "，" + "第八小时步数：" + step9 + "；");
+//                Int step1= FormatUtils.byte2Int(eachData, 4);   step1获取凌晨到1点的步数
+//                Int step2=FormatUtils.byte2Int(eachData, 8);    step2获取1点到2点的步数
+//                Int step3=FormatUtils.byte2Int(eachData, 12);
+//                Int step4=FormatUtils.byte2Int(eachData, 16);
+//.............................................
+//                Int cal1= FormatUtils.byte2Int(eachData, 100);  获取凌晨点到1点的卡路里
+//                Int cal2= FormatUtils.byte2Int(eachData, 104);
+//                Int cal3= FormatUtils.byte2Int(eachData, 108);
+
+//                showdatastring("第一小时步数：" + step1 + "，" + "第八小时步数：" + step9 + "；" + "第一小时卡路里：" + cal1);
 
             }
 
@@ -208,5 +230,135 @@ public class DeviceManager implements DeviceController {
         } else {
             BleForPhoneAndSmsRemind.getInstance().beginPhoneRemind(phoneNum, name, BleForPhoneAndSmsRemind.phoneRemindFromDevice);
         }
+    }
+
+    @Override
+    public void synTime(final DataCallback callback) {
+        BleDataforSyn syn = BleDataforSyn.getSynInstance();
+        syn.setDataSendCallback(new DataSendCallback() {
+            @Override
+            public void sendSuccess(byte[] receveData) {
+                callback.OnSuccess(receveData);
+            }
+
+            @Override
+            public void sendFailed() {
+            }
+
+            @Override
+            public void sendFinished() {
+            }
+        });
+        syn.syncCurrentTime();
+
+    }
+
+    @Override
+    public void setTimeStyle(boolean is24, DataCallback callback) {
+        BleDataForSettingArgs setArgs = BleDataForSettingArgs.getInstance(mContext);
+        setArgs.setDataSendCallback(new DataSendCallback() {
+            @Override
+            public void sendSuccess(byte[] receveData) {
+            }
+
+            @Override
+            public void sendFailed() {
+            }
+
+            @Override
+            public void sendFinished() {
+            }
+        });
+        setArgs.setArgs("0x00", is24);
+    }
+
+    @Override
+    public void factoryReset() {
+        BleDataForFactoryReset.getBleDataInstance().settingFactoryReset();
+    }
+
+    @Override
+    public void startHeartRateListener(Context context, DataCallback callback) {
+        BluetoothLeService.getInstance().addCallback(
+                BleGattHelper.getInstance(context, new gattHelperListener(callback)));
+    }
+
+    class gattHelperListener implements BleGattHelperListener {
+        DataCallback callback;
+        public gattHelperListener(DataCallback callback){
+            this.callback = callback;
+        }
+
+        @Override
+        public void onDeviceStateChangeUI(LocalDeviceEntity device,
+                                          BluetoothGatt gatt,
+                                          final String uuid, final byte[] value) {
+            callback.OnSuccess(value);
+        }
+
+        @Override
+        public void onDeviceConnectedChangeUI(final LocalDeviceEntity device,
+                                              boolean showToast,
+                                              final boolean fromServer) {
+
+        }
+    }
+
+    @Override
+    public void setTarget(int stepTarget, int sleepTimes, int sleepHour, int sleepMinute) {
+        BleDataForTarget.getInstance().sendTargetToDevice(stepTarget, sleepTimes, sleepHour, sleepMinute);
+    }
+
+    @Override
+    public void setHeartRateFreq(int time) {
+        BleDataForSettingArgs.getInstance(mContext).setHeartReatArgs((byte)(int)time);
+    }
+
+    @Override
+    public void setHeartRateWarning(int maxHR, int minHR) {
+        BleDataForHRWarning.getInstance().closeOrOpenWarning( maxHR, minHR, (byte)0x00);
+    }
+
+    @Override
+    public void setBodyItem(String hei, String wei, String gen, String bir) {
+        new BleDataForSettingParams(mContext)
+                .settingTheStepParamsToBracelet(hei, wei, gen, bir);
+    }
+
+    @Override
+    public void setDeviceMenuState(boolean isOpen, int position) {
+        int number = position;
+        int allData =  0;
+        String all =getDataBinString(allData, number, isOpen);
+        int dataInt = Integer.parseInt(all, 2);
+        BleReadDeviceMenuState.getInstance().sendUpdateSwitchData32(dataInt);
+
+    }
+
+    @Override
+    public void setAllMenuState(boolean []data) {
+        for (int i = 0; i< data.length; i++) {
+            setDeviceMenuState(data[i], i);
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void ringDelay(int time) {
+        BleDataForRingDelay.getDelayInstance().settingDelayData(time);
+    }
+
+    @Override
+    public void setSitRemind(int number, int isOpen, String beginTime, String endTime, int duration) {
+        BleForSitRemind.getInstance().setSitData(new sitRemindEntity(number, isOpen, beginTime, endTime, duration));
+    }
+
+    @Override
+    public void deleteSitRemind(int number) {
+        BleForSitRemind.getInstance().deleteThisItem(number);
     }
 }

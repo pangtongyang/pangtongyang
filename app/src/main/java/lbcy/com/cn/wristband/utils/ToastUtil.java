@@ -13,7 +13,7 @@ import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
 
 
-public class ToastUtils {
+public class ToastUtil {
 
 	private static Handler baseHandler = new Handler() {
 		@Override
