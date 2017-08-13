@@ -49,7 +49,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:26.+'
-    compile 'no.nordicsemi.android.support.v18:scanner:0.1.1'
 
     compile 'com.android.support:multidex:1.0.1'
     //支持包用于5.0以下系统
