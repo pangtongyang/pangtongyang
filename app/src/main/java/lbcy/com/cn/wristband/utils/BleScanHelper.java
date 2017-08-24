@@ -2,9 +2,12 @@ package lbcy.com.cn.wristband.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.Toast;
 
 import com.polidea.rxandroidble.RxBleClient;
+import com.polidea.rxandroidble.RxBleConnection;
+import com.polidea.rxandroidble.RxBleDevice;
 import com.polidea.rxandroidble.exceptions.BleScanException;
 import com.polidea.rxandroidble.scan.ScanFilter;
 import com.polidea.rxandroidble.scan.ScanResult;
@@ -17,9 +20,14 @@ import java.util.List;
 import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.ctl.BleScanCallback;
 import lbcy.com.cn.wristband.entity.BleDevice;
+import lbcy.com.cn.wristband.test.OprateActivity;
 import lbcy.com.cn.wristband.test.RxAndroidBleText;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+
+import static com.trello.rxlifecycle.RxLifecycle.bindUntilEvent;
+import static com.trello.rxlifecycle.android.ActivityEvent.DESTROY;
+import static com.trello.rxlifecycle.android.ActivityEvent.PAUSE;
 
 /**
  * Created by chenjie on 2017/8/9.
@@ -32,6 +40,9 @@ public class BleScanHelper {
     HashSet<String> hashSet;
     BleDevice bleDevice;
     BleScanCallback callback;
+
+    private Subscription connectionSubscription;
+    private RxBleDevice bleConnectDevice;
 
     public BleScanHelper(Context context) {
         this.mContext = context;

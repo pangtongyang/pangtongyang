@@ -1,1 +1,1 @@
-include ':app', ':blacklibrary', ':purplelibrary'
+include ':app', ':blacklibrary', ':purplelibrary', ':settingitemlibrary'

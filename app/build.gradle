@@ -5,7 +5,7 @@ android {
     buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "lbcy.com.cn.wristband"
-        minSdkVersion 19
+        minSdkVersion 18
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -48,24 +48,25 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:26.+'
-
-    compile 'com.android.support:multidex:1.0.1'
     //支持包用于5.0以下系统
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     //Butterknife
-    compile 'com.jakewharton:butterknife:8.8.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
     //easypermission
-    compile 'pub.devrel:easypermissions:0.4.3'
     //rxandroidble
+    compile project(':blacklibrary')
+    compile project(':purplelibrary')
+    compile project(':settingitemlibrary')
+    compile 'com.android.support:appcompat-v7:26.+'
+    compile 'com.android.support:design:26.+'
+    compile 'com.android.support:cardview-v7:26.+'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.jakewharton:butterknife:8.8.0'
+    compile 'pub.devrel:easypermissions:0.4.3'
     compile 'com.polidea.rxandroidble:rxandroidble:1.3.3'
     compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.trello:rxlifecycle:1.0'
     compile 'com.trello:rxlifecycle-components:1.0'
-
     testCompile 'junit:junit:4.12'
-    compile project(':blacklibrary')
-    compile project(':purplelibrary')
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
 }

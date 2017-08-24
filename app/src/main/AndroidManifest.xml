@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <uses-feature android:name="android.hardware.location.gps" />
 
     <application
@@ -17,22 +18,46 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
-
-        </activity>
-        <activity android:name=".test.ToolActivity"/>
-        <activity android:name=".test.ConnectionExampleActivity"/>
+        <activity android:name=".MainActivity" />
+        <activity android:name=".test.ToolActivity" />
+        <activity android:name=".test.ConnectionExampleActivity" />
+        <activity android:name=".test.OprateActivity" />
         <activity android:name=".test.RxAndroidBleText">
-
-        </activity>
-        <activity android:name=".test.BlackScanTest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".test.BlackScanTest" />
+
         <service android:name="com.huichenghe.bleControl.Ble.BluetoothLeService" />
+
+        <!-- 登陆引导页 -->
+        <activity
+            android:name=".login.SplashActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name=".login.LoginActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity
+            android:name=".login.BasicbodyActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity android:name=".fragment.MeFragment" />
+        <activity android:name=".activity.DeviceSettingActivity" />
+        <activity android:name=".activity.Main2Activity" />
+        <activity android:name=".activity.BindPhoneActivity" />
+        <activity android:name=".activity.AlarmClockListActivity" />
+        <activity android:name=".activity.SetAlarmClockActivity" />
+        <activity android:name=".activity.ScanHeartRateActivity" />
+        <activity android:name=".activity.SetSedentaryActivity" />
+        <activity android:name=".activity.MyMessageActivity"></activity>
     </application>
 
 </manifest>

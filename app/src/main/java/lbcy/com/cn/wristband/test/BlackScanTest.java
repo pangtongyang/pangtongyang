@@ -1,5 +1,6 @@
 package lbcy.com.cn.wristband.test;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -12,6 +13,7 @@ import android.widget.ListView;
 
 import com.huichenghe.bleControl.Ble.BluetoothLeService;
 import com.huichenghe.bleControl.Ble.LocalDeviceEntity;
+import com.polidea.rxandroidble.RxBleDevice;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,12 +24,14 @@ import butterknife.ButterKnife;
 import lbcy.com.cn.blacklibrary.ble.DeviceConnect;
 import lbcy.com.cn.blacklibrary.manager.DeviceConnectManager;
 import lbcy.com.cn.wristband.R;
+import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.ctl.BleScanCallback;
 import lbcy.com.cn.wristband.entity.BleDevice;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.utils.BleScanHelper;
 import lbcy.com.cn.wristband.utils.HandlerTip;
 import lbcy.com.cn.wristband.utils.ToastUtil;
+import rx.Subscription;
 
 /**
  * Created by chenjie on 2017/8/9.
@@ -39,6 +43,9 @@ public class BlackScanTest extends AppCompatActivity {
     ArrayAdapter adapter;
     BleScanHelper scanHelper;
     DeviceConnectManager manager;
+    private Subscription connectionSubscription;
+    private RxBleDevice bleConnectDevice;
+    private Context mContext = this;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -96,6 +103,30 @@ public class BlackScanTest extends AppCompatActivity {
                     }
                     if (macAddress != null) {
                         manager.selectRxAndroidBleDevice(Consts.BLACK_WRISTBAND_NAME, macAddress);
+                    } else {
+                        ToastUtil.toast("错误！");
+                    }
+                }else if(adapter.getItem(i).equals(Consts.PURPLE_WRISTBAND_NAME)){
+                    scanHelper.stopRxAndroidBleScan();
+
+                    HashSet<String> hashSet = scanHelper.getRxAndroidBleDevices();
+                    Iterator<String> iterator = hashSet.iterator();
+                    String macAddress = null;
+                    while (iterator.hasNext()) {
+                        String data = iterator.next();
+                        String name = data.split("###")[0];
+                        if (name == null) {
+                            continue;
+                        }
+                        if (name.equals(Consts.BLACK_WRISTBAND_NAME)) {
+                            macAddress = data.split("###")[1];
+                            break;
+                        }
+                    }
+                    if (macAddress != null) {
+
+
+
                     } else {
                         ToastUtil.toast("错误！");
                     }

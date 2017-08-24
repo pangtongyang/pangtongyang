@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/login_bg">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/loading"
+        android:layout_alignParentStart="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="40dp"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@mipmap/loginguide"
+                android:layout_marginBottom="@dimen/login_edit_margintop"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/login_bg2"
+                android:layout_marginLeft="@dimen/login_edit_marginleft"
+                android:layout_marginRight="@dimen/login_edit_marginright"
+                android:layout_marginTop="@dimen/login_edit_margintop">
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/et_name_design"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/et_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:hint="@string/activity_login_et_name_hint"
+                        android:textColorHint="@color/login_texthint"
+                        android:textSize="@dimen/login_edit_hint" />
+                </android.support.design.widget.TextInputLayout>
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_centerVertical="true"
+                    android:src="@mipmap/user" >
+                </ImageView>
+            </RelativeLayout>
+
+
+            <RelativeLayout
+                android:id="@+id/password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/login_bg2"
+                android:layout_marginLeft="@dimen/login_edit_marginleft"
+                android:layout_marginRight="@dimen/login_edit_marginright"
+                android:layout_marginTop="@dimen/login_edit_margintop">
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/et_password_design"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true">
+
+                    <EditText
+                        android:id="@+id/et_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:hint="@string/activity_login_et_password_hint"
+                        android:inputType="textPassword"
+                        android:textColorHint="@color/login_texthint"
+                        android:textSize="@dimen/login_edit_hint" />
+                </android.support.design.widget.TextInputLayout>
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_centerVertical="true"
+                    android:src="@mipmap/password" >
+                </ImageView>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/loginbyother"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/password"
+                android:layout_marginLeft="@dimen/login_btn_marginleft"
+                android:layout_marginRight="@dimen/login_btn_marginright">
+
+                <TextView
+                    android:id="@+id/otherlogin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="17dp"
+                    android:clickable="true"
+                    android:onClick="forget_password"
+                    android:text="@string/activity_login_by_other"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+            </RelativeLayout>
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/login_btn_marginleft"
+                android:layout_marginRight="@dimen/login_btn_marginright"
+                android:layout_marginTop="@dimen/login_login_margintop"
+                android:background="@drawable/login_bg"
+                android:text="@string/activity_login_et_btn_login"
+                android:textColor="@color/login_bg"
+                android:textSize="@dimen/login_edit_hint" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <include
+        android:id="@+id/loading"
+        layout="@layout/progressbar_custom_rl"
+        android:visibility="gone" />
+</RelativeLayout>

@@ -52,21 +52,20 @@ public class ConnectionExampleActivity extends RxAppCompatActivity {
 
     @BindView(R.id.textView)
     TextView textView;
+    private String macAddress;
 
     @OnClick(R.id.connect_toggle)
     public void onConnectToggleClick() {
 
-//        if (isConnected()) {
-//            triggerDisconnect();
-//        } else {
-//            connectionSubscription = bleDevice.establishConnection(autoConnectToggleSwitch.isChecked())
-//                    .compose(bindUntilEvent(PAUSE))
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .doOnUnsubscribe(this::clearSubscription)
-//                    .subscribe(this::onConnectionReceived, this::onConnectionFailure);
-//        }
-        LocalDeviceEntity localDeviceEntity = new LocalDeviceEntity(bleDevice.getName(), bleDevice.getMacAddress(), -50, null);
-        BluetoothLeService.getInstance().connect(localDeviceEntity);
+        if (isConnected()) {
+            triggerDisconnect();
+        } else {
+            connectionSubscription = bleDevice.establishConnection(autoConnectToggleSwitch.isChecked())
+                    .compose(bindUntilEvent(PAUSE))
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnUnsubscribe(this::clearSubscription)
+                    .subscribe(this::onConnectionReceived, this::onConnectionFailure);
+        }
     }
 
     boolean isFind = true;
@@ -112,25 +111,13 @@ public class ConnectionExampleActivity extends RxAppCompatActivity {
         super.onStop();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @OnClick(R.id.set_mtu)
-    public void onSetMtu() {
-        BluetoothLeService.getInstance().disconnect();
-//        bleDevice.establishConnection(false)
-//                .flatMap(rxBleConnection -> rxBleConnection.requestMtu(72))
-//                .first() // Disconnect automatically after discovery
-//                .compose(bindUntilEvent(PAUSE))
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .doOnUnsubscribe(this::updateUI)
-//                .subscribe(this::onMtuReceived, this::onConnectionFailure);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_example2);
         ButterKnife.bind(this);
-        String macAddress = getIntent().getStringExtra("extra_mac_address");
+        macAddress = getIntent().getStringExtra("extra_mac_address");
         setTitle(getString(R.string.mac_address, macAddress));
         bleDevice = BaseApplication.getRxBleClient(this).getBleDevice(macAddress);
 
@@ -147,50 +134,16 @@ public class ConnectionExampleActivity extends RxAppCompatActivity {
 
     private void onConnectionFailure(Throwable throwable) {
         //noinspection ConstantConditions
-//        Snackbar.make(findViewById(android.R.id.content), "Connection error: " + throwable, Snackbar.LENGTH_SHORT).show();
         ToastUtil.toast("Connection error: " + throwable);
     }
 
     private void onConnectionReceived(RxBleConnection connection) {
         //noinspection ConstantConditions
-//        Snackbar.make(findViewById(android.R.id.content), "Connection received", Snackbar.LENGTH_SHORT).show();
-//        ToastUtil.toast("Connection received");
-//        Intent intent = new Intent(this, ToolActivity.class);
-//        startActivity(intent);
-
-        BluetoothLeService.getInstance().addCallback(
-                BleGattHelper.getInstance(getApplicationContext(), new gattHelperListener()));
+        ToastUtil.toast("Connection received");
+        Intent intent = new Intent(this, OprateActivity.class);
+        startActivity(intent);
     }
 
-    class gattHelperListener implements BleGattHelperListener {
-        @Override
-        public void onDeviceStateChangeUI(LocalDeviceEntity device,
-                                          BluetoothGatt gatt,
-                                          final String uuid, final byte[] value) {
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String showResult = "当前心率：";
-                    int liveHR = value[1] & 0xff;
-                    if (liveHR != 0) {
-                        showResult += String.valueOf(liveHR);
-                    } else {
-                        showResult += "--";
-                    }
-//                    textheartrate.setText(showResult);
-                }
-            });
-
-        }
-
-        @Override
-        public void onDeviceConnectedChangeUI(final LocalDeviceEntity device,
-                                              boolean showToast,
-                                              final boolean fromServer) {
-
-        }
-    }
 
     private void onConnectionStateChange(RxBleConnection.RxBleConnectionState newState) {
         connectionStateView.setText(newState.toString());
@@ -199,7 +152,6 @@ public class ConnectionExampleActivity extends RxAppCompatActivity {
 
     private void onMtuReceived(Integer mtu) {
         //noinspection ConstantConditions
-//        Snackbar.make(findViewById(android.R.id.content), "MTU received: " + mtu, Snackbar.LENGTH_SHORT).show();
         ToastUtil.toast("MTU received: " + mtu);
     }
 

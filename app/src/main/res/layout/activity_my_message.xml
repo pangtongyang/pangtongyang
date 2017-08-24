@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="lbcy.com.cn.wristband.activity.MyMessageActivity">
+
+    <include
+        android:id="@+id/title_up_layout"
+        layout="@layout/title_bar_activity"/>
+
+        <android.support.v7.widget.RecyclerView
+        android:id="@+id/memessage_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:paddingLeft="@dimen/memessage_list_left"
+        android:paddingRight="@dimen/memessage_list_left"
+        />
+</LinearLayout>

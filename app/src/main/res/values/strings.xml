@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Wristband</string>
     <string name="settings">设置</string>
@@ -8,4 +9,66 @@
     <string name="disconnect">Disconnect</string>
     <string name="connect">Connect</string>
     <string name="mac_address">MAC: %s</string>
+
+    <!-- activity LoginActivity -->
+    <string name="activity_login_et_name_hint"> 请输入用户名 </string>
+    <string name="activity_login_et_password_hint">请输入密码 </string>
+    <string name="activity_login_et_btn_login">登录</string>
+    <string name="activity_login_et_btn_regist">注册</string>
+    <string name="activity_login_by_phone">手机号登录 </string>
+    <string name="activity_login_by_other">证件号登录 </string>
+    <string name="activity_quit">退出</string>
+
+    <!--activity BindPhoneActivity-->
+    <string name="bindphone">手机号 </string>
+    <string name="suremessage">验证码 </string>
+    <string name="getmessage">获取验证码 </string>
+
+    <!--activity BasicbodyActivity-->
+    <string name="simplebody">身体详情 </string>
+    <string name="simplebodyheight">身高 </string>
+    <string name="simplebodyheightunit">cm </string>
+    <string name="simplebodyweight">体重 </string>
+    <string name="simplebodyweightunit">kg </string>
+    <string name="simplebodysubmit">提交 </string>
+
+    <!--fragment MeFragment-->
+    <string name="fragment_me_statics">运动统计 </string>
+    <string name="fragment_me_setting">设备设置 </string>
+    <string name="fragment_me_disturb">勿扰开关 </string>
+    <string name="fragment_me_footprint">个人足迹 </string>
+    <string name="fragment_me_body">身高体重 </string>
+    <string name="fragment_me_phone">绑定手机号 </string>
+    <string name="fragment_me_news">我的消息 </string>
+    <string name="fragment_me_help">帮助说明 </string>
+
+    <!--activity Device Setting-->
+    <string name="activity_device_push">消息推送 </string>
+    <string name="activity_device_late">迟到提醒 </string>
+    <string name="activity_device_clock">闹钟设置 </string>
+    <string name="activity_device_handsup">抬腕显示 </string>
+    <string name="activity_device_antilost">防丢开关 </string>
+    <string name="activity_device_shock">触摸震动 </string>
+    <string name="activity_device_upgrade">固件升级 </string>
+    <string name="activity_device_heartrate">心率监控 </string>
+    <string name="activity_device_sedentary">久坐提醒 </string>
+    <string name="title_activity_alarm_clock_list">AlarmClockListActivity</string>
+
+    <!--activity SetAlarmClockActivity-->
+    <string name="alarm_set_datetime">设置时间</string>
+    <string name="alarm_set_datetime_cycle">重复</string>
+
+    <!--activity ScanHeartRateActivity-->
+    <string name="activity_set_heart">心率监测</string>
+    <string name="activity_set_heartrate">监测频率</string>
+    <string name="activity_call_heart">心率预警</string>
+    <string name="activity_max_min">预警范围</string>
+    <string name="activity_max_heartrate">最大心率</string>
+    <string name="activity_min_heartrate">最小心率</string>
+
+    <!--activity SetSedentaryActivity-->
+    <string name="activity_Sedentary">久坐提醒</string>
+    <string name="start_Sedentary">开启久坐提醒</string>
+    <string name="end_Sedentary">结束久坐提醒</string>
+    <string name="space_Sedentary">时间提醒间隔</string>
 </resources>
