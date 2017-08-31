@@ -8,6 +8,8 @@
     <color name="bottom_all_bg_color_normal">#8c9092</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color><!--黑色 -->
+    <!-- 背景色 -->
+    <color name="bg_color">#f0eff5</color>
     <color name="black_text">#333333</color>
     <color name="gray_bg">#efe7e3</color>
     <!-- 分割线颜色 -->
@@ -19,8 +21,9 @@
     <color name="text_color_6">#666666</color>
     <color name="text_color_9">#999999</color>
     <color name="text_color_c">#cccccc</color>
-
+    <color name="orange">#FFA500</color><!--橙色 -->
     <!--闹钟设置周期文字颜色-->
     <color name="week_text_red">#761811</color>
     <color name="week_text_gray">#959595</color>
+
 </resources>

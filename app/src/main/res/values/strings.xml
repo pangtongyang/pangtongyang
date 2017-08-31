@@ -71,4 +71,25 @@
     <string name="start_Sedentary">开启久坐提醒</string>
     <string name="end_Sedentary">结束久坐提醒</string>
     <string name="space_Sedentary">时间提醒间隔</string>
+
+    <!--activity SetMessagePushActivity-->
+    <string name="messagepush">短信推送</string>
+    <string name="qq">QQ推送</string>
+    <string name="wechat">微信推送</string>
+    <string name="facebook">Facebook推送</string>
+    <string name="telephone">电话推送</string>
+
+    <!--activity SportStatisticsActivity-->
+    <string name="step">平均每日步数</string>
+    <string name="calorie">平均每日大卡</string>
+    <string name="date">最佳周</string>
+    <string name="bestday">最佳日</string>
+    <string name="sports">运动天数</string>
+    <string name="standard">达标天数</string>
+    <string name="setstep">设置目标</string>
+    <string name="setstatistics">每天10000步是保持健康生活的方式</string>
+    <string name="fansports">爱好者</string>
+    <string name="amateursports">业余选手</string>
+    <string name="professionalsport">专业队员</string>
+    <string name="makesurestatistics">确认目标</string>
 </resources>

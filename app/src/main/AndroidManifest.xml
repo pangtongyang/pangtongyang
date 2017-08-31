@@ -57,7 +57,10 @@
         <activity android:name=".activity.SetAlarmClockActivity" />
         <activity android:name=".activity.ScanHeartRateActivity" />
         <activity android:name=".activity.SetSedentaryActivity" />
-        <activity android:name=".activity.MyMessageActivity"></activity>
+        <activity android:name=".activity.MyMessageActivity" />
+        <activity android:name=".activity.SetMessagePushActivity" />
+        <activity android:name=".activity.SportStatisticsActivity" />
+        <activity android:name=".activity.HelpdescriptionActivity"></activity>
     </application>
 
 </manifest>
