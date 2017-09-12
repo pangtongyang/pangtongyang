@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.support.v7.widget.SwitchCompat;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -36,14 +38,20 @@ public class SetItemView extends RelativeLayout {
     private int mTextSize;
     //左侧图标
     private Drawable mLeftIcon;
+    //右侧圆圈
+    private TextView mRightCircle;
     // 右侧图标
     private Drawable mRightIcon;
+    //右侧开关
+    private SwitchCompat mSwitch;
     //左侧边距
     private int mMarginLeft;
     //右侧边距
     private int mMarginRight;
     //定义监听器
     private OnSetItemClick mOnSetItemClick;
+    //定义开关监听器
+    private OnmCheckedChange onmCheckedChange;
 
     public SetItemView(Context context) {
         this(context, null);
@@ -63,6 +71,15 @@ public class SetItemView extends RelativeLayout {
             public void onClick(View v) {
                 if (null != mOnSetItemClick) {
                     mOnSetItemClick.click();
+                }
+            }
+        });
+        //设置开关状态监听事件
+        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (null != onmCheckedChange) {
+                    onmCheckedChange.change(b);
                 }
             }
         });
@@ -101,10 +118,25 @@ public class SetItemView extends RelativeLayout {
                 if (!flag) {
                     mUnderLine.setVisibility(View.GONE);
                 }
+            } else if (arr == R.styleable.SetItemView_switchselected) {
+                boolean selected = typedArray.getBoolean(arr, false);
+                if (selected) {
+                    mIvRightIcon.setVisibility(View.GONE);
+                    mRightCircle.setVisibility(View.GONE);
+                    mSwitch.setVisibility(View.VISIBLE);
+                }
+            } else if (arr == R.styleable.SetItemView_switchchecked) {
+                boolean checked = typedArray.getBoolean(arr, false);
+                mSwitch.setChecked(checked);
+            } else if (arr == R.styleable.SetItemView_isShowLeftIcon) {
+                boolean isShow = typedArray.getBoolean(arr, false);
+                if (!isShow)
+                    mIvLeftIcon.setVisibility(View.GONE);
             }
         }
         typedArray.recycle();
     }
+
 
     /**
      * 初始化控件对象
@@ -116,6 +148,12 @@ public class SetItemView extends RelativeLayout {
         mIvLeftIcon = (ImageView) mView.findViewById(R.id.iv_lefticon);
         mIvRightIcon = (ImageView) mView.findViewById(R.id.iv_righticon);
         mUnderLine = mView.findViewById(R.id.underline);
+        mRightCircle = mView.findViewById(R.id.iv_circle);
+        mSwitch = mView.findViewById(R.id.switch_righticon);
+    }
+
+    public void setmOnCheckedChangeListener(OnmCheckedChange onmCheckedChange) {
+        this.onmCheckedChange = onmCheckedChange;
     }
 
     public void setmOnSetItemClick(OnSetItemClick mOnSetItemClick) {
@@ -124,5 +162,22 @@ public class SetItemView extends RelativeLayout {
 
     public interface OnSetItemClick {
         void click();
+    }
+
+    public interface OnmCheckedChange {
+        void change(boolean state);
+    }
+
+    public void setNumber(int number) {
+        if (number == 0 || number < 0 || number > 999){
+            mRightCircle.setVisibility(View.GONE);
+        } else{
+            mRightCircle.setVisibility(View.VISIBLE);
+            mRightCircle.setText(number+"");
+        }
+    }
+
+    public boolean isChecked(){
+        return mSwitch.isChecked();
     }
 }

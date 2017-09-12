@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
-import lbcy.com.cn.blacklibrary.manager.DeviceManager;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.wristband.R;
 
 import static lbcy.com.cn.wristband.utils.Util.getDataBinString;
@@ -50,7 +50,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
 //        BluetoothLeService.getInstance().addCallback(
 //                BleGattHelper.getInstance(getApplicationContext(), new gattHelperListener()));
-        DeviceManager.getInstance().startHeartRateListener(this, new DataCallback() {
+        BlackDeviceManager.getInstance().startHeartRateListener(this, new DataCallback() {
             @Override
             public void OnSuccess(byte[] data) {
                 runOnUiThread(new Runnable() {
@@ -135,7 +135,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.getdevice:
                 if (butgetdevice.getText().toString().equals("查找设备")) {
                     butgetdevice.setText("取消查找");
-                    DeviceManager.getInstance().findDevice(true, new DataCallback() {
+                    BlackDeviceManager.getInstance().findDevice(true, new DataCallback() {
                         @Override
                         public void OnSuccess(byte[] data) {
                             showdata(data);
@@ -153,12 +153,12 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
                     });
                 } else {
                     butgetdevice.setText("查找设备");
-                    DeviceManager.getInstance().findDevice(false, null);
+                    BlackDeviceManager.getInstance().findDevice(false, null);
                 }
                 break;
             case R.id.getdaydate:
 
-                DeviceManager.getInstance().getDayData(new DataCallback() {
+                BlackDeviceManager.getInstance().getDayData(new DataCallback() {
                     @Override
                     public void OnSuccess(byte[] data) {
                         int stepAll = FormatUtils.byte2Int(data, 4);
@@ -184,7 +184,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.getbatter:
-                DeviceManager.getInstance().getBattery(new DataCallback() {
+                BlackDeviceManager.getInstance().getBattery(new DataCallback() {
                     @Override
                     public void OnSuccess(byte[] data) {
                         showdata(data);
@@ -206,7 +206,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
                 sendNewDataToDevice(false, 0);  //不明白做什么的
                 break;
             case R.id.geteachhouedata:
-                DeviceManager.getInstance().getEachHourStep(new DataCallback() {
+                BlackDeviceManager.getInstance().getEachHourStep(new DataCallback() {
                     @Override
                     public void OnSuccess(byte[] data) {
                         int step1 = FormatUtils.byte2Int(data, 4);
@@ -230,7 +230,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.geteachsleep:
-                DeviceManager.getInstance().getSleepData(new DataCallback() {
+                BlackDeviceManager.getInstance().getSleepData(new DataCallback() {
                     @Override
                     public void OnSuccess(byte[] data) {
                         String stralldata = getsleepdata(data);

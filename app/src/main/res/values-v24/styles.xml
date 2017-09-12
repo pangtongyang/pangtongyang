@@ -1,0 +1,7 @@
+<resources>
+    <style name="NoActionBarTheme" parent="MyTheme">
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:statusBarColor">@color/blue</item>
+    </style>
+</resources>

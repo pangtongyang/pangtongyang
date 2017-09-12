@@ -26,16 +26,19 @@
     <dimen name="login_edit_margin0top">0dp</dimen>
     <dimen name="login_btn_marginleft">40dp</dimen>
     <dimen name="login_btn_marginright">40dp</dimen>
-    <dimen name="login_login_margintop">24dp</dimen>
+    <dimen name="login_margintop">40dp</dimen>
     <dimen name="login_regist_margintop">16dp</dimen>
-    <dimen name="login_edit_hint">14sp</dimen>
+    <dimen name="login_edit_hint">16sp</dimen>
     <dimen name="bodysimple">20sp</dimen>
 
     <!-- common -->
     <dimen name="textsize_12">12sp</dimen>
     <dimen name="textsize_14">14sp</dimen>
     <dimen name="textsize_16">16sp</dimen>
+    <dimen name="textsize_18">18sp</dimen>
     <dimen name="textsize_22">22sp</dimen>
+    <dimen name="textsize_28">28sp</dimen>
+    <dimen name="textsize_32">32sp</dimen>
     <dimen name="margin_5">5dp</dimen>
     <dimen name="margin_6">6dp</dimen>
     <dimen name="margin_7">7dp</dimen>
@@ -57,11 +60,44 @@
     <dimen name="margin_47">47dp</dimen>
     <dimen name="margin_50">50dp</dimen>
     <dimen name="margin_70">70dp</dimen>
+    <dimen name="margin_80">80dp</dimen>
+    <dimen name="padding_5">5dp</dimen>
+    <dimen name="padding_6">6dp</dimen>
+    <dimen name="padding_7">7dp</dimen>
+    <dimen name="padding_8">8dp</dimen>
+    <dimen name="padding_10">10dp</dimen>
+    <dimen name="padding_13">13dp</dimen>
+    <dimen name="padding_14">14dp</dimen>
+    <dimen name="padding_15">15dp</dimen>
+    <dimen name="padding_16">16dp</dimen>
+    <dimen name="padding_20">20dp</dimen>
+    <dimen name="padding_23">23dp</dimen>
+    <dimen name="padding_24">24dp</dimen>
+    <dimen name="padding_25">25dp</dimen>
+    <dimen name="padding_26">26dp</dimen>
+    <dimen name="padding_28">28dp</dimen>
+    <dimen name="padding_30">30dp</dimen>
+    <dimen name="padding_40">40dp</dimen>
+    <dimen name="padding_43">43dp</dimen>
+    <dimen name="padding_47">47dp</dimen>
+    <dimen name="padding_50">50dp</dimen>
+    <dimen name="padding_60">60dp</dimen>
+    <dimen name="padding_70">70dp</dimen>
+    <dimen name="padding_100">100dp</dimen>
 
-    <dimen name="height_120">120dp</dimen>
-    <dimen name="height_60">60dp</dimen>
+    <dimen name="width_5">5dp</dimen>
+    <dimen name="width_15">15dp</dimen>
+    <dimen name="width_20">20dp</dimen>
+    <dimen name="width_30">30dp</dimen>
+    <dimen name="width_35">35dp</dimen>
+    <dimen name="width_40">40dp</dimen>
+    <dimen name="width_45">45dp</dimen>
+    <dimen name="width_50">50dp</dimen>
+    <dimen name="width_60">60dp</dimen>
+    <dimen name="width_80">80dp</dimen>
     <dimen name="width_100">100dp</dimen>
     <dimen name="width_120">120dp</dimen>
-    <dimen name="height_170">170dp</dimen>
+    <dimen name="width_170">170dp</dimen>
+
     <dimen name="fab_margin">16dp</dimen>
 </resources>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/padding_20"
+        android:paddingBottom="@dimen/padding_20">
+        <ImageView
+            android:id="@+id/iv_message_title"
+            android:layout_width="@dimen/width_30"
+            android:layout_height="@dimen/width_30"
+            android:layout_marginStart="@dimen/margin_20"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/push"/>
+
+        <TextView
+            android:id="@+id/tv_message_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/margin_10"
+            android:text="系统消息：您的账号已到期，请登录xxx网址进行续费"
+            android:layout_marginEnd="@dimen/margin_20"
+            android:textSize="@dimen/textsize_16"
+            android:textColor="@color/black_text"
+            android:layout_toEndOf="@+id/iv_message_title"/>
+    </RelativeLayout>
+
+</LinearLayout>

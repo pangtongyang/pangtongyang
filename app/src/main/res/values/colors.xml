@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="mainBackColor">#FFFEFE</color>
+    <color name="mtpLightGray">#99e2e2e2</color>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="coloraccent">#2a96c5</color>
+    <color name="mLightGray">#e2e2e2</color>
+    <color name="mDarkGray">#cccccc</color>
     <color name="menu_item_white_pressed">#f3f3f3</color>
     <color name="bottom_all_bg_color_normal">#8c9092</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color><!--黑色 -->
     <color name="black_text">#333333</color>
     <color name="gray_bg">#efe7e3</color>
+    <color name="gray_text">#E9E8E6</color>
     <!-- 分割线颜色 -->
     <color name="seperator_color">#cccccc</color>
     <!-- LoginActivity-->
     <color name="login_bg">#3caee2</color>
+    <color name="blue">#5AC2F4</color>
     <color name="login_texthint">#9dd1ee</color>
     <color name="text_color_3">#333333</color>
     <color name="text_color_6">#666666</color>
@@ -23,4 +29,17 @@
     <!--闹钟设置周期文字颜色-->
     <color name="week_text_red">#761811</color>
     <color name="week_text_gray">#959595</color>
+
+    <!--开关样式-->
+    <color name="switch_gray">#D8D8D8</color>
+    <color name="switch_green">#63D973</color>
+
+    <!--弹窗样式-->
+    <color name="popup_bg">#8f000000</color>
+    <color name="line_bg">#CDCDCD</color>
+
+    <!--SportStatisticsActivity-->
+    <color name="bg_color">#f0eff5</color>
+    <color name="orange">#FFA500</color><!--橙色 -->
+    <color name="text_dark_gray">#8c9092</color>
 </resources>

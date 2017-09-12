@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/mtpLightGray"
+        android:paddingTop="@dimen/padding_15"
+        android:paddingBottom="@dimen/padding_15">
+        <ImageView
+            android:id="@+id/iv_help_subleft"
+            android:layout_width="@dimen/width_30"
+            android:layout_height="@dimen/width_30"
+            android:layout_marginStart="@dimen/margin_20"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/answer"/>
+
+        <TextView
+            android:id="@+id/tv_help_subcontent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/margin_10"
+            android:text="首先开启蓝牙权限，b并在手环10米范围内,点击设备连接的状态，APP将自行查找范围内手环b并进行配对连接。"
+            android:layout_marginEnd="@dimen/margin_40"
+            android:textSize="@dimen/textsize_16"
+            android:textColor="@color/black_text"
+            android:layout_toEndOf="@+id/iv_help_subleft"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

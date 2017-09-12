@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="lbcy.com.cn.wristband.MainActivity">
+    tools:context="lbcy.com.cn.wristband.test.Main3Activity">
 
 
     <ListView

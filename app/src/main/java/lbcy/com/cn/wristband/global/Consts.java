@@ -10,4 +10,13 @@ public class Consts {
     //public static final String BLACK_WRISTBAND_NAME = "BC_dd2d9a596e3f";
     public static final String BLACK_WRISTBAND_NAME = "BC_";
     public static final String PURPLE_WRISTBAND_NAME = "BC-02B";
+    public static final String CLOCK_DK_NAME = "LBCY_CLOCK_DB";
+
+
+    //订阅消息
+    public static final String CLOCK_LISTENER = "ClockListener";
+    //更新编辑闹钟页文本信息
+    public static final int UPDATE_CLOCK_DATA = 1024;
+    //更新闹钟设置页
+    public static final int UPDATE_ALL_CLOCK_DATA = 1025;
 }

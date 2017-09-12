@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="lbcy.com.cn.wristband.activity.SetMessagePushActivity">
+
+    <lbcy.com.cn.settingitemlibrary.SetItemView
+        android:id="@+id/rl_sms_push"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:leftIcon="@mipmap/messagepush"
+        app:leftText="@string/messagepush"
+        app:rightIcon="@drawable/go_gray"
+        app:switchselected="true"
+        app:textColor="@color/text_color_6"
+        app:textSize="16" />
+
+    <lbcy.com.cn.settingitemlibrary.SetItemView
+        android:id="@+id/rl_qq_push"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:leftIcon="@mipmap/qq"
+        app:leftText="@string/qq"
+        app:rightIcon="@drawable/go_gray"
+        app:switchselected="true"
+        app:textColor="@color/text_color_6"
+        app:textSize="16" />
+
+    <lbcy.com.cn.settingitemlibrary.SetItemView
+        android:id="@+id/rl_wechat_push"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:leftIcon="@mipmap/wechat"
+        app:leftText="@string/wechat"
+        app:rightIcon="@drawable/go_gray"
+        app:switchselected="true"
+        app:textColor="@color/text_color_6"
+        app:textSize="16" />
+
+
+    <lbcy.com.cn.settingitemlibrary.SetItemView
+        android:id="@+id/rl_facebook_push"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:leftIcon="@mipmap/facebook"
+        app:leftText="@string/facebook"
+        app:rightIcon="@drawable/go_gray"
+        app:switchselected="true"
+        app:textColor="@color/text_color_6"
+        app:textSize="16" />
+
+    <lbcy.com.cn.settingitemlibrary.SetItemView
+        android:id="@+id/rl_telephone_push"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:leftIcon="@mipmap/telephone"
+        app:leftText="@string/telephone"
+        app:rightIcon="@drawable/go_gray"
+        app:switchselected="true"
+        app:textColor="@color/text_color_6"
+        app:textSize="16" />
+
+</LinearLayout>

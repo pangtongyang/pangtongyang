@@ -6,44 +6,70 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="lbcy.com.cn.wristband.activity.SetAlarmClockActivity">
-
-    <include
-        android:id="@+id/title_up_layout"
-        layout="@layout/title_bar_activity"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|left"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="10dp"
-        android:gravity="center_horizontal|left"
-        android:text="@string/alarm_set_datetime"
-        android:textColor="@color/black_text"
-        android:textSize="15dp" />
+    <lbcy.com.cn.wristband.widget.timepicker.TimePickView
+        android:id="@+id/timepicker"
+        android:layout_width="match_parent"
+        android:layout_marginStart="@dimen/margin_80"
+        android:layout_marginEnd="@dimen/margin_80"
+        android:layout_height="wrap_content"/>
 
     <View
+        android:id="@+id/underline"
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@color/week_text_red">
-    </View>
+        android:layout_marginStart="16dp"
+        android:background="#cccccc"/>
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/rl_repeat"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:gravity="center">
+        android:layout_height="56dp"
+        android:clickable="true"
+        android:background="@drawable/common_tab_bg"
+        android:gravity="center_vertical">
 
-        <TimePicker
-            android:id="@+id/date_time"
+        <TextView
+            android:id="@+id/tv_lefttext"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="23dp"
+            android:text="@string/alarm_set_datetime_cycle"
+            android:gravity="center_vertical"
+            android:textColor="@color/black_text"
+            android:textSize="@dimen/textsize_16"/>
+
+        <TextView
+            android:id="@+id/tv_righttext"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:text="@string/alarm_set_once"
+            android:layout_toStartOf="@+id/iv_righticon"
+            android:gravity="center_vertical"
+            android:textColor="@color/text_dark_gray"
+            android:textSize="@dimen/textsize_14"/>
+
+        <ImageView
+            android:id="@+id/iv_righticon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_marginEnd="23dp"
+            android:src="@drawable/go_gray"/>
+
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/switch_righticon"
+            app:track="@drawable/back_selector"
+            android:thumb="@drawable/thumb_selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="23dp"
+            android:checked="false"
+            android:visibility="gone"/>
 
-    </LinearLayout>
-    <include
-        android:id="@+id/day_layout"
-        layout="@layout/selector_item"/>
-
+    </RelativeLayout>
 </LinearLayout>

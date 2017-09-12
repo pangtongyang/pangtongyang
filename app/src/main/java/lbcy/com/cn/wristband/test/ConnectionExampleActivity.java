@@ -1,20 +1,12 @@
 package lbcy.com.cn.wristband.test;
 
-import android.bluetooth.BluetoothGatt;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.huichenghe.bleControl.Ble.BleGattHelperListener;
-import com.huichenghe.bleControl.Ble.BluetoothLeService;
-import com.huichenghe.bleControl.Ble.LocalDeviceEntity;
-import com.huichenghe.bleControl.BleGattHelper;
 import com.huichenghe.bleControl.Utils.FormatUtils;
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
@@ -24,7 +16,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
-import lbcy.com.cn.blacklibrary.manager.DeviceManager;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.utils.ToastUtil;
@@ -74,7 +66,7 @@ public class ConnectionExampleActivity extends RxAppCompatActivity {
     public void findDevice() {
         if (isFind) {
 
-            DeviceManager.getInstance().findDevice(isFind, new DataCallback() {
+            BlackDeviceManager.getInstance().findDevice(isFind, new DataCallback() {
                 @Override
                 public void OnSuccess(byte[] data) {
                     runOnUiThread(new Runnable() {
@@ -96,7 +88,7 @@ public class ConnectionExampleActivity extends RxAppCompatActivity {
                 }
             });
         } else {
-            DeviceManager.getInstance().findDevice(isFind, null);
+            BlackDeviceManager.getInstance().findDevice(isFind, null);
         }
         isFind = !isFind;
     }

@@ -2,197 +2,264 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/setting_layout"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="vertical"
-    tools:context="lbcy.com.cn.wristband.activity.DeviceSettingActivity">
+    tools:context="lbcy.com.cn.wristband.activity.MeActivity">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:background="#f2f2f2">
+        android:layout_alignParentTop="true">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
-
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="230dp"
+                android:background="#0000ff"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/rl_top_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/width_50">
+
+                    <ImageView
+                        android:id="@+id/iv_back"
+                        android:layout_width="@dimen/width_50"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:background="@drawable/btn_back_bg"
+                        android:clickable="true"
+                        android:onClick="onBackPressed"
+                        android:padding="@dimen/padding_13"
+                        android:src="@mipmap/back_white" />
+                </RelativeLayout>
 
                 <LinearLayout
-                    android:id="@+id/rl_head"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal">
+                    android:orientation="horizontal">
 
-                    <android.support.v7.widget.CardView
-                        android:layout_width="@dimen/width_120"
-                        android:layout_height="@dimen/height_120"
-                        android:layout_marginBottom="@dimen/margin_16"
-                        android:layout_marginTop="@dimen/margin_16"
-                        android:background="@android:color/white"
-                        app:cardBackgroundColor="@color/colorAccent"
-                        app:cardCornerRadius="60dp"
-                        app:cardElevation="20dp">
-
-                        <ImageView
-                            android:id="@+id/iv_header"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:src="@mipmap/logo" />
-                    </android.support.v7.widget.CardView>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/rl_me"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <RelativeLayout
+                    <LinearLayout
+                        android:id="@+id/rl_head"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.5"
+                        android:paddingBottom="@dimen/padding_40"
+                        android:gravity="center_horizontal">
 
-                        <TextView
-                            android:id="@+id/tv_name"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/margin_16"
-                            android:gravity="left"
-                            android:text="@string/fragment_me_setting"
-                            android:textColor="#110d0a"
-                            android:textSize="@dimen/textsize_22"
-                            android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/tv_id"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@+id/tv_name"
-                            android:layout_marginTop="@dimen/margin_10"
-                            android:gravity="left"
-                            android:text="1234645625235145"
-                            android:textColor="@color/text_color_9"
-                            android:textSize="@dimen/textsize_16" />
+                        <lbcy.com.cn.wristband.widget.ImageViewPlus
+                            android:id="@+id/iv_header"
+                            android:layout_width="@dimen/width_100"
+                            android:layout_height="@dimen/width_100"
+                            android:layout_gravity="center"
+                            android:layout_marginStart="@dimen/margin_10"
+                            android:scaleType="fitXY"
+                            android:src="@mipmap/appsplash" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/rl_me"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
                         <RelativeLayout
-                            android:id="@+id/rl_mac"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@+id/tv_id">
+                            android:layout_height="match_parent">
 
                             <TextView
-                                android:id="@+id/tv_mac"
+                                android:id="@+id/tv_name"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/margin_5"
-                                android:text="MAC地址"
-                                android:textColor="@color/text_color_9"
-                                android:textSize="@dimen/textsize_16" />
+                                android:gravity="start"
+                                android:text="@string/fragment_me_setting"
+                                android:textColor="@color/white"
+                                android:textSize="@dimen/textsize_22"
+                                android:textStyle="bold"
+                                android:layout_alignParentTop="true"
+                                android:layout_alignParentStart="true" />
 
                             <TextView
-                                android:id="@+id/tv_macid"
+                                android:id="@+id/tv_id"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/margin_5"
-                                android:gravity="center"
-                                android:text="12346"
-                                android:textColor="@color/text_color_9"
+                                android:layout_below="@+id/tv_name"
+                                android:layout_marginTop="@dimen/margin_10"
+                                android:gravity="start"
+                                android:text="1234645625235145"
+                                android:textColor="@color/white"
                                 android:textSize="@dimen/textsize_16" />
+
+                            <RelativeLayout
+                                android:id="@+id/rl_version"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@+id/tv_id">
+
+                                <TextView
+                                    android:id="@+id/tv_version"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/margin_5"
+                                    android:text="固件版本：  "
+                                    android:textColor="@color/white"
+                                    android:textSize="@dimen/textsize_16" />
+
+                                <TextView
+                                    android:id="@+id/tv_version_content"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/margin_5"
+                                    android:layout_toEndOf="@+id/tv_version"
+                                    android:gravity="center"
+                                    android:text="A1B2C3D4E5F6"
+                                    android:textColor="@color/white"
+                                    android:textSize="@dimen/textsize_16" />
+                            </RelativeLayout>
+
+                            <TextView
+                                android:id="@+id/tv_link"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_below="@+id/rl_version"
+                                android:layout_marginTop="@dimen/margin_10"
+                                android:drawableStart="@drawable/app_circle_green"
+                                android:drawablePadding="@dimen/padding_5"
+                                android:gravity="start"
+                                android:text="设备已经连接"
+                                android:textColor="@color/white"
+                                android:textSize="@dimen/textsize_14" />
+
+                            <RelativeLayout
+                                android:id="@+id/rl_battery"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@+id/tv_link">
+
+                                <ImageView
+                                    android:id="@+id/iv_battery"
+                                    android:layout_width="@dimen/width_30"
+                                    android:layout_height="@dimen/width_30"
+                                    android:layout_marginStart="-5dp"
+                                    android:src="@mipmap/battery_100"
+                                    android:textColor="@color/white"
+                                    android:textSize="@dimen/textsize_16" />
+
+                                <TextView
+                                    android:id="@+id/tv_battery"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_centerVertical="true"
+                                    android:layout_toEndOf="@+id/iv_battery"
+                                    android:gravity="start"
+                                    android:text="100%"
+                                    android:textColor="@color/white"
+                                    android:textSize="@dimen/textsize_14" />
+                            </RelativeLayout>
+
                         </RelativeLayout>
 
-                        <TextView
-                            android:id="@+id/tv_link"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentBottom="true"
-                            android:layout_alignParentStart="true"
-                            android:layout_below="@+id/rl_mac"
-                            android:layout_marginTop="@dimen/margin_10"
-                            android:gravity="left"
-                            android:text="设备已经连接"
-                            android:textColor="@color/text_color_9"
-                            android:textSize="@dimen/textsize_14" />
-                    </RelativeLayout>
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </LinearLayout>
 
+            <lbcy.com.cn.settingitemlibrary.SetItemView
+                android:id="@+id/rl_late_alarm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:leftIcon="@mipmap/setup"
+                app:leftText="@string/activity_device_late"
+                app:rightIcon="@drawable/go_gray"
+                app:switchselected="true"
+                app:textColor="@color/text_color_6"
+                app:textSize="16" />
+
+            <lbcy.com.cn.settingitemlibrary.SetItemView
+                android:id="@+id/rl_hand_up"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:leftIcon="@mipmap/statistics"
+                app:leftText="@string/activity_device_handsup"
+                app:rightIcon="@drawable/go_gray"
+                app:switchselected="true"
+                app:textColor="@color/text_color_6"
+                app:textSize="16" />
+
+            <lbcy.com.cn.settingitemlibrary.SetItemView
+                android:id="@+id/rl_loss"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:leftIcon="@mipmap/disturb"
+                app:leftText="@string/activity_device_antilost"
+                app:rightIcon="@drawable/go_gray"
+                app:switchselected="true"
+                app:textColor="@color/text_color_6"
+                app:textSize="16" />
+
+            <lbcy.com.cn.settingitemlibrary.SetItemView
+                android:id="@+id/rl_vibrate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:leftIcon="@mipmap/footprint"
+                app:leftText="@string/activity_device_shock"
+                app:rightIcon="@drawable/go_gray"
+                app:switchselected="true"
+                app:textColor="@color/text_color_6"
+                app:textSize="16" />
 
             <lbcy.com.cn.settingitemlibrary.SetItemView
                 android:id="@+id/rl_push"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:isShowUnderLine="false"
-                app:leftIcon="@mipmap/push"
+                app:leftIcon="@mipmap/body"
                 app:leftText="@string/activity_device_push"
-                app:rightIcon="@drawable/task_arrow"
+                app:rightIcon="@drawable/go_gray"
                 app:textColor="@color/text_color_6"
                 app:textSize="16" />
 
             <lbcy.com.cn.settingitemlibrary.SetItemView
-                android:id="@+id/rl_late"
+                android:id="@+id/rl_clock_setting"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:leftIcon="@mipmap/late"
-                app:leftText="@string/activity_device_late"
-                app:rightIcon="@drawable/task_arrow"
-                app:textColor="@color/text_color_6"
-                app:textSize="16" />
-
-            <lbcy.com.cn.settingitemlibrary.SetItemView
-                android:id="@+id/rl_clock"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:leftIcon="@mipmap/clock"
+                app:leftIcon="@mipmap/phone"
                 app:leftText="@string/activity_device_clock"
-                app:rightIcon="@drawable/task_arrow"
+                app:rightIcon="@drawable/go_gray"
                 app:textColor="@color/text_color_6"
                 app:textSize="16" />
 
             <lbcy.com.cn.settingitemlibrary.SetItemView
-                android:id="@+id/rl_handsup"
+                android:id="@+id/rl_heart_rate_scan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:leftIcon="@mipmap/handsup"
-                app:leftText="@string/activity_device_handsup"
-                app:rightIcon="@drawable/task_arrow"
+                app:leftIcon="@mipmap/news"
+                app:leftText="@string/activity_device_heartrate"
+                app:rightIcon="@drawable/go_gray"
                 app:textColor="@color/text_color_6"
                 app:textSize="16" />
 
             <lbcy.com.cn.settingitemlibrary.SetItemView
-                android:id="@+id/rl_antilost"
+                android:id="@+id/rl_long_sitting_alarm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:leftIcon="@mipmap/antilost"
-                app:leftText="@string/activity_device_antilost"
-                app:rightIcon="@drawable/task_arrow"
-                app:textColor="@color/text_color_6"
-                app:textSize="16" />
-
-            <lbcy.com.cn.settingitemlibrary.SetItemView
-                android:id="@+id/rl_shock"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:leftIcon="@mipmap/shock"
-                app:leftText="@string/activity_device_shock"
-                app:rightIcon="@drawable/task_arrow"
+                app:leftIcon="@mipmap/help"
+                app:leftText="@string/activity_device_sedentary"
+                app:rightIcon="@drawable/go_gray"
                 app:textColor="@color/text_color_6"
                 app:textSize="16" />
 
@@ -200,40 +267,13 @@
                 android:id="@+id/rl_upgrade"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:leftIcon="@mipmap/upgrade"
+                android:layout_marginBottom="30dp"
+                app:leftIcon="@mipmap/help"
                 app:leftText="@string/activity_device_upgrade"
-                app:rightIcon="@drawable/task_arrow"
-                app:textColor="@color/text_color_6"
-                app:textSize="16" />
-
-            <lbcy.com.cn.settingitemlibrary.SetItemView
-                android:id="@+id/rl_heartrate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
-                android:layout_marginTop="14dp"
-                app:isShowUnderLine="false"
-                app:leftIcon="@mipmap/heartrate"
-                app:leftText="@string/activity_device_heartrate"
-                app:rightIcon="@drawable/task_arrow"
-                app:textColor="@color/text_color_6"
-                app:textSize="16" />
-
-            <lbcy.com.cn.settingitemlibrary.SetItemView
-                android:id="@+id/rl_sedentary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
-                android:layout_marginTop="14dp"
-                app:isShowUnderLine="false"
-                app:leftIcon="@mipmap/sedentary"
-                app:leftText="@string/activity_device_sedentary"
-                app:rightIcon="@drawable/task_arrow"
+                app:rightIcon="@drawable/go_gray"
                 app:textColor="@color/text_color_6"
                 app:textSize="16" />
 
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>
-
-

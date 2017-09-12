@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:orientation="horizontal"
+            android:paddingBottom="5dip"
+            android:paddingTop="5dip">
+
+            <View
+                android:layout_width="0dip"
+                android:layout_height="0dip"
+                android:layout_weight="1" />
+
+            <FrameLayout
+                android:layout_width="110dip"
+                android:layout_height="wrap_content">
+
+                <lbcy.com.cn.wristband.widget.timepicker.LoopView
+                    android:id="@+id/loop_hour"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="110dip"
+                android:layout_height="wrap_content">
+
+                <lbcy.com.cn.wristband.widget.timepicker.LoopView
+                    android:id="@+id/loop_min"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center" />
+            </FrameLayout>
+
+            <View
+                android:layout_width="0dip"
+                android:layout_height="0dip"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="15dip"
+            android:background="@color/colorPrimary" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="15dip"
+            android:background="@color/colorPrimary" />
+
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#E2E2E2"
+        android:visibility="gone"/>
+
+</LinearLayout>

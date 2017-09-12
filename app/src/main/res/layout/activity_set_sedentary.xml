@@ -7,69 +7,27 @@
     android:orientation="vertical"
     tools:context="lbcy.com.cn.wristband.activity.SetSedentaryActivity">
 
-    <include
-        android:id="@+id/title_up_layout"
-        layout="@layout/title_bar_activity" />
-
-    <!--久坐提醒 tooglebutton-->
-    <RelativeLayout
+    <View
         android:layout_width="match_parent"
-        android:layout_height="@dimen/title_bar_h">
+        android:layout_height="@dimen/width_5"
+        android:background="@color/mtpLightGray" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:paddingBottom="@dimen/title_bar_back_bottom"
-            android:paddingTop="@dimen/title_bar_back_bottom">
+    <!--久坐提醒 switch-->
+    <lbcy.com.cn.settingitemlibrary.SetItemView
+        android:id="@+id/rl_sedentary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:switchselected="true"
+        app:leftIcon="@mipmap/sedentary"
+        app:leftText="@string/activity_Sedentary"
+        app:isShowUnderLine="false">
 
+    </lbcy.com.cn.settingitemlibrary.SetItemView>
 
-
-            <ImageView
-                android:id="@+id/image_sedentary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/title_bar_save_right"
-                android:src="@mipmap/sedentary" />
-
-            <TextView
-                android:id="@+id/sedentary_content"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/image_sedentary"
-                android:layout_marginLeft="@dimen/alarm_clock_list_left"
-                android:text="@string/activity_Sedentary"
-                />
-            <ToggleButton
-                android:id="@+id/set_heart_toggle"
-                android:layout_width="60dp"
-                android:layout_height="80dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/title_bar_add_padding"
-                android:background="@android:color/transparent"
-                android:button="@drawable/ios7_btn"
-                android:checked="false"
-                android:gravity="right|center_vertical"
-                android:text=""
-                android:textOff=""
-                android:textOn="" />
-
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_alignParentBottom="true"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:background="#99999999" />
-
-    </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/width_20"
+        android:background="@color/mtpLightGray" />
 
     <!--开始久坐提醒-->
     <LinearLayout
@@ -80,24 +38,21 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/title_bar_save_right"
+            android:layout_marginStart="@dimen/title_bar_save_right"
             android:paddingBottom="@dimen/title_bar_back_bottom"
             android:paddingTop="@dimen/title_bar_back_bottom"
             android:text="@string/start_Sedentary"
             android:textSize="@dimen/home_fragment_info_item_size"/>
 
         <Button
-            android:id="@+id/StartSedentary"
+            android:id="@+id/startSedentary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/title_bar_save_right"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="@dimen/title_bar_save_right"
-            android:text="time"/>
+            android:layout_height="@dimen/width_40"
+            android:layout_marginStart="@dimen/margin_50"
+            android:layout_marginEnd="@dimen/margin_50"
+            android:background="@drawable/btn_sedentary_bg"
+            android:textColor="@color/black_text"
+            android:text="09:00"/>
 
     </LinearLayout>
 
@@ -110,32 +65,27 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/title_bar_save_right"
+            android:layout_marginStart="@dimen/title_bar_save_right"
             android:paddingBottom="@dimen/title_bar_back_bottom"
             android:paddingTop="@dimen/title_bar_back_bottom"
             android:text="@string/end_Sedentary"
             android:textSize="@dimen/home_fragment_info_item_size"/>
 
         <Button
-            android:id="@+id/EndSedentary"
+            android:id="@+id/endSedentary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/title_bar_save_right"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="@dimen/title_bar_save_right"
-            android:text="time"/>
+            android:layout_height="@dimen/width_40"
+            android:layout_marginStart="@dimen/margin_50"
+            android:layout_marginEnd="@dimen/margin_50"
+            android:background="@drawable/btn_sedentary_bg"
+            android:textColor="@color/black_text"
+            android:text="09:00"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1px"
-            android:layout_alignParentBottom="true"
             android:layout_marginTop="@dimen/margin_10"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginStart="16dp"
             android:background="#99999999" />
     </LinearLayout>
 
@@ -148,31 +98,21 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/title_bar_save_right"
+            android:layout_marginStart="@dimen/title_bar_save_right"
             android:paddingTop="@dimen/title_bar_back_bottom"
+            android:paddingBottom="@dimen/title_bar_back_bottom"
             android:text="@string/space_Sedentary"
             android:textSize="@dimen/home_fragment_info_item_size"/>
 
         <Button
-            android:id="@+id/SpaceSedentary"
+            android:id="@+id/spaceSedentary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/title_bar_save_right"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="@dimen/title_bar_save_right"
-            android:text="time"/>
+            android:layout_height="@dimen/width_40"
+            android:layout_marginStart="@dimen/margin_50"
+            android:layout_marginEnd="@dimen/margin_50"
+            android:background="@drawable/btn_sedentary_bg_special"
+            android:textColor="@color/black_text"
+            android:text="30分钟"/>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_alignParentBottom="true"
-            android:layout_marginTop="@dimen/margin_10"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:background="#99999999" />
     </LinearLayout>
 </LinearLayout>

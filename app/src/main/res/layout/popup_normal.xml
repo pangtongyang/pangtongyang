@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:id="@+id/click_to_dismiss"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/popup_bg"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+
+        <LinearLayout
+            android:id="@+id/popup_anima"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_centerInParent="true">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/width_50"
+                android:text="@string/alarm_set_repeat_set"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/textsize_16"
+                android:background="@drawable/repeat_set_top_bg"/>
+            <RelativeLayout
+                android:id="@+id/rl_zhouyi"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/width_50"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:background="@drawable/white_tab_bg">
+                <TextView
+                    android:id="@+id/tx_zhouyi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/width_50"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/margin_10"
+                    android:paddingEnd="0dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:textColor="@color/black_text"
+                    android:text="@string/alarm_set_zhouyi"/>
+
+                <ImageView
+                    android:id="@+id/iv_zhouyi"
+                    android:layout_width="@dimen/width_30"
+                    android:layout_height="@dimen/width_30"
+                    android:src="@mipmap/checkmark_blue"
+                    android:layout_marginEnd="@dimen/margin_10"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_zhouer"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/width_50"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:background="@drawable/white_tab_bg">
+                <TextView
+                    android:id="@+id/tx_zhouer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/width_50"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/margin_10"
+                    android:paddingEnd="0dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:textColor="@color/black_text"
+                    android:text="@string/alarm_set_zhouer"/>
+
+                <ImageView
+                    android:id="@+id/iv_zhouer"
+                    android:layout_width="@dimen/width_30"
+                    android:layout_height="@dimen/width_30"
+                    android:src="@mipmap/checkmark_blue"
+                    android:layout_marginEnd="@dimen/margin_10"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_zhousan"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/width_50"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:background="@drawable/white_tab_bg">
+                <TextView
+                    android:id="@+id/tx_zhousan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/width_50"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/margin_10"
+                    android:paddingEnd="0dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:textColor="@color/black_text"
+                    android:text="@string/alarm_set_zhousan"/>
+
+                <ImageView
+                    android:id="@+id/iv_zhousan"
+                    android:layout_width="@dimen/width_30"
+                    android:layout_height="@dimen/width_30"
+                    android:src="@mipmap/checkmark_blue"
+                    android:layout_marginEnd="@dimen/margin_10"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_zhousi"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/width_50"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:background="@drawable/white_tab_bg">
+                <TextView
+                    android:id="@+id/tx_zhousi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/width_50"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/margin_10"
+                    android:paddingEnd="0dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:textColor="@color/black_text"
+                    android:text="@string/alarm_set_zhousi"/>
+
+                <ImageView
+                    android:id="@+id/iv_zhousi"
+                    android:layout_width="@dimen/width_30"
+                    android:layout_height="@dimen/width_30"
+                    android:src="@mipmap/checkmark_blue"
+                    android:layout_marginEnd="@dimen/margin_10"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_zhouwu"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/width_50"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:background="@drawable/white_tab_bg">
+                <TextView
+                    android:id="@+id/tx_zhouwu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/width_50"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/margin_10"
+                    android:paddingEnd="0dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:textColor="@color/black_text"
+                    android:text="@string/alarm_set_zhouwu"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true" />
+
+                <ImageView
+                    android:id="@+id/iv_zhouwu"
+                    android:layout_width="@dimen/width_30"
+                    android:layout_height="@dimen/width_30"
+                    android:src="@mipmap/checkmark_blue"
+                    android:layout_marginEnd="@dimen/margin_10"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_zhouliu"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/width_50"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:background="@drawable/white_tab_bg">
+                <TextView
+                    android:id="@+id/tx_zhouliu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/width_50"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/margin_10"
+                    android:paddingEnd="0dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:textColor="@color/black_text"
+                    android:text="@string/alarm_set_zhouliu"/>
+
+                <ImageView
+                    android:id="@+id/iv_zhouliu"
+                    android:layout_width="@dimen/width_30"
+                    android:layout_height="@dimen/width_30"
+                    android:src="@mipmap/checkmark_blue"
+                    android:layout_marginEnd="@dimen/margin_10"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_zhouri"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/width_50"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:background="@drawable/white_tab_bg">
+                <TextView
+                    android:id="@+id/tx_zhouri"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/width_50"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/margin_10"
+                    android:paddingEnd="0dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:textColor="@color/black_text"
+                    android:text="@string/alarm_set_zhouri"/>
+
+                <ImageView
+                    android:id="@+id/iv_zhouri"
+                    android:layout_width="@dimen/width_30"
+                    android:layout_height="@dimen/width_30"
+                    android:src="@mipmap/checkmark_blue"
+                    android:layout_marginEnd="@dimen/margin_10"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/width_50">
+                <Button
+                    android:id="@+id/btn_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/cancel"
+                    android:textSize="@dimen/textsize_16"
+                    android:textColor="@color/black_text"
+                    android:background="@drawable/btn_left_bottom_circle_gray_bg"/>
+
+                <Button
+                    android:id="@+id/btn_confirm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/confirm"
+                    android:textSize="@dimen/textsize_16"
+                    android:textColor="@color/white"
+                    android:background="@drawable/btn_right_bottom_circlr_blue_bg"/>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

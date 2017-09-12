@@ -16,7 +16,7 @@ import static android.Manifest.permission_group.LOCATION;
  * Created by qindachang on 2017/3/30.
  */
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     String[] locations = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
@@ -27,4 +27,5 @@ public class BaseActivity extends AppCompatActivity {
     protected void requestLocationPermission() {
         EasyPermissions.requestPermissions(this, "Android 6.0以上扫描蓝牙需要该权限", Consts.REQUEST_CODE_ASK_LOCATION_PERMISSIONS, locations);
     }
+
 }

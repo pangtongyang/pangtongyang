@@ -7,13 +7,14 @@ import android.support.multidex.MultiDex;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.internal.RxBleLog;
 
-import lbcy.com.cn.blacklibrary.manager.DeviceManager;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
+import lbcy.com.cn.purplelibrary.app.MyApplication;
 
 /**
  * Created by chenjie on 2017/8/6.
  */
 
-public class BaseApplication extends Application {
+public class BaseApplication extends MyApplication {
     private static final String TAG = BaseApplication.class.getSimpleName();
     private static BaseApplication baseApplication;
     private RxBleClient rxBleClient;
@@ -36,7 +37,7 @@ public class BaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         baseApplication = this;
-        DeviceManager.setContext(baseApplication);
+        BlackDeviceManager.setContext(baseApplication);
 
         rxBleClient = RxBleClient.create(this);
         RxBleClient.setLogLevel(RxBleLog.DEBUG);

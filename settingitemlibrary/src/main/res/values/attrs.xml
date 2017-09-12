@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="SetItemView">
-        <attr name="leftText" format="string"/>
-        <attr name="leftIcon" format="integer"/>
-        <attr name="rightIcon" format="integer"/>
-        <attr name="textSize" format="float"/>
-        <attr name="textColor" format="color"/>
-        <attr name="isShowUnderLine" format="boolean"/>
+        <attr name="leftText" format="string" />
+        <attr name="leftIcon" format="integer" />
+        <attr name="rightIcon" format="integer" />
+        <attr name="textSize" format="float" />
+        <attr name="textColor" format="color" />
+        <attr name="isShowLeftIcon" format="boolean" />
+        <attr name="isShowUnderLine" format="boolean" />
+        <attr name="switchselected" format="boolean" />
+        <attr name="switchchecked" format="boolean" />
     </declare-styleable>
 </resources>
