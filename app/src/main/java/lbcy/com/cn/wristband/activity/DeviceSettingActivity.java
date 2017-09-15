@@ -92,6 +92,15 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     }
 
     private void itemClick() {
+        rlLateAlarm.setmOnSetItemClick(new SetItemView.OnSetItemClick() {
+            @Override
+            public void click() {
+                Intent intent = new Intent(mActivity, AlarmClockListActivity.class);
+                intent.putExtra("is_late_clock", true);
+                startActivity(intent);
+            }
+        });
+
         rlPush.setmOnSetItemClick(new SetItemView.OnSetItemClick() {
             @Override
             public void click() {
@@ -104,6 +113,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
             @Override
             public void click() {
                 Intent intent = new Intent(mActivity, AlarmClockListActivity.class);
+                intent.putExtra("is_late_clock", false);
                 startActivity(intent);
             }
         });

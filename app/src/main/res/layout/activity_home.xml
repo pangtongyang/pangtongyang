@@ -24,6 +24,7 @@
                 android:id="@+id/rl_top1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:clickable="true"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:orientation="vertical">
@@ -51,6 +52,7 @@
                 android:id="@+id/rl_top2"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:clickable="true"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:orientation="vertical">
@@ -78,6 +80,7 @@
                 android:id="@+id/rl_top3"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:clickable="true"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:orientation="vertical">
@@ -105,21 +108,21 @@
 
         <ImageView
             android:id="@+id/iv_user"
-            android:layout_width="@dimen/width_40"
+            android:layout_width="@dimen/width_45"
             android:layout_height="match_parent"
             android:layout_alignParentStart="true"
             android:paddingStart="@dimen/padding_10"
-            android:paddingEnd="@dimen/padding_5"
+            android:paddingEnd="@dimen/padding_10"
             android:clickable="true"
             android:padding="@dimen/padding_5"
             android:src="@mipmap/geren" />
 
         <ImageView
             android:id="@+id/iv_history"
-            android:layout_width="@dimen/width_40"
+            android:layout_width="@dimen/width_45"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
-            android:paddingStart="@dimen/padding_5"
+            android:paddingStart="@dimen/padding_10"
             android:paddingEnd="@dimen/padding_10"
             android:clickable="true"
             android:padding="@dimen/padding_5"

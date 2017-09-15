@@ -151,6 +151,16 @@
 
             </LinearLayout>
 
+            <lbcy.com.cn.settingitemlibrary.SetItemView
+                android:id="@+id/rl_disturb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:leftIcon="@mipmap/disturb"
+                app:leftText="@string/fragment_me_disturb"
+                app:rightIcon="@drawable/go_gray"
+                app:switchselected="true"
+                app:textColor="@color/text_color_6"
+                app:textSize="16" />
 
             <lbcy.com.cn.settingitemlibrary.SetItemView
                 android:id="@+id/rl_statistics"
@@ -169,17 +179,6 @@
                 app:leftIcon="@mipmap/setup"
                 app:leftText="@string/fragment_me_setting"
                 app:rightIcon="@drawable/go_gray"
-                app:textColor="@color/text_color_6"
-                app:textSize="16" />
-
-            <lbcy.com.cn.settingitemlibrary.SetItemView
-                android:id="@+id/rl_disturb"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:leftIcon="@mipmap/disturb"
-                app:leftText="@string/fragment_me_disturb"
-                app:rightIcon="@drawable/go_gray"
-                app:switchselected="true"
                 app:textColor="@color/text_color_6"
                 app:textSize="16" />
 

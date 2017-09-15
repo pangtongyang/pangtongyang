@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
+import lbcy.com.cn.wristband.entity.ClockBean;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxBus;
 import razerdp.basepopup.BasePopupWindow;
@@ -19,36 +20,66 @@ import razerdp.basepopup.BasePopupWindow;
  * Created by 大灯泡 on 2016/1/15.
  * 普通的popup
  */
-public class ScalePopup extends BasePopupWindow implements View.OnClickListener{
+public class RepeatSettingPopup extends BasePopupWindow implements View.OnClickListener{
 
     private View popupView;
-    private SPUtil spUtil;
     private boolean []week = new boolean[7];
     private ImageView []images = new ImageView[7];
-    String ClockTAG;
+    private ClockBean mClockBean;
 
-    public ScalePopup(Activity context, String ClockTAG) {
+    public RepeatSettingPopup(Activity context, ClockBean clockBean) {
         super(context);
-        this.ClockTAG = ClockTAG;
-        spUtil = new SPUtil(BaseApplication.getBaseApplication(), Consts.CLOCK_DK_NAME);
+        this.mClockBean = clockBean;
         bindEvent();
         loadData();
     }
 
     private void loadData(){
-        String data = spUtil.getString(ClockTAG+"week", "");
-        if (data.equals("")){
+        String data = mClockBean.getText();
+        if (data.equals("只响一次")){
             for (int i=0; i<7; i++){
                 week[i] = false;
             }
-        } else {
-            String []w = data.split(",");
+        } else if (data.equals("每日")) {
             for (int i=0; i<7; i++){
-                week[i] = w[i].equals("1");
-                if (week[i]){
-                    images[i].setVisibility(View.VISIBLE);
-                }
+                week[i] = true;
             }
+        } else {
+            if (data.contains("周一")) {
+                week[0] = true;
+                images[0].setVisibility(View.VISIBLE);
+            }
+
+            if (data.contains("周二")) {
+                week[1] = true;
+                images[1].setVisibility(View.VISIBLE);
+            }
+
+            if (data.contains("周三")) {
+                week[2] = true;
+                images[2].setVisibility(View.VISIBLE);
+            }
+
+            if (data.contains("周四")) {
+                week[3] = true;
+                images[3].setVisibility(View.VISIBLE);
+            }
+
+            if (data.contains("周五")) {
+                week[4] = true;
+                images[4].setVisibility(View.VISIBLE);
+            }
+
+            if (data.contains("周六")) {
+                week[5] = true;
+                images[5].setVisibility(View.VISIBLE);
+            }
+
+            if (data.contains("周日")) {
+                week[6] = true;
+                images[6].setVisibility(View.VISIBLE);
+            }
+
         }
     }
 
@@ -67,7 +98,7 @@ public class ScalePopup extends BasePopupWindow implements View.OnClickListener{
 
     @Override
     public View onCreatePopupView() {
-        popupView= LayoutInflater.from(getContext()).inflate(R.layout.popup_normal,null);
+        popupView= LayoutInflater.from(getContext()).inflate(R.layout.popup_repeat_setting,null);
         return popupView;
     }
 
@@ -105,7 +136,6 @@ public class ScalePopup extends BasePopupWindow implements View.OnClickListener{
             case R.id.rl_zhouyi:
                 View zhouyi = findViewById(R.id.iv_zhouyi);
                 if (zhouyi.getVisibility() == View.GONE){
-                    week[0] = true;
                     findViewById(R.id.iv_zhouyi).setVisibility(View.VISIBLE);
                 } else {
                     findViewById(R.id.iv_zhouyi).setVisibility(View.GONE);
@@ -265,9 +295,6 @@ public class ScalePopup extends BasePopupWindow implements View.OnClickListener{
         if (allFlag == 7) {
             text = "每日";
         }
-
-        spUtil.putString(ClockTAG+"week", mWeek);
-        spUtil.putString(ClockTAG+"weekText", text);
 
         Message message = new Message();
         message.what = Consts.UPDATE_CLOCK_DATA;

@@ -259,7 +259,7 @@
                     android:text="@string/confirm"
                     android:textSize="@dimen/textsize_16"
                     android:textColor="@color/white"
-                    android:background="@drawable/btn_right_bottom_circlr_blue_bg"/>
+                    android:background="@drawable/btn_right_bottom_circle_blue_bg"/>
 
 
             </LinearLayout>

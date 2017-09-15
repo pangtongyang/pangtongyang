@@ -34,13 +34,13 @@
         <ImageView
             android:id="@+id/iv_righticon"
             android:layout_width="@dimen/width_50"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:background="@drawable/btn_back_bg"
             android:clickable="true"
             android:padding="@dimen/padding_13"
-            android:visibility="gone" />
+            android:visibility="gone"/>
     </RelativeLayout>
 
     <FrameLayout

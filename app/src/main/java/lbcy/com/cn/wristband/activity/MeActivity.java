@@ -23,8 +23,10 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.settingitemlibrary.SetItemView;
 import lbcy.com.cn.wristband.R;
+import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.popup.SlideFromBottomPopup;
 import lbcy.com.cn.wristband.widget.ImageViewPlus;
 import razerdp.basepopup.BasePopupWindow;
@@ -75,6 +77,7 @@ public class MeActivity extends TakePhotoActivity {
     @BindView(R.id.root_layout)
     RelativeLayout rootLayout;
     BasePopupWindow popupWindow;
+    SPUtil spUtil;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,6 +85,7 @@ public class MeActivity extends TakePhotoActivity {
         setContentView(R.layout.activity_me);
         ButterKnife.bind(this);
         mActivity = this;
+        spUtil = new SPUtil(mActivity, Consts.USER_DB_NAME);
         itemClick();
 
     }
@@ -143,12 +147,20 @@ public class MeActivity extends TakePhotoActivity {
         });
     }
 
-    @OnClick({R.id.iv_header})
+    @OnClick({R.id.iv_header, R.id.btn_quit})
     public void butterOnClick(View v){
+        Intent intent;
         switch (v.getId()){
             case R.id.iv_header:
                 popupWindow = getPopup();
                 popupWindow.showPopupWindow();
+                break;
+            case R.id.btn_quit:
+                spUtil.putString("is_login", "0");
+                intent = new Intent(mActivity, LoginActivity.class);
+                startActivity(intent);
+                finish();
+                MainActivity.mActivity.finish();
                 break;
         }
 

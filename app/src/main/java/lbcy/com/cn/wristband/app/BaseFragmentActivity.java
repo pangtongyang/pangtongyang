@@ -12,7 +12,7 @@ import lbcy.com.cn.wristband.rx.RxManager;
  */
 
 public abstract class BaseFragmentActivity extends FragmentActivity {
-    public FragmentActivity mActivity;
+    public static FragmentActivity mActivity;
     public RxManager mRxManager;
 
     @Override

@@ -180,17 +180,6 @@
             </LinearLayout>
 
             <lbcy.com.cn.settingitemlibrary.SetItemView
-                android:id="@+id/rl_late_alarm"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:leftIcon="@mipmap/setup"
-                app:leftText="@string/activity_device_late"
-                app:rightIcon="@drawable/go_gray"
-                app:switchselected="true"
-                app:textColor="@color/text_color_6"
-                app:textSize="16" />
-
-            <lbcy.com.cn.settingitemlibrary.SetItemView
                 android:id="@+id/rl_hand_up"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -220,6 +209,16 @@
                 app:leftText="@string/activity_device_shock"
                 app:rightIcon="@drawable/go_gray"
                 app:switchselected="true"
+                app:textColor="@color/text_color_6"
+                app:textSize="16" />
+
+            <lbcy.com.cn.settingitemlibrary.SetItemView
+                android:id="@+id/rl_late_alarm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:leftIcon="@mipmap/setup"
+                app:leftText="@string/activity_device_late"
+                app:rightIcon="@drawable/go_gray"
                 app:textColor="@color/text_color_6"
                 app:textSize="16" />
 

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao' // apply plugin
 
 android {
     compileSdkVersion 26
@@ -20,6 +21,7 @@ android {
             java.srcDirs = ['src/main/java', 'src/main/java-gen']
             jniLibs.srcDirs = ['libs']
 
+            assets.srcDirs = ['src/main/assets', 'src/main/assets/']
         }
     }
     buildTypes {
@@ -70,6 +72,7 @@ dependencies {
     compile 'com.jph.takephoto:takephoto_library:4.0.3'  //图片获取库
     compile 'com.github.razerdp:BasePopup:1.8.2' //弹窗库
     compile 'com.jude:easyrecyclerview:4.4.2' //列表库
+    compile 'org.greenrobot:greendao:3.2.2' //数据库
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
 }

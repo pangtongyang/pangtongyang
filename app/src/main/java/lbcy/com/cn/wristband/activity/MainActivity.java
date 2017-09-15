@@ -18,6 +18,7 @@ import butterknife.OnClick;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseFragmentActivity;
 import lbcy.com.cn.wristband.fragment.WebFragment;
+import lbcy.com.cn.wristband.global.Consts;
 
 /**
  * Created by chenjie on 2017/9/5.
@@ -72,6 +73,7 @@ public class MainActivity extends BaseFragmentActivity {
     RelativeLayout rlTop2;
     @BindView(R.id.rl_top3)
     RelativeLayout rlTop3;
+    int mainPage1 = 0, mainPage2 = 0, mainPage3 = 0;
 
     @Override
     protected int getLayoutId() {
@@ -85,12 +87,13 @@ public class MainActivity extends BaseFragmentActivity {
 
     @Override
     protected void initView() {
-        healthFragment = new WebFragment("10000000", R.color.colorPrimary);
-        kaoqinFragment = new WebFragment("20000000", R.color.blue);
-        expertFragment = new WebFragment("30000000", R.color.white);
-        starFragment = new WebFragment("40000000", R.color.gray_text);
+        healthFragment = new WebFragment(Consts.WEB_INDEX);
+        kaoqinFragment = new WebFragment(Consts.WEB_CLASS_TODAY);
+        expertFragment = new WebFragment(Consts.WEB_EXPERT);
+        starFragment = new WebFragment(Consts.WEB_STAR);
         adapter = new FragmentAdapter(getSupportFragmentManager());
         vpContent.setAdapter(adapter);
+        vpContent.setOffscreenPageLimit(4);
         jumpHealthFragment();
         vpContent.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -160,12 +163,26 @@ public class MainActivity extends BaseFragmentActivity {
 
     private void jumpHealthFragment() {
         if (!tvBottom1.isSelected()) {
+            switch (mainPage1){
+                case 0:
+                    view1.setVisibility(View.VISIBLE);
+                    view2.setVisibility(View.GONE);
+                    view3.setVisibility(View.GONE);
+                    break;
+                case 1:
+                    view1.setVisibility(View.GONE);
+                    view2.setVisibility(View.VISIBLE);
+                    view3.setVisibility(View.GONE);
+                    break;
+                case 2:
+                    view1.setVisibility(View.GONE);
+                    view2.setVisibility(View.GONE);
+                    view3.setVisibility(View.VISIBLE);
+                    break;
+            }
             rlTop2.setVisibility(View.VISIBLE);
             rlTop3.setVisibility(View.VISIBLE);
             ivHistory.setVisibility(View.VISIBLE);
-            view1.setVisibility(View.VISIBLE);
-            view2.setVisibility(View.GONE);
-            view3.setVisibility(View.GONE);
             tvTop1.setText(R.string.sport);
             tvTop2.setText(R.string.heart_rate);
             tvTop3.setText(R.string.sleep);
@@ -176,12 +193,26 @@ public class MainActivity extends BaseFragmentActivity {
 
     private void jumpKaoqinFragment() {
         if (!tvBottom2.isSelected()) {
+            switch (mainPage2){
+                case 0:
+                    view1.setVisibility(View.VISIBLE);
+                    view2.setVisibility(View.GONE);
+                    view3.setVisibility(View.GONE);
+                    break;
+                case 1:
+                    view1.setVisibility(View.GONE);
+                    view2.setVisibility(View.VISIBLE);
+                    view3.setVisibility(View.GONE);
+                    break;
+                case 2:
+                    view1.setVisibility(View.GONE);
+                    view2.setVisibility(View.GONE);
+                    view3.setVisibility(View.VISIBLE);
+                    break;
+            }
             rlTop2.setVisibility(View.VISIBLE);
             rlTop3.setVisibility(View.VISIBLE);
             ivHistory.setVisibility(View.INVISIBLE);
-            view1.setVisibility(View.VISIBLE);
-            view2.setVisibility(View.GONE);
-            view3.setVisibility(View.GONE);
             tvTop1.setText(R.string.today);
             tvTop2.setText(R.string.week);
             tvTop3.setText(R.string.month);
@@ -192,12 +223,21 @@ public class MainActivity extends BaseFragmentActivity {
 
     private void jumpExpertFragment() {
         if (!tvBottom3.isSelected()) {
+            switch (mainPage3){
+                case 0:
+                    view1.setVisibility(View.VISIBLE);
+                    view2.setVisibility(View.GONE);
+                    view3.setVisibility(View.GONE);
+                    break;
+                case 1:
+                    view1.setVisibility(View.GONE);
+                    view2.setVisibility(View.VISIBLE);
+                    view3.setVisibility(View.GONE);
+                    break;
+            }
             rlTop2.setVisibility(View.VISIBLE);
             rlTop3.setVisibility(View.GONE);
             ivHistory.setVisibility(View.INVISIBLE);
-            view1.setVisibility(View.VISIBLE);
-            view2.setVisibility(View.GONE);
-            view3.setVisibility(View.GONE);
             tvTop1.setText(R.string.sport);
             tvTop2.setText(R.string.eat);
             setSelected(tvBottom3);
@@ -209,10 +249,8 @@ public class MainActivity extends BaseFragmentActivity {
         if (!tvBottom4.isSelected()) {
             rlTop2.setVisibility(View.GONE);
             rlTop3.setVisibility(View.GONE);
-            ivHistory.setVisibility(View.INVISIBLE);
             view1.setVisibility(View.GONE);
-            view2.setVisibility(View.GONE);
-            view3.setVisibility(View.GONE);
+            ivHistory.setVisibility(View.INVISIBLE);
             tvTop1.setText(R.string.activity_home_tv_star);
             setSelected(tvBottom4);
             vpContent.setCurrentItem(TAB_STAR, false);
@@ -247,6 +285,71 @@ public class MainActivity extends BaseFragmentActivity {
             case R.id.iv_user:
                 intent = new Intent(mActivity, MeActivity.class);
                 startActivity(intent);
+                break;
+        }
+    }
+
+    @OnClick({R.id.rl_top1, R.id.rl_top2, R.id.rl_top3})
+    public void topClick(View v) {
+        switch (v.getId()) {
+            case R.id.rl_top1:
+                if (view1.getVisibility() == View.GONE) {
+                    view1.setVisibility(View.VISIBLE);
+                    view2.setVisibility(View.GONE);
+                    view3.setVisibility(View.GONE);
+                    switch (prePage) {
+                        case 0:
+                            mainPage1 = 0;
+                            healthFragment.updateUrl(Consts.WEB_INDEX);
+                            break;
+                        case 1:
+                            mainPage2 = 0;
+                            kaoqinFragment.updateUrl(Consts.WEB_CLASS_TODAY);
+                            break;
+                        case 2:
+                            mainPage3 = 0;
+                            expertFragment.updateUrl(Consts.WEB_EXPERT);
+                            break;
+                    }
+                }
+                break;
+            case R.id.rl_top2:
+                if (view2.getVisibility() == View.GONE) {
+                    view1.setVisibility(View.GONE);
+                    view2.setVisibility(View.VISIBLE);
+                    view3.setVisibility(View.GONE);
+                    switch (prePage) {
+                        case 0:
+                            mainPage1 = 1;
+                            healthFragment.updateUrl(Consts.WEB_HEART_RATE_INDEX);
+                            break;
+                        case 1:
+                            mainPage2 = 1;
+                            kaoqinFragment.updateUrl(Consts.WEB_CLASS_WEEK);
+                            break;
+                        case 2:
+                            mainPage3 = 1;
+                            expertFragment.updateUrl(Consts.WEB_HEALTH);
+                            break;
+                    }
+                }
+                break;
+            case R.id.rl_top3:
+                if (view3.getVisibility() == View.GONE) {
+                    view1.setVisibility(View.GONE);
+                    view2.setVisibility(View.GONE);
+                    view3.setVisibility(View.VISIBLE);
+                    switch (prePage) {
+                        case 0:
+                            mainPage1 = 2;
+                            healthFragment.updateUrl(Consts.WEB_SLEEP_INDEX);
+                            break;
+                        case 1:
+                            mainPage2 = 2;
+                            kaoqinFragment.updateUrl(Consts.WEB_CLASS_MONTH);
+                            break;
+                    }
+                }
                 break;
         }
     }
