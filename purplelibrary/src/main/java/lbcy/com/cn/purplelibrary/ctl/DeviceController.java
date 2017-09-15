@@ -28,4 +28,6 @@ public interface DeviceController {
      * 判断手环是否连接（自行处理返回值）
      */
     void isLinked();
+
+
 }

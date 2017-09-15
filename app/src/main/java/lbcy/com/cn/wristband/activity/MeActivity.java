@@ -82,7 +82,6 @@ public class MeActivity extends TakePhotoActivity {
         setContentView(R.layout.activity_me);
         ButterKnife.bind(this);
         mActivity = this;
-        ivHeader.setImageResource(R.mipmap.appsplash);
         itemClick();
 
     }

@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     android:orientation="vertical"
     android:fitsSystemWindows="true">
 
@@ -128,6 +129,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:layout_weight="1">
         <android.support.v4.view.ViewPager
             android:id="@+id/vp_content"
@@ -147,7 +149,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawablePadding="@dimen/padding_5"
+            android:drawablePadding="-5dp"
             android:drawableTop="@drawable/menu_health_style"
             android:gravity="center"
             android:text="@string/sport"
@@ -159,7 +161,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawablePadding="@dimen/padding_5"
+            android:drawablePadding="-5dp"
             android:drawableTop="@drawable/menu_kaoqin_style"
             android:gravity="center"
             android:text="@string/kaoqin"
@@ -171,7 +173,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawablePadding="@dimen/padding_5"
+            android:drawablePadding="-5dp"
             android:drawableTop="@drawable/menu_expert_style"
             android:gravity="center"
             android:text="@string/expert"
@@ -183,7 +185,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawablePadding="@dimen/padding_5"
+            android:drawablePadding="-5dp"
             android:drawableTop="@drawable/menu_star_style"
             android:gravity="center"
             android:text="@string/star"

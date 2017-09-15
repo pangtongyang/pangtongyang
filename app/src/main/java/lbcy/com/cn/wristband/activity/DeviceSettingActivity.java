@@ -87,7 +87,6 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         setContentView(R.layout.activity_device_setting);
         ButterKnife.bind(this);
         mActivity = this;
-        ivHeader.setImageResource(R.mipmap.appsplash);
         itemClick();
 
     }

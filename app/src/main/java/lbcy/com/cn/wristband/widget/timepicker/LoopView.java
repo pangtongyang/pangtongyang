@@ -72,7 +72,7 @@ public class LoopView extends View {
         colorGray = 0xff8c9092; //ffa7a7a7;
         //colorBlack = 0xff572dc9;// 0xff313131;
         colorBlack = 0xff5AC2F4;//0xff333333;
-        colorGrayLight = 0x1D2142c5; //0xffc5c5c5;
+        colorGrayLight = 0x3f2142c5; //0xffc5c5c5;
         l = 2.0F;
         isLoop = true;
         positon = -1;
@@ -125,9 +125,9 @@ public class LoopView extends View {
         t = (int) ((float) h * l * (float) (r - 1));
         s = (int) ((double) (t * 2) / Math.PI);
         u = (int) ((double) t / Math.PI);
-        v = g + textSize;
-        n = (int) (((float) s - l * (float) h) / 2.0F);
-        o = (int) (((float) s + l * (float) h) / 2.0F);
+        v = (g + textSize) * 5 / 4;
+        n = (int) (((float) s - l * (float) h) / 1.9F);
+        o = (int) (((float) s + l * (float) h) / 1.9F);
         if (positon == -1) {
             if (isLoop) {
                 positon = (arrayList.size() + 1) / 2;
@@ -152,6 +152,7 @@ public class LoopView extends View {
             }
             paintB.getTextBounds("\u661F\u671F", 0, 2, rect);
             j1 = rect.height();
+            j1 = (int) (j1 * 1.5f);
             if (j1 > h) {
                 h = j1;
             }

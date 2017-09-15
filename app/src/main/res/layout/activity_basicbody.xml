@@ -26,7 +26,7 @@
                 <EditText
                     android:id="@+id/et_height"
                     android:layout_width="match_parent"
-                    android:layout_height="45dp"
+                    android:layout_height="55dp"
                     android:background="@drawable/et_line_blue_bg"
                     android:gravity="center_vertical|end"
                     android:hint="@string/simplebodyheighthint"
@@ -65,12 +65,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/login_edit_marginleft"
                 android:layout_marginEnd="@dimen/login_edit_marginright"
-                android:layout_marginTop="@dimen/login_edit_margintop">
+                android:layout_marginTop="@dimen/margin_40">
 
                 <EditText
                     android:id="@+id/et_weight"
                     android:layout_width="match_parent"
-                    android:layout_height="45dp"
+                    android:layout_height="55dp"
                     android:background="@drawable/et_line_blue_bg"
                     android:gravity="center_vertical|end"
                     android:hint="@string/simplebodyweighthint"
@@ -109,7 +109,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginLeft="@dimen/margin_80"
                 android:layout_marginRight="@dimen/margin_80"
-                android:layout_marginTop="@dimen/login_margintop"
+                android:layout_marginTop="@dimen/margin_50"
                 android:background="@drawable/btn_submit_bg"
                 android:text="@string/simplebodysubmit"
                 android:textColor="@android:color/white"

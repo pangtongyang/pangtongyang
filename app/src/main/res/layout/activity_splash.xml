@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/appsplash"
-    tools:context="lbcy.com.cn.wristband.login.SplashActivity">
+    android:background="@drawable/app_splash">
 
 </RelativeLayout>
