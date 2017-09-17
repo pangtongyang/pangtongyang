@@ -1,6 +1,7 @@
 package lbcy.com.cn.wristband.app;
 
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.app.FragmentActivity;
 
 import butterknife.ButterKnife;
@@ -14,6 +15,7 @@ import lbcy.com.cn.wristband.rx.RxManager;
 public abstract class BaseFragmentActivity extends FragmentActivity {
     public static FragmentActivity mActivity;
     public RxManager mRxManager;
+    public boolean isSplashed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +23,8 @@ public abstract class BaseFragmentActivity extends FragmentActivity {
         setTheme(R.style.NoActionBarTheme);
         mActivity = this;
         mRxManager = new RxManager();
+        if (savedInstanceState!=null)
+            isSplashed = savedInstanceState.getBoolean("isSplashed", false);
         initData();
         setContentView(getLayoutId());
         ButterKnife.bind(this);
@@ -33,6 +37,12 @@ public abstract class BaseFragmentActivity extends FragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         mRxManager.clear();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("isSplashed", true);
+        super.onSaveInstanceState(outState);
     }
 
     protected abstract int getLayoutId();

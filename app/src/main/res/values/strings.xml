@@ -140,4 +140,17 @@
     <string name="amateursports">业余选手</string>
     <string name="professionalsport">专业队员</string>
     <string name="makesurestatistics">确认目标</string>
+
+    <!--titles-->
+    <string name="title_sport_sequence">运动排名</string>
+    <string name="title_sport_history">运动历史</string>
+    <string name="title_sport">心率运动模式</string>
+    <string name="title_heart_rate_start">实时心率</string>
+    <string name="title_sport_detail">心率运动模式详情</string>
+    <string name="title_heart_rate_week">周心率</string>
+    <string name="title_sleep">睡眠数据</string>
+    <string name="title_attendance">考勤情况</string>
+    <string name="title_get_school_sequence">到校时间排名</string>
+    <string name="title_sport_video">运动视频</string>
+    <string name="title_health_detail">健康详情</string>
 </resources>

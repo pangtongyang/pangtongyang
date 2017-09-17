@@ -73,6 +73,8 @@ dependencies {
     compile 'com.github.razerdp:BasePopup:1.8.2' //弹窗库
     compile 'com.jude:easyrecyclerview:4.4.2' //列表库
     compile 'org.greenrobot:greendao:3.2.2' //数据库
+    compile 'com.just.agentweb:agentweb:2.0.1' //webview支持进度条
+    compile 'com.lcodecorex:tkrefreshlayout:1.0.7' //webview支持layout
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
 }

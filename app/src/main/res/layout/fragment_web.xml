@@ -1,12 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_web_content"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <WebView
-        android:id="@+id/web"
+    <RelativeLayout
+        android:id="@+id/rl_top_bar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="@dimen/width_50"
+        android:background="@color/blue">
 
-    </WebView>
+        <TextView
+            android:id="@+id/tv_top_bar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/activity_login_et_btn_login"
+            android:textColor="@color/white"
+            android:textSize="@dimen/textsize_18" />
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="@dimen/width_50"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/btn_back_bg"
+            android:clickable="true"
+            android:padding="@dimen/padding_13"
+            android:src="@mipmap/back_white" />
+
+        <ImageView
+            android:id="@+id/iv_righticon"
+            android:layout_width="@dimen/width_50"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/btn_back_bg"
+            android:clickable="true"
+            android:padding="@dimen/padding_13"
+            android:visibility="gone"/>
+    </RelativeLayout>
+
+</LinearLayout>

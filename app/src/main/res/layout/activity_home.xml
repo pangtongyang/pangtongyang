@@ -115,6 +115,7 @@
             android:paddingEnd="@dimen/padding_10"
             android:clickable="true"
             android:padding="@dimen/padding_5"
+            android:background="@drawable/btn_back_bg"
             android:src="@mipmap/geren" />
 
         <ImageView
@@ -126,15 +127,16 @@
             android:paddingEnd="@dimen/padding_10"
             android:clickable="true"
             android:padding="@dimen/padding_5"
+            android:background="@drawable/btn_back_bg"
             android:src="@mipmap/history" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:background="@color/white"
         android:layout_weight="1">
-        <android.support.v4.view.ViewPager
+        <lbcy.com.cn.wristband.widget.NoScrollViewPager
             android:id="@+id/vp_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -147,6 +149,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="@color/white">
+
         <TextView
             android:id="@+id/tv_bottom1"
             android:layout_width="0dp"

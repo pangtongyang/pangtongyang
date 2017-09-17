@@ -8,10 +8,17 @@ import android.support.multidex.MultiDex;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.internal.RxBleLog;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.purplelibrary.app.MyApplication;
+import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.entity.DaoMaster;
 import lbcy.com.cn.wristband.entity.DaoSession;
+import lbcy.com.cn.wristband.global.Consts;
 
 /**
  * Created by chenjie on 2017/8/6.
@@ -26,6 +33,9 @@ public class BaseApplication extends MyApplication {
     private SQLiteDatabase db;
     private DaoMaster mDaoMaster;
     private DaoSession mDaoSession;
+
+    public final List<String> WEB_TITLE_LIST = new ArrayList<>();
+    public final List<String> WEB_URL_LIST = new ArrayList<>();
 
     /**
      * In practise you will use some kind of dependency injection pattern.
@@ -57,6 +67,7 @@ public class BaseApplication extends MyApplication {
 //                .build();
 //        BluetoothLe.getDefault().init(this, config);
 
+        initWebTitle();
     }
 
     public static BaseApplication getBaseApplication() {
@@ -82,5 +93,30 @@ public class BaseApplication extends MyApplication {
 
     public SQLiteDatabase getDb() {
         return db;
+    }
+
+    public void initWebTitle(){
+        WEB_URL_LIST.add(Consts.WEB_SEQUENCE);
+        WEB_TITLE_LIST.add(getString(R.string.title_sport_sequence));
+        WEB_URL_LIST.add(Consts.WEB_HISTORY);
+        WEB_TITLE_LIST.add(getString(R.string.title_sport_history));
+        WEB_URL_LIST.add(Consts.WEB_HEART_RATE_SPORT);
+        WEB_TITLE_LIST.add(getString(R.string.title_sport));
+        WEB_URL_LIST.add(Consts.WEB_HEART_RATE_TEST);
+        WEB_TITLE_LIST.add(getString(R.string.title_heart_rate_start));
+        WEB_URL_LIST.add(Consts.WEB_HEART_RATE_DETAIL);
+        WEB_TITLE_LIST.add(getString(R.string.title_sport_detail));
+        WEB_URL_LIST.add(Consts.WEB_HEART_RATE_HISTORY);
+        WEB_TITLE_LIST.add(getString(R.string.title_heart_rate_week));
+        WEB_URL_LIST.add(Consts.WEB_SLEEP_HISTORY);
+        WEB_TITLE_LIST.add(getString(R.string.title_sleep));
+        WEB_URL_LIST.add(Consts.WEB_CLASS_ATTEND);
+        WEB_TITLE_LIST.add(getString(R.string.title_attendance));
+        WEB_URL_LIST.add(Consts.WEB_CLASS_RANKING);
+        WEB_TITLE_LIST.add(getString(R.string.title_get_school_sequence));
+        WEB_URL_LIST.add(Consts.WEB_VIDEO);
+        WEB_TITLE_LIST.add(getString(R.string.title_sport_video));
+
+
     }
 }

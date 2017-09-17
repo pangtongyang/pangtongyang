@@ -6,19 +6,28 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
+import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
+import lbcy.com.cn.wristband.app.BaseWebFragment;
 import lbcy.com.cn.wristband.app.BaseFragmentActivity;
 import lbcy.com.cn.wristband.fragment.WebFragment;
 import lbcy.com.cn.wristband.global.Consts;
+import lbcy.com.cn.wristband.utils.AnimationUtil;
+import lbcy.com.cn.wristband.widget.NoScrollViewPager;
 
 /**
  * Created by chenjie on 2017/9/5.
@@ -31,7 +40,8 @@ public class MainActivity extends BaseFragmentActivity {
     private final int TAB_EXPERT = 2;
     private final int TAB_STAR = 3;
 
-    WebFragment healthFragment, kaoqinFragment, expertFragment, starFragment;
+    BaseWebFragment healthFragment, kaoqinFragment, expertFragment, starFragment;
+    BaseWebFragment[] webFragments = new WebFragment[4];
     FragmentAdapter adapter;
 
     int prePage = 0;
@@ -56,7 +66,7 @@ public class MainActivity extends BaseFragmentActivity {
     @BindView(R.id.rl_home_top_bar)
     RelativeLayout rlHomeTopBar;
     @BindView(R.id.vp_content)
-    ViewPager vpContent;
+    NoScrollViewPager vpContent;
     @BindView(R.id.tv_bottom1)
     TextView tvBottom1;
     @BindView(R.id.tv_bottom2)
@@ -73,7 +83,18 @@ public class MainActivity extends BaseFragmentActivity {
     RelativeLayout rlTop2;
     @BindView(R.id.rl_top3)
     RelativeLayout rlTop3;
+
+
     int mainPage1 = 0, mainPage2 = 0, mainPage3 = 0;
+    long mExitTime;
+    SPUtil spUtil;
+    Bundle mBundle;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        llHomeBottomBar.setVisibility(View.VISIBLE);
+    }
 
     @Override
     protected int getLayoutId() {
@@ -87,10 +108,59 @@ public class MainActivity extends BaseFragmentActivity {
 
     @Override
     protected void initView() {
-        healthFragment = new WebFragment(Consts.WEB_INDEX);
-        kaoqinFragment = new WebFragment(Consts.WEB_CLASS_TODAY);
-        expertFragment = new WebFragment(Consts.WEB_EXPERT);
-        starFragment = new WebFragment(Consts.WEB_STAR);
+        if (!isSplashed){
+            startActivity(new Intent(mActivity, SplashActivity.class));
+            //判断是否已登录
+            spUtil = new SPUtil(mActivity, Consts.USER_DB_NAME);
+            String isLogin = spUtil.getString("is_login", "0");
+            if (isLogin.equals("0")) {
+                finish();
+                return;
+            }
+        }
+
+        //webview初始化
+        webFragments[0] = healthFragment = WebFragment.getInstance(mBundle = new Bundle());
+        mBundle.putString(Consts.URL_KEY, Consts.WEB_INDEX);
+        webFragments[1] = kaoqinFragment = WebFragment.getInstance(mBundle = new Bundle());
+        mBundle.putString(Consts.URL_KEY, Consts.WEB_CLASS_TODAY);
+        webFragments[2] = expertFragment = WebFragment.getInstance(mBundle = new Bundle());
+        mBundle.putString(Consts.URL_KEY, Consts.WEB_EXPERT);
+        webFragments[3] = starFragment = WebFragment.getInstance(mBundle = new Bundle());
+        mBundle.putString(Consts.URL_KEY, Consts.WEB_STAR);
+
+        vpContent.setNoScroll(true);
+
+        for (int i = 0; i < 4; i++) {
+            int finalI = i;
+            webFragments[i].setOnBackClickListener(new BaseWebFragment.OnBackClick() {
+                @Override
+                public void click() {
+                    webFragments[finalI].isBackPressed = true;
+                    if (!webFragments[finalI].getMyAgentWeb().back()) {
+                        webFragments[finalI].isBackPressed = false;
+                    }
+                }
+            });
+
+            webFragments[i].setOnWebItemClickListener(new BaseWebFragment.OnWebItemClick() {
+                @Override
+                public void click(boolean isBackPressed, List<String> webHistoryUrls) {
+//                    if (isBackPressed) {
+//                        if (webHistoryUrls.size() == 1) {
+//                            showMainTopBar();
+//                            vpContent.setNoScroll(false);
+//                        }
+//                    } else {
+//                        if (webHistoryUrls.size() == 2) {
+//                            showNormalTopBar();
+//                            vpContent.setNoScroll(true);
+//                        }
+//                    }
+                }
+            });
+        }
+
         adapter = new FragmentAdapter(getSupportFragmentManager());
         vpContent.setAdapter(adapter);
         vpContent.setOffscreenPageLimit(4);
@@ -125,11 +195,19 @@ public class MainActivity extends BaseFragmentActivity {
 
             }
         });
+
     }
 
     @Override
     protected void loadData() {
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //一定要保证 mAentWebFragemnt 回调
+        webFragments[prePage].onActivityResult(requestCode, resultCode, data);
     }
 
     private class FragmentAdapter extends FragmentPagerAdapter {
@@ -163,7 +241,7 @@ public class MainActivity extends BaseFragmentActivity {
 
     private void jumpHealthFragment() {
         if (!tvBottom1.isSelected()) {
-            switch (mainPage1){
+            switch (mainPage1) {
                 case 0:
                     view1.setVisibility(View.VISIBLE);
                     view2.setVisibility(View.GONE);
@@ -193,7 +271,7 @@ public class MainActivity extends BaseFragmentActivity {
 
     private void jumpKaoqinFragment() {
         if (!tvBottom2.isSelected()) {
-            switch (mainPage2){
+            switch (mainPage2) {
                 case 0:
                     view1.setVisibility(View.VISIBLE);
                     view2.setVisibility(View.GONE);
@@ -223,7 +301,7 @@ public class MainActivity extends BaseFragmentActivity {
 
     private void jumpExpertFragment() {
         if (!tvBottom3.isSelected()) {
-            switch (mainPage3){
+            switch (mainPage3) {
                 case 0:
                     view1.setVisibility(View.VISIBLE);
                     view2.setVisibility(View.GONE);
@@ -239,7 +317,7 @@ public class MainActivity extends BaseFragmentActivity {
             rlTop3.setVisibility(View.GONE);
             ivHistory.setVisibility(View.INVISIBLE);
             tvTop1.setText(R.string.sport);
-            tvTop2.setText(R.string.eat);
+            tvTop2.setText(R.string.health);
             setSelected(tvBottom3);
             vpContent.setCurrentItem(TAB_EXPERT, false);
         }
@@ -289,8 +367,9 @@ public class MainActivity extends BaseFragmentActivity {
         }
     }
 
-    @OnClick({R.id.rl_top1, R.id.rl_top2, R.id.rl_top3})
+    @OnClick({R.id.rl_top1, R.id.rl_top2, R.id.rl_top3, R.id.iv_history})
     public void topClick(View v) {
+        Intent intent;
         switch (v.getId()) {
             case R.id.rl_top1:
                 if (view1.getVisibility() == View.GONE) {
@@ -300,15 +379,21 @@ public class MainActivity extends BaseFragmentActivity {
                     switch (prePage) {
                         case 0:
                             mainPage1 = 0;
-                            healthFragment.updateUrl(Consts.WEB_INDEX);
+                            healthFragment.clearHistoryUrls();
+                            healthFragment.loadUrl(Consts.WEB_INDEX);
                             break;
                         case 1:
                             mainPage2 = 0;
-                            kaoqinFragment.updateUrl(Consts.WEB_CLASS_TODAY);
+                            kaoqinFragment.clearHistoryUrls();
+                            kaoqinFragment.loadUrl(Consts.WEB_CLASS_TODAY);
                             break;
                         case 2:
                             mainPage3 = 0;
-                            expertFragment.updateUrl(Consts.WEB_EXPERT);
+                            expertFragment.clearHistoryUrls();
+                            expertFragment.loadUrl(Consts.WEB_EXPERT);
+                            break;
+                        case 3:
+                            view1.setVisibility(View.GONE);
                             break;
                     }
                 }
@@ -321,15 +406,18 @@ public class MainActivity extends BaseFragmentActivity {
                     switch (prePage) {
                         case 0:
                             mainPage1 = 1;
-                            healthFragment.updateUrl(Consts.WEB_HEART_RATE_INDEX);
+                            healthFragment.clearHistoryUrls();
+                            healthFragment.loadUrl(Consts.WEB_HEART_RATE_INDEX);
                             break;
                         case 1:
                             mainPage2 = 1;
-                            kaoqinFragment.updateUrl(Consts.WEB_CLASS_WEEK);
+                            kaoqinFragment.clearHistoryUrls();
+                            kaoqinFragment.loadUrl(Consts.WEB_CLASS_WEEK);
                             break;
                         case 2:
                             mainPage3 = 1;
-                            expertFragment.updateUrl(Consts.WEB_HEALTH);
+                            expertFragment.clearHistoryUrls();
+                            expertFragment.loadUrl(Consts.WEB_HEALTH);
                             break;
                     }
                 }
@@ -342,16 +430,54 @@ public class MainActivity extends BaseFragmentActivity {
                     switch (prePage) {
                         case 0:
                             mainPage1 = 2;
-                            healthFragment.updateUrl(Consts.WEB_SLEEP_INDEX);
+                            healthFragment.clearHistoryUrls();
+                            healthFragment.loadUrl(Consts.WEB_SLEEP_INDEX);
                             break;
                         case 1:
                             mainPage2 = 2;
-                            kaoqinFragment.updateUrl(Consts.WEB_CLASS_MONTH);
+                            kaoqinFragment.clearHistoryUrls();
+                            kaoqinFragment.loadUrl(Consts.WEB_CLASS_MONTH);
                             break;
                     }
                 }
                 break;
+            case R.id.iv_history:
+                startActivity(new Intent(mActivity, WebActivity.class).putExtra("url", Consts.WEB_HISTORY));
+                break;
         }
     }
 
+    public void showNormalTopBar() {
+        AnimationUtil.showAndHiddenAnimation(webFragments[prePage].getTopBar(), AnimationUtil.AnimationState.STATE_SHOW, 300);
+        AnimationUtil.showAndHiddenAnimation(rlHomeTopBar, AnimationUtil.AnimationState.STATE_HIDDEN, 300);
+        AnimationUtil.showAndHiddenAnimation(llHomeBottomBar, AnimationUtil.AnimationState.STATE_HIDDEN, 300);
+    }
+
+    public void showMainTopBar() {
+        AnimationUtil.showAndHiddenAnimation(rlHomeTopBar, AnimationUtil.AnimationState.STATE_SHOW, 300);
+        AnimationUtil.showAndHiddenAnimation(llHomeBottomBar, AnimationUtil.AnimationState.STATE_SHOW, 300);
+        AnimationUtil.showAndHiddenAnimation(webFragments[prePage].getTopBar(), AnimationUtil.AnimationState.STATE_HIDDEN, 300);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            BaseWebFragment webFragment = webFragments[prePage];
+            if (webFragment != null) {
+                webFragment.isBackPressed = true;
+                if (!webFragment.getMyAgentWeb().back()) {
+                    webFragment.isBackPressed = false;
+                    if ((System.currentTimeMillis() - mExitTime) > 2000) {
+                        Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT).show();
+                        mExitTime = System.currentTimeMillis();
+
+                    } else {
+                        finish();
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
 }

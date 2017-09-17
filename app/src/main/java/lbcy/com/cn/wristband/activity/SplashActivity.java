@@ -64,10 +64,13 @@ public class SplashActivity extends BaseActivity {
             } catch (InterruptedException e) {
                 Log.e(TAG, e.toString());
                 e.printStackTrace();
+                MainActivity.mActivity.finish();
+                finish();
+                return;
             }
             if (isLogin.equals("1")){
-                Intent intent = new Intent(mActivity, MainActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(mActivity, MainActivity.class);
+//                startActivity(intent);
                 finish();
             } else {
                 Intent intent = new Intent(mActivity, LoginActivity.class);

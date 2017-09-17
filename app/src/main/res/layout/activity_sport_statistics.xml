@@ -524,9 +524,12 @@
                     android:layout_height="wrap_content"
                     android:max="90000"
                     android:maxHeight="@dimen/width_30"
+                    android:layout_marginStart="@dimen/margin_5"
+                    android:layout_marginEnd="@dimen/margin_15"
+                    android:progress="60000"
                     android:progressDrawable="@drawable/seekbar_background_style"
                     android:thumb="@drawable/seekbar_thumb_style"
-                    android:thumbOffset="0dp" />
+                    android:splitTrack="false" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -546,12 +549,13 @@
                         android:textSize="@dimen/textsize_16" />
 
                     <TextView
+                        android:id="@+id/textView2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:gravity="center_vertical|center"
                         android:layout_weight="1"
-                        android:text="30000"
+                        android:gravity="center_vertical|center"
+                        android:text="     30000"
                         android:textColor="@color/text_dark_gray"
                         android:textSize="@dimen/textsize_16" />
 
@@ -561,7 +565,7 @@
                         android:layout_gravity="center"
                         android:gravity="center_vertical|center"
                         android:layout_weight="1"
-                        android:text="60000"
+                        android:text="  60000"
                         android:textColor="@color/text_dark_gray"
                         android:textSize="@dimen/textsize_16" />
 
@@ -570,7 +574,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center_vertical|center"
-                        android:layout_marginEnd="-20dp"
+                        android:layout_marginEnd="-25dp"
                         android:layout_weight="1"
                         android:text="90000"
                         android:textColor="@color/text_dark_gray"

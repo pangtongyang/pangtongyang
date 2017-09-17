@@ -1,5 +1,9 @@
 package lbcy.com.cn.wristband.global;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by chenjie on 2017/8/7.
  */
@@ -12,6 +16,8 @@ public class Consts {
     public static final String PURPLE_WRISTBAND_NAME = "BC-02B";
     public static final String CLOCK_DK_NAME = "LBCY_CLOCK_DB";
     public static final String USER_DB_NAME = "LBCY_USER_DB";
+
+    public static final String URL_KEY = "url_key";
 
     public static final int CLOCK_MAX_NUM = 7;
 
@@ -62,9 +68,13 @@ public class Consts {
     //运动视频页
     public static final String WEB_VIDEO = WEB_BASE + "/video/list";
     //健康建议页
-    public static final String WEB_HEALTH = WEB_BASE + "/video/health";
+    public static final String WEB_HEALTH = WEB_BASE + "/health";
     //健康文章详情页（id为文章id）/health/:id
     //星座页
     public static final String WEB_STAR = WEB_BASE + "/constellation";
+
+    public static final String []WEB_INDEXES = {WEB_INDEX, WEB_HEART_RATE_INDEX, WEB_SLEEP_INDEX,
+            WEB_CLASS_TODAY, WEB_CLASS_WEEK, WEB_CLASS_MONTH, WEB_EXPERT, WEB_HEALTH, WEB_STAR};
+
 
 }

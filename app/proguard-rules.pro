@@ -23,3 +23,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keep class com.just.library.** {
+    *;
+}
+-dontwarn com.just.library.**
+-keepclassmembers class com.just.library.agentweb.AndroidInterface{ *; }

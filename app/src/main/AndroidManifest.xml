@@ -7,6 +7,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <uses-feature android:name="android.hardware.location.gps" />
 
@@ -32,16 +37,18 @@
         <!-- 登陆引导页 -->
         <activity
             android:name=".activity.SplashActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
+
+        </activity>
+        <activity
+            android:name=".activity.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activity.MainActivity"
-            android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.LoginActivity"
             android:screenOrientation="portrait" />
@@ -61,6 +68,7 @@
             android:name=".activity.AlarmClockListActivity"
             android:screenOrientation="portrait" />
         <activity
+
             android:name=".activity.SetAlarmClockActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -80,6 +88,12 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.HelpActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.WebActivity"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
 
