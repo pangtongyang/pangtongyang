@@ -13,14 +13,14 @@ import lbcy.com.cn.wristband.rx.RxManager;
  */
 
 public abstract class BaseFragmentActivity extends FragmentActivity {
-    public static FragmentActivity mActivity;
+    public FragmentActivity mActivity;
     public RxManager mRxManager;
     public boolean isSplashed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.NoActionBarTheme);
+        setTheme(R.style.SplashTheme);
         mActivity = this;
         mRxManager = new RxManager();
         if (savedInstanceState!=null)

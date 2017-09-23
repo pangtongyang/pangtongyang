@@ -4,4 +4,10 @@
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:statusBarColor">@color/blue</item>
     </style>
+    <style name="SplashTheme" parent="MyTheme">
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:statusBarColor">@color/blue</item>
+        <item name="android:windowBackground">@drawable/app_splash</item>
+    </style>
 </resources>

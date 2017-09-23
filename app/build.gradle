@@ -63,7 +63,7 @@ dependencies {
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.jakewharton:butterknife:8.8.0'
-    compile 'pub.devrel:easypermissions:0.4.3' //权限获取库
+    compile 'pub.devrel:easypermissions:1.0.0' //权限获取库
     compile 'com.polidea.rxandroidble:rxandroidble:1.3.3' //蓝牙扫描库
     compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
     compile 'io.reactivex:rxandroid:1.1.0'

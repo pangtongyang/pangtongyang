@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,11 +25,14 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
+import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.settingitemlibrary.SetItemView;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.popup.SlideFromBottomPopup;
+import lbcy.com.cn.wristband.rx.RxBus;
 import lbcy.com.cn.wristband.widget.ImageViewPlus;
 import razerdp.basepopup.BasePopupWindow;
 
@@ -85,9 +90,10 @@ public class MeActivity extends TakePhotoActivity {
         setContentView(R.layout.activity_me);
         ButterKnife.bind(this);
         mActivity = this;
-        spUtil = new SPUtil(mActivity, Consts.USER_DB_NAME);
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
         itemClick();
 
+        getSettings();
     }
 
     private void itemClick(){
@@ -160,7 +166,9 @@ public class MeActivity extends TakePhotoActivity {
                 intent = new Intent(mActivity, LoginActivity.class);
                 startActivity(intent);
                 finish();
-                MainActivity.mActivity.finish();
+                Message message = new Message();
+                message.what = Consts.CLOSE_ACTIVITY;
+                RxBus.getInstance().post(Consts.ACTIVITY_MANAGE_LISTENER, message);
                 break;
         }
 
@@ -216,4 +224,26 @@ public class MeActivity extends TakePhotoActivity {
         finish();
     }
 
+
+    /**************************************************************************/
+    //紫色手环连接相关
+    private void getSettings(){
+        PurpleDeviceManager.getInstance().isLinked(new PurpleDeviceManager.DataListener() {
+            @Override
+            public void getData(Object data) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvLink.setText(data.toString());
+                        if (data.toString().equals("设备已经连接"))
+                            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_green), null, null, null);
+                        else
+                            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_red), null, null, null);
+                    }
+                });
+            }
+        });
+    }
+
+    /**************************************************************************/
 }

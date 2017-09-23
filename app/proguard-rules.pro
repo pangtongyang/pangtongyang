@@ -28,3 +28,4 @@
 }
 -dontwarn com.just.library.**
 -keepclassmembers class com.just.library.agentweb.AndroidInterface{ *; }
+-keep public class * extends android.webkit.WebChromeClient

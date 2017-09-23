@@ -13,6 +13,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
@@ -52,14 +53,14 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        spUtil = new SPUtil(mActivity, Consts.USER_DB_NAME);
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
     }
 
     @Override
     protected void initView() {
         setTitle(getResources().getString(R.string.activity_login_et_btn_login));
         hideBackButton();
-        etName.setText(spUtil.getString("username",""));
+        etName.setText(spUtil.getString("userName",""));
         etPassword.setText(spUtil.getString("password",""));
         if (spUtil.getString("login_type","card").equals("card")){
             tvOtherlogin.setText(R.string.activity_login_by_phone);
@@ -105,10 +106,8 @@ public class LoginActivity extends BaseActivity {
                 break;
             case R.id.btn_login:
                 if (validate()) {
-                    saveData();
-                    Intent intent = new Intent(mActivity, MainActivity.class);
-                    startActivity(intent);
-                    finish();
+                    loginAction();
+
                 }
                 break;
         }
@@ -134,7 +133,18 @@ public class LoginActivity extends BaseActivity {
             spUtil.putString("login_type", "phone");
         }
         spUtil.putString("is_login", "1");
-        spUtil.putString("username", etName.getText().toString().trim());
+        spUtil.putString("userName", etName.getText().toString().trim());
         spUtil.putString("password", etPassword.getText().toString().trim());
+    }
+
+    private void loginAction(){
+        saveData();
+        Intent intent = new Intent(mActivity, MainActivity.class);
+        intent.putExtra("isSplashed", true);
+        spUtil.putString("which_device", "2"); //1 -> 黑色 2 -> 紫色
+        spUtil.putString("deviceName", "purple"); //
+        spUtil.putString("deviceAddress", "FE:54:B9:7C:CB:FA"); //
+        startActivity(intent);
+        finish();
     }
 }

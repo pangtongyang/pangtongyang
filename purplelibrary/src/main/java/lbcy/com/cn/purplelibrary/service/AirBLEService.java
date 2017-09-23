@@ -309,12 +309,6 @@ public class AirBLEService extends Service implements DfuProgress {
             // TODO: handle exception
         }
 
-        // 关闭GATT
-        if (mBluetoothGatt != null) {
-            mBluetoothGatt.close();
-            mBluetoothGatt = null;
-            mBluetoothGattService = null;
-        }
         if (mBluetoothAdapter != null) {
             mBluetoothAdapter = null;
         }
@@ -384,7 +378,7 @@ public class AirBLEService extends Service implements DfuProgress {
         // such that resources are cleaned up properly. In this particular
         // example, close() is
         // invoked when the UI is disconnected from the Service.
-        close();
+        disconnectLast_all();
         return super.onUnbind(intent);
     }
 
@@ -483,36 +477,6 @@ public class AirBLEService extends Service implements DfuProgress {
 //        sendBroadcast(intent2);
 
         return true;
-    }
-
-    /**
-     * Disconnects an existing connection or cancel a pending connection. The
-     * disconnection result is reported asynchronously through the
-     * {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
-     * callback.
-     */
-    public void disconnect() {
-        onDestroy();
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-
-            return;
-        }
-        mBluetoothGatt.disconnect();
-        close();
-    }
-
-    /**
-     * After using a given BLE device, the app must call this method to ensure
-     * resources are released properly.
-     */
-    public void close() {
-        if (mBluetoothGatt == null) {
-            return;
-        }else{
-            mBluetoothGatt.close();
-            mBluetoothGatt = null;
-        }
-
     }
 
     /**
@@ -629,8 +593,6 @@ public class AirBLEService extends Service implements DfuProgress {
             do_disconnect(device);
             if (mBluetoothGatt != null) {
                 mBluetoothGatt.disconnect();
-                mBluetoothGatt.close();
-                mBluetoothGatt = null;
             }
         } catch (Exception e) {
             // TODO: handle exception

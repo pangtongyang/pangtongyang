@@ -14,6 +14,7 @@ import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
  */
 public class ManagerDeviceService {
     private static Context context;
+    private static Intent intent;
     private String TAG = this.getClass().getSimpleName();
 
     public ManagerDeviceService(Context context) {
@@ -34,7 +35,7 @@ public class ManagerDeviceService {
             stopService();
         }
 
-        Intent intent = new Intent();
+        intent = new Intent();
         intent.setAction("lbcy.com.cn.purplelibrary.service.DeviceService");
         intent.setPackage(context.getPackageName());
         intent.setClass(context, DeviceService.class);
@@ -51,16 +52,7 @@ public class ManagerDeviceService {
         return false;
     }
     public static void stopService() {
-//        Intent intent = DeviceService.getIntent();
-//        intent.setAction("lbcy.com.cn.purplelibrary.service.DeviceService");
-//        intent.setPackage(context.getPackageName());
-//        context.stopService(intent);
-        //断开连接
-        Intent intent = new Intent();
-        //设置Intent的action属性
-        intent.setAction(CommonConfiguration.DIS_CONNECT_DEVICE_NOTIFICATION);
-        //发出广播
-        context.sendBroadcast(intent);
+        context.stopService(intent);
     }
 
     public static boolean isWorked() {
@@ -73,5 +65,7 @@ public class ManagerDeviceService {
         }
         return false;
     }
+
+
 
 }

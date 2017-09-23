@@ -175,6 +175,9 @@ public class DeviceService extends Service {
             if (btReceiver != null) {
                 unregisterReceiver(btReceiver);
             }
+            if (bleService != null) {
+                bleService.stopSelf();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -242,7 +245,7 @@ public class DeviceService extends Service {
     private void createLink(String deviceAddress, String deviceName) {
         try {
             if (isWorked() && bleService != null) {
-                bleService.disconnect();
+                bleService.stopSelf();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -484,7 +487,7 @@ public class DeviceService extends Service {
             }
         } else if (intent.getAction().equals(CommonConfiguration.DIS_CONNECT_DEVICE_NOTIFICATION)) {
             if (isWorked() && bleService != null && bleService.initialize()) {
-                bleService.disconnect();
+                bleService.stopSelf();
             }
         } else if (intent.getAction().equals(CommonConfiguration.CONNECT_DEVICE_NOTIFICATION)) {
             deviceAddress = intent.getStringExtra("deviceAddress");
@@ -956,7 +959,7 @@ public class DeviceService extends Service {
                 e.printStackTrace();
             }
             Intent intent = new Intent();
-            intent.setAction(CommonConfiguration.RESULT_BLE_HEART_RATE_DATA_NOTIFICATION);
+            intent.setAction(CommonConfiguration.RESULT_BLE_SPORTSDATA_NOTIFICATION);
             intent.putExtra("deviceAddress", deviceAddress);
             sendBroadcast(intent);
         }
@@ -1093,7 +1096,7 @@ public class DeviceService extends Service {
             }
 
             Intent intent = new Intent();
-            intent.setAction(CommonConfiguration.RESULT_BLE_SLEEPDATA_NOTIFICATION);
+            intent.setAction(CommonConfiguration.RESULT_BLE_SPORTSDATA_NOTIFICATION);
             intent.putExtra("deviceAddress", deviceAddress);
             sendBroadcast(intent);
         }
@@ -1388,10 +1391,11 @@ public class DeviceService extends Service {
         for (int i = 0; i < runningService.size(); i++) {
 //            Log.i("sunping", runningService.get(i).service.getClassName().toString()+",,,,,com.wisgen.health.service.DeviceService");
             if (runningService.get(i).service.getClassName().toString().equals("lbcy.com.cn.purplelibrary.service.AirBLEService")) {
-//                Log.i("sunping", runningService.get(i).service.getClassName().toString()+",,,,,com.wisgen.health.service.AirBLEService");
+                Log.i("sunping", runningService.get(i).service.getClassName().toString()+",,,,,com.wisgen.health.service.AirBLEService");
                 return true;
             }
         }
+        Log.i("sunping", "false");
         return false;
     }
 

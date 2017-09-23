@@ -24,12 +24,17 @@ public class Consts {
 
     //订阅消息
     public static final String CLOCK_LISTENER = "ClockListener";
+    public static final String ACTIVITY_MANAGE_LISTENER = "ActivityListener";
     //更新编辑闹钟页文本信息
     public static final int UPDATE_CLOCK_DATA = 1024;
     //更新闹钟设置页
     public static final int UPDATE_ALL_CLOCK_DATA = 1025;
     //更新编辑闹钟页类型信息
     public static final int UPDATE_CLOCK_TYPE_DATA = 1026;
+    //关闭Activity
+    public static final int CLOSE_ACTIVITY = 1027;
+    //连接手环
+    public static final int CONNECT_DEVICE = 1028;
 
     //web页面链接
     public static final String WEB_BASE = "file:///android_asset/www/index.html#";
@@ -44,9 +49,9 @@ public class Consts {
     //心率运动模式首页
     public static final String WEB_HEART_RATE_SPORT = WEB_BASE + "/heartbeats/info/sport";
     //心率运动模式实时测心率页
-    public static final String WEB_HEART_RATE_TEST = WEB_BASE + "/heartbeats/info/start";
+    public static final String WEB_HEART_RATE_TEST = WEB_BASE + "/heartbeats/info/sport/start";
     //心率运动模式详情页
-    public static final String WEB_HEART_RATE_DETAIL = WEB_BASE + "/heartbeats/info/detail";
+    public static final String WEB_HEART_RATE_DETAIL = WEB_BASE + "/heartbeats/info/sport/detail";
     //周心率数据页
     public static final String WEB_HEART_RATE_HISTORY = WEB_BASE + "/heartbeats/info/history";
     //睡眠首页

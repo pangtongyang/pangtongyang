@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -42,6 +43,7 @@ import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.activity.WebActivity;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxManager;
+import lbcy.com.cn.wristband.utils.ScreenUtil;
 
 import static lbcy.com.cn.wristband.global.Consts.URL_KEY;
 
@@ -57,29 +59,31 @@ public abstract class BaseWebFragment extends Fragment {
     public RxManager mRxManager;
     List<String> webHistoryUrls = new ArrayList<>();
 
-    public boolean isBackPressed = false;
+    public boolean loadIndexUrl = false;
 
     protected AgentWeb mAgentWeb;
     AgentWeb.PreAgentWeb preAgentWeb;
 
     @BindView(R.id.ll_web_content)
     LinearLayout llWebContent;
-    @BindView(R.id.tv_top_bar_title)
-    TextView tvTopBarTitle;
-    @BindView(R.id.iv_back)
-    ImageView ivBack;
-    @BindView(R.id.iv_righticon)
-    ImageView ivRighticon;
-    @BindView(R.id.rl_top_bar)
-    RelativeLayout rlTopBar;
+//    @BindView(R.id.tv_top_bar_title)
+//    TextView tvTopBarTitle;
+//    @BindView(R.id.iv_back)
+//    ImageView ivBack;
+//    @BindView(R.id.iv_righticon)
+//    ImageView ivRighticon;
+//    @BindView(R.id.rl_top_bar)
+//    RelativeLayout rlTopBar;
 
     //访问一级页面，先清理url历史再访问
-    public void clearHistoryUrls(){
+    public void clearHistoryUrls() {
         webHistoryUrls.clear();
     }
 
     public void loadUrl(String url) {
         if (mAgentWeb != null) {
+            loadIndexUrl = true;
+            clearHistoryUrls();
             mAgentWeb.getLoader().loadUrl(url);
         }
     }
@@ -88,15 +92,14 @@ public abstract class BaseWebFragment extends Fragment {
         return mAgentWeb;
     }
 
-    public View getTopBar() {
-        return rlTopBar;
-    }
+//    public View getTopBar() {
+//        return rlTopBar;
+//    }
 
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-//        mRootView =inflater.inflate(getLayoutId(),container,false);
 
         mRootView = inflater.inflate(R.layout.fragment_web, container, false);
         mActivity = getActivity();
@@ -105,7 +108,7 @@ public abstract class BaseWebFragment extends Fragment {
         unbinder = ButterKnife.bind(this, mRootView);//绑定framgent
         initView();
         loadData();
-        rlTopBar.setVisibility(View.GONE);
+//        rlTopBar.setVisibility(View.GONE);
         return mRootView;
 
     }
@@ -129,15 +132,28 @@ public abstract class BaseWebFragment extends Fragment {
                 .ready();//设置 WebSettings
 
         mAgentWeb = preAgentWeb.go(getUrl());
+
         mAgentWeb.getWebCreator().get().setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                ((WebView)view).requestDisallowInterceptTouchEvent(true);
+                if (view.getScrollY() == 0 && ((WebView) view).getUrl().contains(Consts.WEB_STAR)){
+                    if (motionEvent.getY() <= ScreenUtil.dip2px(mActivity, 133)) {
+                        ((WebView) view).requestDisallowInterceptTouchEvent(true);
+                    } else {
+                        ((WebView) view).requestDisallowInterceptTouchEvent(false);
+                    }
+                }
+
                 return false;
             }
         });
         WebView webView = mAgentWeb.getWebCreator().get();
         webView.setWebViewClient(mWebViewClient);
+
+        if(mAgentWeb!=null){
+            mAgentWeb.getJsInterfaceHolder().addJavaObject("android",new AndroidInterface(mAgentWeb,this.getActivity()));
+
+        }
     }
 
     //初始化view
@@ -190,49 +206,40 @@ public abstract class BaseWebFragment extends Fragment {
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            if (isBackPressed) {
-                if (webHistoryUrls.contains(view.getUrl())) {
-                    webHistoryUrls.remove(webHistoryUrls.size() - 1);
-//                    onWebItemClick.click(isBackPressed, webHistoryUrls);
+            if (webHistoryUrls.size() == 2 && webHistoryUrls.get(0).contains(view.getUrl())){
+                mAgentWeb.getWebCreator().get().clearHistory();
+                webHistoryUrls.remove(webHistoryUrls.size() - 1);
+            }
+            if (!webHistoryUrls.contains(view.getUrl())) {
+                if (loadIndexUrl) {
+                    webHistoryUrls.add(view.getUrl());
+                    mAgentWeb.getWebCreator().get().clearHistory();
+                    loadIndexUrl = false;
+                    return;
                 }
-                isBackPressed = false;
-            } else {
-                if (!webHistoryUrls.contains(view.getUrl())) {
 
-                    if (webHistoryUrls.size() != 0){
-                        if (webHistoryUrls.size() == 2)
-                            webHistoryUrls.set(1, view.getUrl());
-                        else
-                            webHistoryUrls.add(view.getUrl());
-                        startActivity(new Intent(mActivity, WebActivity.class).putExtra("url", view.getUrl()));
-                        view.loadUrl(webHistoryUrls.get(0));
-                        clearHistoryUrls();
-                    } else {
-                        boolean isIndex = false;
-                        for (int i=0; i< Consts.WEB_INDEXES.length; i++){
-                            if (Consts.WEB_INDEXES[i].equals(view.getUrl()))
-                                isIndex = true;
-                        }
-                        if (isIndex){
-                            webHistoryUrls.add(view.getUrl());
-//                            onWebItemClick.click(isBackPressed, webHistoryUrls);
-                        }
+                if (webHistoryUrls.size() != 0) {
+                    //if--else前三行未作用，暂时保留
+                    if (webHistoryUrls.size() == 2)
+                        webHistoryUrls.set(1, view.getUrl());
+                    else
+                        webHistoryUrls.add(view.getUrl());
+                    startActivity(new Intent(mActivity, WebActivity.class).putExtra("url", view.getUrl()));
+                    view.loadUrl(webHistoryUrls.get(0));
+                } else {
+                    boolean isIndex = false;
+                    for (int i = 0; i < Consts.WEB_INDEXES.length; i++) {
+                        if (Consts.WEB_INDEXES[i].equals(view.getUrl()))
+                            isIndex = true;
                     }
-
+                    if (isIndex) {
+                        webHistoryUrls.add(view.getUrl());
+                    }
                 }
+
             }
         }
     };
-
-    OnWebItemClick onWebItemClick;
-
-    public interface OnWebItemClick {
-        void click(boolean isBackPressed, List<String> webHistoryUrls);
-    }
-
-    public void setOnWebItemClickListener(OnWebItemClick onWebItemClick) {
-        this.onWebItemClick = onWebItemClick;
-    }
 
     protected String getUrl() {
         String target = "";
@@ -245,10 +252,21 @@ public abstract class BaseWebFragment extends Fragment {
 
     protected WebChromeClient mWebChromeClient = new WebChromeClient() {
         @Override
+        public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+            Log.i("console", message + "(" +sourceID  + ":" + lineNumber+")");
+            super.onConsoleMessage(message, lineNumber, sourceID);
+        }
+
+        @Override
+        public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+            Log.i("console", "["+consoleMessage.messageLevel()+"] "+ consoleMessage.message() + "(" +consoleMessage.sourceId()  + ":" + consoleMessage.lineNumber()+")");
+            return true;
+        }
+
+        @Override
         public void onProgressChanged(WebView view, int newProgress) {
             //  super.onProgressChanged(view, newProgress);
             Log.i(TAG, "onProgressChanged:" + newProgress + "  view:" + view);
-            onWebItemClick.click(true, webHistoryUrls);
         }
 
     };
@@ -268,10 +286,10 @@ public abstract class BaseWebFragment extends Fragment {
     protected ChromeClientCallbackManager.ReceivedTitleCallback mCallback = new ChromeClientCallbackManager.ReceivedTitleCallback() {
         @Override
         public void onReceivedTitle(WebView view, String title) {
-            if (tvTopBarTitle != null && !TextUtils.isEmpty(title))
-                if (title.length() > 10)
-                    title = title.substring(0, 10).concat("...");
-            tvTopBarTitle.setText(title);
+//            if (tvTopBarTitle != null && !TextUtils.isEmpty(title))
+//                if (title.length() > 10)
+//                    title = title.substring(0, 10).concat("...");
+//            tvTopBarTitle.setText(title);
 
         }
     };
@@ -287,25 +305,6 @@ public abstract class BaseWebFragment extends Fragment {
             //do you work
         }
     };
-
-    @OnClick({R.id.iv_back})
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.iv_back:
-                onBackClick.click();
-                break;
-        }
-    }
-
-    public void setOnBackClickListener(OnBackClick onBackClick) {
-        this.onBackClick = onBackClick;
-    }
-
-    OnBackClick onBackClick;
-
-    public interface OnBackClick {
-        void click();
-    }
 
     @Override
     public void onResume() {

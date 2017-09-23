@@ -35,7 +35,6 @@ import lbcy.com.cn.wristband.widget.webview.WebLayout;
 /**
  * Created by chenjie on 2017/9/5.
  */
-
 public abstract class BaseWebActivity extends AppCompatActivity {
 
     public AppCompatActivity mActivity;
@@ -65,7 +64,7 @@ public abstract class BaseWebActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.NoActionBarTheme);
+        setTheme(R.style.SplashTheme);
         setContentView(R.layout.activity_base);
         ButterKnife.bind(this);
         baseContentview.setVisibility(View.GONE);
@@ -88,6 +87,11 @@ public abstract class BaseWebActivity extends AppCompatActivity {
                 .ready();
 
         mAgentWeb = preAgentWeb.go(getUrl());
+
+        if(mAgentWeb!=null){
+            mAgentWeb.getJsInterfaceHolder().addJavaObject("android",new AndroidInterface(mAgentWeb, mActivity));
+
+        }
     }
 
     @OnClick({R.id.iv_back, R.id.iv_righticon})
@@ -167,6 +171,11 @@ public abstract class BaseWebActivity extends AppCompatActivity {
                 } else if (view.getUrl().contains("health")) {
                     tvTopBarTitle.setText("健康详情");
                 }
+
+            }
+
+            if (view.getUrl().equals(Consts.WEB_HEART_RATE_SPORT) || view.getUrl().equals(Consts.WEB_HEART_RATE_TEST)){
+                view.clearHistory();
             }
         }
     };
@@ -231,4 +240,6 @@ public abstract class BaseWebActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return mAgentWeb.handleKeyEvent(keyCode, event) || super.onKeyDown(keyCode, event);
     }
+
+
 }
