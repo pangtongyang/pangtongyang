@@ -45,4 +45,10 @@ public interface DeviceController {
      * @param dataListener 升级返回值，获取Map<String, String> progress 升级进程, code 错误码
      */
     void updateDevice(String uploadFilePath, PurpleDeviceManager.DataListener dataListener);
+
+    /**
+     * 获取手环电池电量
+     * @param dataListener 回调函数
+     */
+    void getBattery(PurpleDeviceManager.DataListener dataListener);
 }

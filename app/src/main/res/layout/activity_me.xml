@@ -133,16 +133,16 @@
                                 android:id="@+id/tv_link"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentStart="true"
-                                android:layout_below="@+id/rl_mac"
-                                android:layout_marginTop="@dimen/margin_10"
-                                android:drawableStart="@drawable/app_circle_green"
+                                android:layout_marginTop="11dp"
+                                android:drawableStart="@drawable/app_circle_red"
                                 android:drawablePadding="@dimen/padding_5"
                                 android:gravity="start"
                                 android:maxLines="1"
-                                android:text="设备已经连接"
+                                android:text="设备尚未连接"
                                 android:textColor="@color/white"
-                                android:textSize="@dimen/textsize_14" />
+                                android:textSize="@dimen/textsize_14"
+                                android:layout_below="@+id/rl_mac"
+                                android:layout_alignParentStart="true" />
                         </RelativeLayout>
 
                     </LinearLayout>

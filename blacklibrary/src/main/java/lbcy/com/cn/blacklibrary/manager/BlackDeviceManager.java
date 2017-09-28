@@ -131,7 +131,7 @@ public class BlackDeviceManager implements DeviceController {
 
             }
         });
-        BleDataForBattery.getmCurrentBattery();
+//        BleDataForBattery.getmCurrentBattery();
         BleDataForBattery.getInstance().getBatteryPx();
     }
 
@@ -276,9 +276,10 @@ public class BlackDeviceManager implements DeviceController {
     }
 
     @Override
-    public void startHeartRateListener(Context context, DataCallback callback) {
+    public void startHeartRateListener(DataCallback callback) {
+
         BluetoothLeService.getInstance().addCallback(
-                BleGattHelper.getInstance(context, new gattHelperListener(callback)));
+                BleGattHelper.getInstance(mContext, new gattHelperListener(callback)));
     }
 
     class gattHelperListener implements BleGattHelperListener {

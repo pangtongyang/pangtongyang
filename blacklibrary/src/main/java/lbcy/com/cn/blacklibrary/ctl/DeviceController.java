@@ -74,10 +74,9 @@ public interface DeviceController {
 
     /**
      * 获取实时心率
-     * @param context 对应页面上下文
      * @param callback 回调函数，返回心率16进制值
      */
-    void startHeartRateListener(Context context, DataCallback callback);
+    void startHeartRateListener(DataCallback callback);
 
     /**
      * 睡眠和运动目标设置

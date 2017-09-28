@@ -80,6 +80,7 @@
     <string name="activity_device_version">固件版本 </string>
     <string name="activity_device_heartrate">心率监控 </string>
     <string name="activity_device_sedentary">久坐提醒 </string>
+    <string name="activity_device_sedentary_time">时间设置 </string>
     <string name="title_activity_alarm_clock_list">AlarmClockListActivity</string>
 
     <!--activity SetAlarmClockActivity-->
@@ -117,6 +118,10 @@
     <string name="start_Sedentary">开始久坐时间</string>
     <string name="end_Sedentary">结束久坐时间</string>
     <string name="space_Sedentary">时间提醒间隔</string>
+    <string name="space_Sedentary_30">30分钟</string>
+    <string name="space_Sedentary_60">60分钟</string>
+    <string name="space_Sedentary_90">90分钟</string>
+    <string name="space_Sedentary_120">120分钟</string>
 
     <!--popup photo-->
     <string name="take_photo">拍照</string>

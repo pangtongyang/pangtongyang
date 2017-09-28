@@ -180,4 +180,8 @@ public class SetItemView extends RelativeLayout {
     public boolean isChecked(){
         return mSwitch.isChecked();
     }
+
+    public void setChecked(boolean checked){
+        mSwitch.setChecked(checked);
+    }
 }

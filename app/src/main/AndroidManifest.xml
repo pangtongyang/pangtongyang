@@ -79,6 +79,9 @@
             android:name=".activity.SetSedentaryActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".activity.SetSedentaryTimeActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activity.MyMessageActivity"
             android:screenOrientation="portrait" />
         <activity

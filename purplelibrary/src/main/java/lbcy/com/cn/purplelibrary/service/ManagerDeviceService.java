@@ -7,8 +7,6 @@ import android.content.Intent;
 import java.util.ArrayList;
 import java.util.List;
 
-import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
-
 /**
  * 设备管理器
  */

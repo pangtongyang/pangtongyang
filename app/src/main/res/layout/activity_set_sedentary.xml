@@ -17,10 +17,10 @@
         android:id="@+id/rl_sedentary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:switchselected="true"
+        app:isShowUnderLine="false"
         app:leftIcon="@mipmap/sedentary"
         app:leftText="@string/activity_Sedentary"
-        app:isShowUnderLine="false">
+        app:switchselected="true">
 
     </lbcy.com.cn.settingitemlibrary.SetItemView>
 

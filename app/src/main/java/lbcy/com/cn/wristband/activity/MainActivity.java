@@ -27,11 +27,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.huichenghe.bleControl.Ble.BluetoothLeService;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import lbcy.com.cn.blacklibrary.ble.DeviceConnect;
+import lbcy.com.cn.blacklibrary.manager.DeviceConnectManager;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.service.ManagerDeviceService;
 import lbcy.com.cn.purplelibrary.service.MyNotificationService;
@@ -39,11 +43,17 @@ import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseWebFragment;
 import lbcy.com.cn.wristband.app.BaseFragmentActivity;
+import lbcy.com.cn.wristband.ctl.BleScanCallback;
+import lbcy.com.cn.wristband.entity.BleDevice;
 import lbcy.com.cn.wristband.fragment.WebFragment;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.popup.LoadingPopup;
+import lbcy.com.cn.wristband.test.BlackScanTest;
+import lbcy.com.cn.wristband.test.ToolActivity;
 import lbcy.com.cn.wristband.utils.AnimationUtil;
+import lbcy.com.cn.wristband.utils.BleScanHelper;
 import lbcy.com.cn.wristband.utils.HandlerTip;
+import lbcy.com.cn.wristband.utils.ToastUtil;
 import lbcy.com.cn.wristband.widget.NoScrollViewPager;
 import razerdp.basepopup.BasePopupWindow;
 import rx.functions.Action1;
@@ -113,6 +123,9 @@ public class MainActivity extends BaseFragmentActivity {
     SPUtil spUtil;
     Bundle mBundle;
 
+    //当前连接的设备
+    String which_device = "1";
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -154,6 +167,9 @@ public class MainActivity extends BaseFragmentActivity {
     @Override
     protected void initView() {
 
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
+        which_device = spUtil.getString("which_device", "1");
+
         textViews[0] = tvBottom1;
         textViews[1] = tvBottom2;
         textViews[2] = tvBottom3;
@@ -165,7 +181,6 @@ public class MainActivity extends BaseFragmentActivity {
         if (!isSplashed) {
             startActivity(new Intent(mActivity, SplashActivity.class));
             //判断是否已登录
-            spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
             String isLogin = spUtil.getString("is_login", "0");
             if (isLogin.equals("0")) {
                 finish();
@@ -186,7 +201,11 @@ public class MainActivity extends BaseFragmentActivity {
                         finish();
                         break;
                     case Consts.CONNECT_DEVICE:
-                        purpleConnectAction();
+                        if (which_device.equals("1")){
+                            blackConnectAction();
+                        } else {
+                            purpleConnectAction();
+                        }
                         break;
                 }
             }
@@ -489,18 +508,6 @@ public class MainActivity extends BaseFragmentActivity {
         }
     }
 
-//    public void showNormalTopBar() {
-//        AnimationUtil.showAndHiddenAnimation(webFragments[prePage].getTopBar(), AnimationUtil.AnimationState.STATE_SHOW, 300);
-//        AnimationUtil.showAndHiddenAnimation(rlHomeTopBar, AnimationUtil.AnimationState.STATE_HIDDEN, 300);
-//        AnimationUtil.showAndHiddenAnimation(llHomeBottomBar, AnimationUtil.AnimationState.STATE_HIDDEN, 300);
-//    }
-//
-//    public void showMainTopBar() {
-//        AnimationUtil.showAndHiddenAnimation(rlHomeTopBar, AnimationUtil.AnimationState.STATE_SHOW, 300);
-//        AnimationUtil.showAndHiddenAnimation(llHomeBottomBar, AnimationUtil.AnimationState.STATE_SHOW, 300);
-//        AnimationUtil.showAndHiddenAnimation(webFragments[prePage].getTopBar(), AnimationUtil.AnimationState.STATE_HIDDEN, 300);
-//    }
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -510,6 +517,12 @@ public class MainActivity extends BaseFragmentActivity {
 
             } else {
                 finish();
+                HandlerTip.getInstance().postDelayed(500, new HandlerTip.HandlerCallback() {
+                    @Override
+                    public void postDelayed() {
+                        System.exit(0);
+                    }
+                });
             }
             return true;
         }
@@ -530,7 +543,14 @@ public class MainActivity extends BaseFragmentActivity {
         }
 
         //黑色手环销毁
-
+        if (BluetoothLeService.getInstance() != null){
+            BluetoothLeService.getInstance().disconnect();
+            BluetoothLeService.getInstance().stopSelf();
+        }
+        if (scanHelper != null && !scanHelper.isScanSubscriptionNull())
+            scanHelper.stopRxAndroidBleScan();
+        if (manager != null)
+            manager.stopService();
     }
 
     /**************************************************************************/
@@ -604,6 +624,7 @@ public class MainActivity extends BaseFragmentActivity {
             try {
                 Thread.sleep(1000l);
                 managerDeviceService.startService();
+                ToastUtil.toast("正在连接设备，请稍后...");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -660,9 +681,14 @@ public class MainActivity extends BaseFragmentActivity {
         }
     }
 
+    boolean isToastFlag = true;
     protected void handleReceiver(Context context, Intent intent) {
 
         if (intent.getAction().equals(CommonConfiguration.RESULT_CONNECT_DEVICE_NOTIFICATION)) {
+            if (isToastFlag){
+                ToastUtil.toast("连接成功！");
+                isToastFlag = false;
+            }
         } else if (intent.getAction().equals(CommonConfiguration.RESULT_FAIL_CONNECT_DEVICE_NOTIFICATION)) {
             Toast.makeText(MainActivity.this, "连接设备失败", Toast.LENGTH_SHORT).show();
         }
@@ -682,8 +708,38 @@ public class MainActivity extends BaseFragmentActivity {
 
     /**************************************************************************/
     //黑色手环相关
-    private void blackConnectAction(){
+    BleScanHelper scanHelper;
+    DeviceConnectManager manager;
 
+    private void blackConnectAction(){
+        String mac_address = spUtil.getString("deviceAddress");
+        scanHelper = new BleScanHelper(this);
+        manager = new DeviceConnectManager(getApplicationContext());
+
+        scanHelper.startRxAndroidBleScan(new BleScanCallback() {
+            @Override
+            public void updateUI(BleDevice device) {
+                if (device.getMacAddress().equals(mac_address)){
+                    scanHelper.stopRxAndroidBleScan();
+                    manager.selectRxAndroidBleDevice(Consts.BLACK_WRISTBAND_NAME, mac_address);
+                }
+            }
+        });
+
+        manager.registerReceiverForAllEvent(new DeviceConnect() {
+            @Override
+            public void connect() {
+                ToastUtil.toast("连接成功！");
+//                Intent intet = new Intent(BlackScanTest.this, ToolActivity.class);
+//                startActivity(intet);
+            }
+
+            @Override
+            public void scan(ArrayList data) {
+
+            }
+        });
+        manager.startService();
     }
 
     /**************************************************************************/

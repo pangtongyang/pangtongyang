@@ -50,7 +50,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
 //        BluetoothLeService.getInstance().addCallback(
 //                BleGattHelper.getInstance(getApplicationContext(), new gattHelperListener()));
-        BlackDeviceManager.getInstance().startHeartRateListener(this, new DataCallback() {
+        BlackDeviceManager.getInstance().startHeartRateListener(new DataCallback() {
             @Override
             public void OnSuccess(byte[] data) {
                 runOnUiThread(new Runnable() {

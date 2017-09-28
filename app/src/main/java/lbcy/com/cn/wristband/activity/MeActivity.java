@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.huichenghe.bleControl.Ble.BluetoothLeService;
 import com.jph.takephoto.app.TakePhotoActivity;
 import com.jph.takephoto.model.TImage;
 import com.jph.takephoto.model.TResult;
@@ -84,6 +85,9 @@ public class MeActivity extends TakePhotoActivity {
     BasePopupWindow popupWindow;
     SPUtil spUtil;
 
+    //当前连接的设备
+    String which_device = "1";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,7 +97,13 @@ public class MeActivity extends TakePhotoActivity {
         spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
         itemClick();
 
-        getSettings();
+
+        which_device = spUtil.getString("which_device", "1");
+        if (which_device.equals("1")){
+            b_getSettings();
+        } else {
+            p_getSettings();
+        }
     }
 
     private void itemClick(){
@@ -227,7 +237,7 @@ public class MeActivity extends TakePhotoActivity {
 
     /**************************************************************************/
     //紫色手环连接相关
-    private void getSettings(){
+    private void p_getSettings(){
         PurpleDeviceManager.getInstance().isLinked(new PurpleDeviceManager.DataListener() {
             @Override
             public void getData(Object data) {
@@ -243,6 +253,19 @@ public class MeActivity extends TakePhotoActivity {
                 });
             }
         });
+    }
+
+    /**************************************************************************/
+    //黑色手环相关
+    private void b_getSettings(){
+        if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+            tvLink.setText("设备已经连接");
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_green), null, null, null);
+        } else {
+            tvLink.setText("设备尚未连接");
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_red), null, null, null);
+        }
+
     }
 
     /**************************************************************************/

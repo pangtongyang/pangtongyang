@@ -106,13 +106,17 @@ public class PurpleDeviceManager implements DeviceController {
             String deviceName = spUtil.getString("deviceName");
             String deviceAddress = spUtil.getString("deviceAddress");
             if (deviceName != null && !"".equals(deviceName) && !"null".equals(deviceName)) {
-                if (isLink){
-                    dataListener.getData("设备已经连接");
-                } else {
-                    dataListener.getData("设备尚未连接");
+                if (dataListener != null){
+                    if (isLink){
+                        dataListener.getData("设备已经连接");
+                    } else {
+                        dataListener.getData("设备尚未连接");
+                    }
                 }
             } else {
-                dataListener.getData("设备尚未连接");
+                if (dataListener != null){
+                    dataListener.getData("设备尚未连接");
+                }
             }
         } else if (intent.getAction().equals(CommonConfiguration.RESULT_BLE_SPORTSDATA_NOTIFICATION)){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -122,7 +126,10 @@ public class PurpleDeviceManager implements DeviceController {
                     .build().list();
             if (!list.isEmpty()) {
                 SportInfo sportInfo = list.get(0);
-                sportsDataListener.getData(sportInfo);
+                if (sportsDataListener != null){
+                    sportsDataListener.getData(sportInfo);
+                    sportsDataListener = null;
+                }
             }
         } else if(intent.getAction().equals(CommonConfiguration.RESULT_UPDATE_DEVICE_NOTIFICATION)){
             int progress = intent.getIntExtra("progress", 0);
@@ -130,7 +137,10 @@ public class PurpleDeviceManager implements DeviceController {
             Map<String, String> map = new HashMap<>();
             map.put("progress", String.valueOf(progress));
             map.put("code", String.valueOf(code));
-            uploadDataListener.getData(map);
+            if (uploadDataListener != null){
+                uploadDataListener.getData(map);
+                uploadDataListener = null;
+            }
         }
     }
 
@@ -184,6 +194,15 @@ public class PurpleDeviceManager implements DeviceController {
         mContext.sendBroadcast(intent);
 
         this.uploadDataListener = dataListener;
+    }
+
+    @Override
+    public void getBattery(DataListener dataListener) {
+        //通知获取运动数据
+        Intent intent = new Intent();
+        intent.setAction(CommonConfiguration.GET_BLE_SPORTSDATA_NOTIFICATION);
+        mContext.sendBroadcast(intent);
+        this.sportsDataListener = dataListener;
     }
 
 

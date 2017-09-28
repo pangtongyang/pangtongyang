@@ -7,6 +7,6 @@ import java.util.ArrayList;
  */
 
 public interface DeviceConnect {
-    void connect();
-    void scan(ArrayList data);
+    void connect();//连接成功回调
+    void scan(ArrayList data);//sdk自带扫描方法回调
 }

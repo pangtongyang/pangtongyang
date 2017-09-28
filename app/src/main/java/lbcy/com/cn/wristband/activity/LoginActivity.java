@@ -141,9 +141,10 @@ public class LoginActivity extends BaseActivity {
         saveData();
         Intent intent = new Intent(mActivity, MainActivity.class);
         intent.putExtra("isSplashed", true);
-        spUtil.putString("which_device", "2"); //1 -> 黑色 2 -> 紫色
-        spUtil.putString("deviceName", "purple"); //
-        spUtil.putString("deviceAddress", "FE:54:B9:7C:CB:FA"); //
+        spUtil.putString("which_device", "1"); //1 -> 黑色 2 -> 紫色
+        spUtil.putString("deviceName", "wristband"); //
+//        spUtil.putString("deviceAddress", "FE:54:B9:7C:CB:FA"); //紫色test
+        spUtil.putString("deviceAddress", "CD:96:8C:EC:EE:B3"); //黑色test
         startActivity(intent);
         finish();
     }

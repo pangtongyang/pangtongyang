@@ -50,7 +50,7 @@ public class ToastUtil {
 		baseHandler.sendMessage(msg);
 	}
 
-	public static Toast makeText(Context context, CharSequence text,
+	private static Toast makeText(Context context, CharSequence text,
                                  int duration) {
 
 		if (null == context) {

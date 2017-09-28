@@ -11,20 +11,29 @@ import java.util.Map;
 public class Consts {
     //获取位置权限
     public static final int REQUEST_CODE_ASK_LOCATION_PERMISSIONS = 1024;
-    //public static final String BLACK_WRISTBAND_NAME = "BC_dd2d9a596e3f";
     public static final String BLACK_WRISTBAND_NAME = "BC_";
     public static final String PURPLE_WRISTBAND_NAME = "BC-02B";
-    public static final String CLOCK_DK_NAME = "LBCY_CLOCK_DB";
+    public static final String SETTING_DB_NAME = "LBCY_CLOCK_DB";
     public static final String USER_DB_NAME = "LBCY_USER_DB";
 
     public static final String URL_KEY = "url_key";
 
+    //闹钟最大数量
     public static final int CLOCK_MAX_NUM = 7;
+
+
+    //Activity request
+    public final static int SEDENTARY_TIME_ACTIVITY_REQUEST = 1111;
+
+    //Activity result
+    public final static int SEDENTARY_TIME_ACTIVITY_RESULT_UP = 111;
+    public final static int SEDENTARY_TIME_ACTIVITY_RESULT_DOWN = 112;
 
 
     //订阅消息
     public static final String CLOCK_LISTENER = "ClockListener";
     public static final String ACTIVITY_MANAGE_LISTENER = "ActivityListener";
+    public static final String ACTIVITY_SEDENTARY_LISTENER = "SedentaryActivityListener";
     //更新编辑闹钟页文本信息
     public static final int UPDATE_CLOCK_DATA = 1024;
     //更新闹钟设置页
@@ -35,6 +44,9 @@ public class Consts {
     public static final int CLOSE_ACTIVITY = 1027;
     //连接手环
     public static final int CONNECT_DEVICE = 1028;
+    //更新久坐提醒时间间隔
+    public static final int UPDATE_SEDENTARY_SPACE_TIME = 1029;
+
 
     //web页面链接
     public static final String WEB_BASE = "file:///android_asset/www/index.html#";

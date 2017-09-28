@@ -48,7 +48,7 @@ public class AlarmClockListActivity extends BaseActivity {
         getIntent = getIntent();
         isLateClock = getIntent.getBooleanExtra("is_late_clock", false);
 
-        spUtil = new SPUtil(mActivity, Consts.CLOCK_DK_NAME);
+        spUtil = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
         clockBeanDao = BaseApplication.getBaseApplication().getBaseDaoSession().getClockBeanDao();
         if (isLateClock){
             list = clockBeanDao.queryBuilder().where(ClockBeanDao.Properties.Type.eq("迟到提醒")).build().list();

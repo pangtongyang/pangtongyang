@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.huichenghe.bleControl.Ble.BluetoothLeService;
 import com.jph.takephoto.app.TakePhotoActivity;
 import com.jph.takephoto.model.TImage;
 import com.jph.takephoto.model.TResult;
@@ -22,6 +24,11 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import lbcy.com.cn.blacklibrary.ble.DataCallback;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
+import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
+import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.settingitemlibrary.SetItemView;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.popup.SlideFromBottomPopup;
@@ -81,13 +88,36 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     @BindView(R.id.root_layout)
     RelativeLayout rootLayout;
 
+    SPUtil spUtil;
+
+    //设备是否连接
+    boolean isLinked = false;
+    //当前连接的设备
+    String which_device = "1";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_setting);
         ButterKnife.bind(this);
         mActivity = this;
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
         itemClick();
+
+        which_device = spUtil.getString("which_device", "1");
+        if (which_device.equals("1")){
+            rlVibrate.setVisibility(View.GONE);
+            rlLongSittingAlarm.setVisibility(View.VISIBLE);
+            rlHeartRateScan.setVisibility(View.VISIBLE);
+
+            b_getSettings();
+        } else {
+            rlVibrate.setVisibility(View.VISIBLE);
+            rlLongSittingAlarm.setVisibility(View.GONE);
+            rlHeartRateScan.setVisibility(View.GONE);
+
+            p_getSettings();
+        }
 
     }
 
@@ -203,4 +233,99 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     public void onBackPressed(View view) {
         finish();
     }
+
+    /**************************************************************************/
+    //紫色手环连接相关
+    private void p_getSettings(){
+        PurpleDeviceManager.getInstance().isLinked(new PurpleDeviceManager.DataListener() {
+            @Override
+            public void getData(Object data) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvLink.setText(data.toString());
+                        if (data.toString().equals("设备已经连接"))
+                            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_green), null, null, null);
+                        else
+                            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_red), null, null, null);
+                    }
+                });
+            }
+        });
+
+        PurpleDeviceManager.getInstance().getBattery(new PurpleDeviceManager.DataListener() {
+
+            @Override
+            public void getData(Object data) {
+                int power = Integer.valueOf(data.toString());
+                tvBattery.setText(power + "%");
+                ivBattery.setImageResource(power <= 33
+                        ? R.mipmap.power_red : (power <= 66
+                        ? R.mipmap.power_yellow : R.mipmap.power_green));
+            }
+        });
+    }
+
+    /**************************************************************************/
+    //黑色手环相关
+    private void b_getSettings(){
+        if (BluetoothLeService.getInstance()!= null && BluetoothLeService.getInstance().isConnectedDevice()){
+            tvLink.setText("设备已经连接");
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_green), null, null, null);
+        } else {
+            tvLink.setText("设备尚未连接");
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_red), null, null, null);
+        }
+
+        if (BlackDeviceManager.getInstance() != null){
+            //心率实时获取方法，包含其他方法回调，需要提前调用
+            BlackDeviceManager.getInstance().startHeartRateListener(new DataCallback() {
+                @Override
+                public void OnSuccess(byte[] data) {
+
+                }
+
+                @Override
+                public void OnFailed() {
+
+                }
+
+                @Override
+                public void OnFinished() {
+
+                }
+            });
+        }
+
+        if (BlackDeviceManager.getInstance() != null){
+            BlackDeviceManager.getInstance().getBattery(new DataCallback() {
+                @Override
+                public void OnSuccess(byte[] data) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            int power = data[0];
+                            tvBattery.setText(power + "%");
+                            ivBattery.setImageResource(power <= 33
+                                    ? R.mipmap.power_red : (power <= 66
+                                    ? R.mipmap.power_yellow : R.mipmap.power_green));
+                        }
+                    });
+                }
+
+                @Override
+                public void OnFailed() {
+
+                }
+
+                @Override
+                public void OnFinished() {
+
+                }
+            });
+        }
+
+    }
+
+    /**************************************************************************/
 }

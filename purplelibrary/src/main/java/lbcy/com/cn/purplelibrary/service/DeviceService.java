@@ -67,14 +67,14 @@ public class DeviceService extends Service {
     public static String deviceName = "";
     public static String deviceAddress = "";
 
-//    private SleepInfoDaoImpl sleepInfoDao;
-//    private SportDetailsDaoImpl sportDetailsDao;
-//    private SportInfoDaoImpl sportInfoDao;
-//    private AlarmClockInfoDaoImpl alarmClockInfoDao;
-//    private TargetRemindDaoImpl targetRemindDao;
-//    private SportTargetDaoImpl sportTargetDao;
-//    private NotFazeTimeDaoImpl notFazeTimeDao;
-//    private HeartRateDaoImpl heartRateDao;
+    private SleepInfoDao sleepInfoDao;
+    private SportDetailsDao sportDetailsDao;
+    private SportInfoDao sportInfoDao;
+    private AlarmClockInfoDao alarmClockInfoDao;
+    private TargetRemindDao targetRemindDao;
+    private SportTargetDao sportTargetDao;
+    private NotFazeTimeDao notFazeTimeDao;
+    private HeartRateInfoDao heartRateDao;
 
     private AirBLEService bleService = null;
 
@@ -83,8 +83,6 @@ public class DeviceService extends Service {
     private Intent service = null;
 
     private SPUtil sharedPreferencesDao;
-
-//    private AsyncHttpClient httpClient = new AsyncHttpClient();
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -95,14 +93,14 @@ public class DeviceService extends Service {
         // TODO Auto-generated method stub
         super.onCreate();
 
-//        sleepInfoDao = new SleepInfoDaoImpl(this);
-//        sportDetailsDao = new SportDetailsDaoImpl(this);
-//        sportInfoDao = new SportInfoDaoImpl(this);
-//        alarmClockInfoDao = new AlarmClockInfoDaoImpl(this);
-//        targetRemindDao = new TargetRemindDaoImpl(this);
-//        sportTargetDao = new SportTargetDaoImpl(this);
-//        notFazeTimeDao = new NotFazeTimeDaoImpl(this);
-//        heartRateDao = new HeartRateDaoImpl(this);
+        sleepInfoDao = MyApplication.getInstances().getDaoSession().getSleepInfoDao();
+        sportDetailsDao = MyApplication.getInstances().getDaoSession().getSportDetailsDao();
+        sportInfoDao = MyApplication.getInstances().getDaoSession().getSportInfoDao();
+        alarmClockInfoDao = MyApplication.getInstances().getDaoSession().getAlarmClockInfoDao();
+        targetRemindDao = MyApplication.getInstances().getDaoSession().getTargetRemindDao();
+        sportTargetDao = MyApplication.getInstances().getDaoSession().getSportTargetDao();
+        notFazeTimeDao = MyApplication.getInstances().getDaoSession().getNotFazeTimeDao();
+        heartRateDao = MyApplication.getInstances().getDaoSession().getHeartRateInfoDao();
         sharedPreferencesDao = new SPUtil(getApplicationContext(), CommonConfiguration.SHAREDPREFERENCES_NAME);
     }
 
@@ -159,8 +157,6 @@ public class DeviceService extends Service {
     }
 
 
-
-
     public void onDestroy() {
         // TODO Auto-generated method stubo
         super.onDestroy();
@@ -175,16 +171,13 @@ public class DeviceService extends Service {
             if (btReceiver != null) {
                 unregisterReceiver(btReceiver);
             }
-            if (bleService != null) {
-                bleService.stopSelf();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static Intent getIntent() {
-        return new Intent("lbcy.com.cn.purplelibrary.service.DeviceService");
+        return new Intent("com.wisgen.health.service.DeviceService");
     }
 
     //自动同步数据
@@ -245,7 +238,7 @@ public class DeviceService extends Service {
     private void createLink(String deviceAddress, String deviceName) {
         try {
             if (isWorked() && bleService != null) {
-                bleService.stopSelf();
+                bleService.disconnect();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -270,8 +263,6 @@ public class DeviceService extends Service {
             inf.addAction(ACTION);
             registerReceiver(btReceiver, inf);
             Intent service = new Intent(this, AirBLEService.class);
-            service.setAction("lbcy.com.cn.purplelibrary.service.AirBLEService");
-            service.setPackage(getPackageName());
             service.putExtra("address", deviceAddress);
             service.putExtra("deviceName", deviceName);
             bindService(service, mServiceConnection, Context.BIND_AUTO_CREATE);
@@ -487,7 +478,7 @@ public class DeviceService extends Service {
             }
         } else if (intent.getAction().equals(CommonConfiguration.DIS_CONNECT_DEVICE_NOTIFICATION)) {
             if (isWorked() && bleService != null && bleService.initialize()) {
-                bleService.stopSelf();
+                bleService.disconnect();
             }
         } else if (intent.getAction().equals(CommonConfiguration.CONNECT_DEVICE_NOTIFICATION)) {
             deviceAddress = intent.getStringExtra("deviceAddress");
@@ -534,8 +525,7 @@ public class DeviceService extends Service {
             }
         } else if (intent.getAction().equals(CommonConfiguration.ALARM_CLOCK_NOTIFICATION)) {
             if (isWorked() && bleService != null && bleService.initialize()) {
-                AlarmClockInfoDao clockInfoDao = MyApplication.getInstances().getDaoSession().getAlarmClockInfoDao();
-                List<AlarmClockInfo> list = clockInfoDao.queryBuilder().orderAsc(AlarmClockInfoDao.Properties.Id).build().list();
+                List<AlarmClockInfo> list = alarmClockInfoDao.queryBuilder().orderAsc(AlarmClockInfoDao.Properties.Id).build().list();
 
                 if (!list.isEmpty()) {
                     int state1 = 0;
@@ -590,7 +580,6 @@ public class DeviceService extends Service {
             if (isWorked() && bleService != null && bleService.initialize()) {
 
                 if (!isNotFaze()) {
-                    TargetRemindDao targetRemindDao = MyApplication.getInstances().getDaoSession().getTargetRemindDao();
                     List<TargetRemind> targetRemindList = targetRemindDao.loadAll();
                     if (!targetRemindList.isEmpty()) {
                         TargetRemind targetRemind = targetRemindList.get(0);
@@ -603,16 +592,13 @@ public class DeviceService extends Service {
                             betweenTime = simpleDateFormat.parse(sdf.format(new Date()) + " " + targetRemind.getRemindTime() + ":00").getTime() - simpleDateFormat.parse(simpleDateFormat.format(new Date())).getTime();
 //                            Log.v("sunping","time:"+betweenTime+"");
                             if (betweenTime <= 1000 * 60 * 1 && betweenTime >= -1000 * 60 * 1) {
-                                SportTargetDao sportTargetDao = MyApplication.getInstances().getDaoSession().getSportTargetDao();
                                 List<SportTarget> sportTargetList = sportTargetDao.loadAll();
                                 int steps = 0;
                                 if (!sportTargetList.isEmpty()) {
                                     SportTarget sportTarget = sportTargetList.get(0);
                                     int targetStep = sportTarget.getSteps();
-                                    SportInfoDao sportInfoDao = MyApplication.getInstances().getDaoSession().getSportInfoDao();
-                                    List<SportInfo> sportInfoList = sportInfoDao.queryBuilder()
-                                            .where(SportInfoDao.Properties.DateTime.eq(sdf.format(new Date())))
-                                            .build().list();
+
+                                    List<SportInfo> sportInfoList = sportInfoDao.queryBuilder().where(SportInfoDao.Properties.DateTime.eq(sdf.format(new Date()))).build().list();
                                     if (!sportInfoList.isEmpty()) {
                                         SportInfo sportInfo = sportInfoList.get(0);
                                         steps = targetStep - sportInfo.getSteps();
@@ -661,10 +647,7 @@ public class DeviceService extends Service {
 
         Boolean isRemind = false;
 
-        NotFazeTimeDao notFazeTimeDao = MyApplication.getInstances().getDaoSession().getNotFazeTimeDao();
-        List<NotFazeTime> notFazeTimeList = notFazeTimeDao.queryBuilder()
-                .where(NotFazeTimeDao.Properties.State.eq(1))
-                .build().list();
+        List<NotFazeTime> notFazeTimeList = notFazeTimeDao.queryBuilder().where(NotFazeTimeDao.Properties.State.eq("1")).build().list();
         if (!notFazeTimeList.isEmpty()) {
             NotFazeTime notFazeTime = notFazeTimeList.get(0);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -876,14 +859,13 @@ public class DeviceService extends Service {
                 }
                 JSONArray jsonArrayListData = new JSONArray();
                 for (int i = 0; i < var1.size(); i++) {
-                    HeartRateInfoDao heartRateInfoDao = MyApplication.getInstances().getDaoSession().getHeartRateInfoDao();
-
                     HeartRate heartRate = (HeartRate) var1.get(i);
                     String date = heartRate.date;
                     if (!date.equals(toDay)) {
-                        Long count = heartRateInfoDao.queryBuilder()
+                        Long count = heartRateDao.queryBuilder()
                                 .where(HeartRateInfoDao.Properties.DateTime.eq(date), HeartRateInfoDao.Properties.State.eq('1'))
                                 .count();
+
                         if (count > 0) {
                             continue;
                         }
@@ -917,7 +899,7 @@ public class DeviceService extends Service {
 
                     }
 
-                    Long count = heartRateInfoDao.queryBuilder()
+                    Long count = heartRateDao.queryBuilder()
                             .where(HeartRateInfoDao.Properties.DateTime.eq(date))
                             .count();
 
@@ -929,28 +911,26 @@ public class DeviceService extends Service {
                     str = sb.toString();
 
                     if (count > 0) {
-                        HeartRateInfo heartRateInfo = heartRateInfoDao.queryBuilder().build().unique();
+                        HeartRateInfo heartRateInfo = heartRateDao.queryBuilder().build().unique();
                         heartRateInfo.setDateTime(date);
                         heartRateInfo.setContent(str);
                         heartRateInfo.setState("1");
-                        heartRateInfoDao.update(heartRateInfo);
-
+                        heartRateDao.update(heartRateInfo);
                     } else {
                         HeartRateInfo heartRateInfo = new HeartRateInfo();
                         heartRateInfo.setDateTime(date);
                         heartRateInfo.setContent(str);
                         heartRateInfo.setState("1");
-
-                        heartRateInfoDao.insert(heartRateInfo);
+                        heartRateDao.insert(heartRateInfo);
                     }
                 }
 
-//                数据上传服务器
+
 //                RequestParams params = new RequestParams();
 //                params.put("Mac", sharedPreferencesDao.getString("deviceAddress"));
 //                params.put("Data", jsonArrayListData.toString());
-//              Log.v("sunping", jsonArrayListData.toString() + ",," + info.getMacAddress());
-
+////              Log.v("sunping", jsonArrayListData.toString() + ",," + info.getMacAddress());
+//
 //                Message msg = handler.obtainMessage();
 //                msg.obj = params;
 //                handler.sendMessage(msg);
@@ -970,8 +950,6 @@ public class DeviceService extends Service {
             Log.i("TAG","获取睡眠信息成功！！！！！！！！！！！！！！！！！！！！！！！！！");
             // TODO Auto-generated method stub
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-            SleepInfoDao sleepInfoDao = MyApplication.getInstances().getDaoSession().getSleepInfoDao();
 
             SleepInfo del_sleepInfo = sleepInfoDao.queryBuilder()
                     .where(SleepInfoDao.Properties.DateTime.eq(sdf.format(new Date()))).build().unique();
@@ -1080,12 +1058,11 @@ public class DeviceService extends Service {
 
                     jsonArrayListData.put(lightJsonArrayData);
 
-//                    上传服务器
 //                    final RequestParams params = new RequestParams();
 //                    params.put("Mac", sharedPreferencesDao.getString("deviceAddress"));
 //                    params.put("Data", jsonArrayListData.toString());
-//                    Log.v("sunping", jsonArrayListData.toString() + ",sleep," + info.getMacAddress());
-
+////                    Log.v("sunping", jsonArrayListData.toString() + ",sleep," + info.getMacAddress());
+//
 //                    Message msg = handler.obtainMessage();
 //                    msg.obj = params;
 //                    handler.sendMessage(msg);
@@ -1126,8 +1103,6 @@ public class DeviceService extends Service {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            SportInfoDao sportInfoDao = MyApplication.getInstances().getDaoSession().getSportInfoDao();
 
             //删除当前数据
             SportInfo del_sportInfo = sportInfoDao.queryBuilder()
@@ -1195,8 +1170,6 @@ public class DeviceService extends Service {
             sportInfo.setCreateTime(sdf.format(new Date()));
             sportInfo.setDid(deviceAddress);
             sportInfo.setDateTime(date);
-
-            SportInfoDao sportInfoDao = MyApplication.getInstances().getDaoSession().getSportInfoDao();
             sportInfoDao.insert(sportInfo);
 
             Intent intent = new Intent();
@@ -1231,8 +1204,6 @@ public class DeviceService extends Service {
                 int hour = arg.getHour();
                 int[] steps = arg.getStep();
                 int[] calories = arg.getCalories();
-
-                SportDetailsDao sportDetailsDao = MyApplication.getInstances().getDaoSession().getSportDetailsDao();
 
                 //删除
                 SportDetails del_sportDetails = sportDetailsDao.queryBuilder()
@@ -1309,7 +1280,7 @@ public class DeviceService extends Service {
 
                         JSONArray jsonArrayListData = new JSONArray();
                         jsonArrayListData.put(jsonArrayData);
-//                        上传服务器
+
 //                        RequestParams params = new RequestParams();
 ////                        params.put("Mac", info.getMacAddress());
 //                        params.put("Mac", sharedPreferencesDao.getString("deviceAddress"));
@@ -1336,7 +1307,7 @@ public class DeviceService extends Service {
             intent.putExtra("deviceAddress", deviceAddress);
             sendBroadcast(intent);
         }
-//        上传服务器
+
 //        private Handler handler = new Handler() {
 //
 //            @Override
@@ -1391,11 +1362,10 @@ public class DeviceService extends Service {
         for (int i = 0; i < runningService.size(); i++) {
 //            Log.i("sunping", runningService.get(i).service.getClassName().toString()+",,,,,com.wisgen.health.service.DeviceService");
             if (runningService.get(i).service.getClassName().toString().equals("lbcy.com.cn.purplelibrary.service.AirBLEService")) {
-                Log.i("sunping", runningService.get(i).service.getClassName().toString()+",,,,,com.wisgen.health.service.AirBLEService");
+//                Log.i("sunping", runningService.get(i).service.getClassName().toString()+",,,,,com.wisgen.health.service.AirBLEService");
                 return true;
             }
         }
-        Log.i("sunping", "false");
         return false;
     }
 
