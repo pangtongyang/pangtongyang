@@ -1,33 +1,14 @@
 package lbcy.com.cn.wristband.test;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
-
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.TimePickerDialog;
-import android.app.TimePickerDialog.OnTimeSetListener;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
-import android.widget.TimePicker;
-import android.widget.Toast;
 
 import lbcy.com.cn.wristband.R;
 
@@ -40,7 +21,6 @@ public class OprateActivity extends Activity implements View.OnClickListener,OnC
 	private Button button24, button25, button26;// zh , en , steplen
 	private CheckBox vibrate, press, check11;
 
-	private static final String TAG = OprateActivity.class.getSimpleName();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub

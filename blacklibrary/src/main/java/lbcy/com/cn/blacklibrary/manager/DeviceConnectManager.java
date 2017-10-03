@@ -1,6 +1,5 @@
 package lbcy.com.cn.blacklibrary.manager;
 
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,14 +26,12 @@ import lbcy.com.cn.blacklibrary.ble.DeviceConnect;
  */
 
 public class DeviceConnectManager {
-    private static final String TAG = DeviceConnectManager.class.getSimpleName();
-    private static DeviceConnectManager manager;
     private Context mContext;
     private DeviceConnect mDevice; //广播监听
     private DeviceConnect mDevice1; //设备扫描
-    private ArrayList mData = new ArrayList();
+    private ArrayList<LocalDeviceEntity> mData = new ArrayList<>();
     private final int CLOSE_NOTE_NOT_CONNECT = 1;
-    Intent bleConnect;
+    private Intent bleConnect;
 
 
     public DeviceConnectManager(Context context) {
@@ -61,7 +58,7 @@ public class DeviceConnectManager {
         public void onReceive(Context context, final Intent intent) {
             switch (intent.getAction()) {   // 设备已连接的广播
                 case DeviceConfig.DEVICE_CONNECTE_AND_NOTIFY_SUCESSFUL:
-                    if (BluetoothLeService.getInstance().isConnectedDevice()) {
+                    if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()) {
                         mDevice.connect();
                     }
 //                    closeProgressDialog();  关闭弹窗
@@ -136,7 +133,7 @@ public class DeviceConnectManager {
             Collections.sort(mData, new Comparator<LocalDeviceEntity>() {
                 @Override
                 public int compare(LocalDeviceEntity lhs, LocalDeviceEntity rhs) {
-                    return new Integer(rhs.getRssi()).compareTo(lhs.getRssi());
+                    return (Integer.valueOf(rhs.getRssi())).compareTo(lhs.getRssi());
                 }
             });
 
@@ -156,9 +153,9 @@ public class DeviceConnectManager {
         }
 
         BleScanUtils.getBleScanUtilsInstance(mContext).stopScan();
-        LocalDeviceEntity deviceEntity = (LocalDeviceEntity) mData.get(position);// 获取设备实体类
+        LocalDeviceEntity deviceEntity = mData.get(position);// 获取设备实体类
 //        showProgressDialog("" + deviceEntity.getName());  开启弹窗
-        Toast.makeText(mContext, "设备连接中", Toast.LENGTH_SHORT).show();
+
         if (BluetoothLeService.getInstance() != null) {
 
             BluetoothLeService.getInstance().connect(deviceEntity);
@@ -193,7 +190,7 @@ public class DeviceConnectManager {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case CLOSE_NOTE_NOT_CONNECT:
-                    if (!BluetoothLeService.getInstance().isDeviceConnected((LocalDeviceEntity) msg.obj)) {
+                    if (BluetoothLeService.getInstance() != null && !BluetoothLeService.getInstance().isDeviceConnected((LocalDeviceEntity) msg.obj)) {
 //                    closeProgressDialog();  关闭弹窗
                         Toast.makeText(mContext, "连接超时", Toast.LENGTH_SHORT).show();
                     }

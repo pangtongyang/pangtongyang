@@ -29,3 +29,10 @@
 -dontwarn com.just.library.**
 -keepclassmembers class com.just.library.agentweb.AndroidInterface{ *; }
 -keep public class * extends android.webkit.WebChromeClient
+
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontnote retrofit2.Platform
+-dontwarn retrofit2.Platform$Java8
+-keepattributes Signature
+-keepattributes Exceptions

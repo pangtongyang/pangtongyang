@@ -3,59 +3,60 @@ package lbcy.com.cn.wristband.activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.huichenghe.bleControl.Ble.BluetoothLeService;
+import com.just.library.AgentWeb;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 import lbcy.com.cn.blacklibrary.ble.DeviceConnect;
 import lbcy.com.cn.blacklibrary.manager.DeviceConnectManager;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
+import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 import lbcy.com.cn.purplelibrary.service.ManagerDeviceService;
-import lbcy.com.cn.purplelibrary.service.MyNotificationService;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
+import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.app.BaseWebFragment;
 import lbcy.com.cn.wristband.app.BaseFragmentActivity;
 import lbcy.com.cn.wristband.ctl.BleScanCallback;
 import lbcy.com.cn.wristband.entity.BleDevice;
+import lbcy.com.cn.wristband.entity.LoginData;
+import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.fragment.WebFragment;
 import lbcy.com.cn.wristband.global.Consts;
-import lbcy.com.cn.wristband.popup.LoadingPopup;
-import lbcy.com.cn.wristband.test.BlackScanTest;
-import lbcy.com.cn.wristband.test.ToolActivity;
-import lbcy.com.cn.wristband.utils.AnimationUtil;
+import lbcy.com.cn.wristband.service.MyNotificationService;
 import lbcy.com.cn.wristband.utils.BleScanHelper;
 import lbcy.com.cn.wristband.utils.HandlerTip;
 import lbcy.com.cn.wristband.utils.ToastUtil;
 import lbcy.com.cn.wristband.widget.NoScrollViewPager;
-import razerdp.basepopup.BasePopupWindow;
+import lbcy.com.cn.wristband.widget.webview.WebLayout;
 import rx.functions.Action1;
 
 /**
@@ -63,6 +64,7 @@ import rx.functions.Action1;
  */
 
 public class MainActivity extends BaseFragmentActivity {
+    private static final int BLUETOOTH_OPEN_REQUEST = 14450;
 
     private final int TAB_HEALTH = 0;
     private final int TAB_KAOQIN = 1;
@@ -74,6 +76,8 @@ public class MainActivity extends BaseFragmentActivity {
     FragmentAdapter adapter;
 
     int prePage = 0;
+    @BindView(R.id.web)
+    LinearLayout web;
     @BindView(R.id.tv_top1)
     TextView tvTop1;
     @BindView(R.id.view1)
@@ -123,8 +127,49 @@ public class MainActivity extends BaseFragmentActivity {
     SPUtil spUtil;
     Bundle mBundle;
 
-    //当前连接的设备
-    String which_device = "1";
+    // 当前连接的设备
+    String which_device = "2";
+
+    // 判断localStorage是否已写入
+    // 注意退出登录时，务必修改spUtil:SHAREDPREFERENCES_NAME存储的js_is_write值为0
+    private boolean jsIsWrite = false;
+    //判断web页面是否已加载
+    private boolean isWebInit = false;
+    private WebViewClient mWebViewClient = new WebViewClient() {
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            if (!jsIsWrite) {
+                jsIsWrite = setJsData(view);
+                spUtil.putString("js_is_write", jsIsWrite ? "1" : "0");
+            }
+            if (!isWebInit && jsIsWrite) {
+                initWeb();
+
+                adapter = new FragmentAdapter(getSupportFragmentManager());
+                vpContent.setAdapter(adapter);
+                isWebInit = true;
+            }
+        }
+    };
+
+    public boolean setJsData(WebView webView) {
+        LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
+        if (loginDataDao.loadAll().size() == 0)
+            return false;
+        LoginData loginData = loginDataDao.loadAll().get(0);
+        Gson gson = new Gson();
+        String loginJson = gson.toJson(loginData);
+        String js = "window.localStorage.setItem('authInf','" + loginJson + "');";
+        String jsUrl = "javascript:(function({var localStorage = window.localStorage;localStorage.setItem('authInf','" + loginJson + "')})()";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            webView.evaluateJavascript(js, null);
+        } else {
+            webView.loadUrl(jsUrl);
+            webView.reload();
+        }
+        return true;
+    }
 
     @Override
     protected void onResume() {
@@ -161,14 +206,36 @@ public class MainActivity extends BaseFragmentActivity {
 
     @Override
     protected void initData() {
-
+        toggleNotificationListenerService();
     }
 
     @Override
     protected void initView() {
 
         spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
-        which_device = spUtil.getString("which_device", "1");
+        which_device = spUtil.getString("which_device", "2");
+
+        jsIsWrite = spUtil.getString("js_is_write", "0").equals("0");
+
+        if (!jsIsWrite) {
+            //预加载localStorage
+            AgentWeb.with(this)
+                    .setAgentWebParent(web, new LinearLayout.LayoutParams(-1, -1))//
+                    .useDefaultIndicator()//
+                    .defaultProgressBarColor()
+                    .setWebViewClient(mWebViewClient)
+                    .setSecutityType(AgentWeb.SecurityType.strict)
+                    .setWebLayout(new WebLayout(this))
+                    .createAgentWeb()//
+                    .ready().go(Consts.WEB_BASE + "/test.html");
+        } else {
+            //初始化web页面
+            initWeb();
+
+            adapter = new FragmentAdapter(getSupportFragmentManager());
+            vpContent.setAdapter(adapter);
+        }
+
 
         textViews[0] = tvBottom1;
         textViews[1] = tvBottom2;
@@ -188,20 +255,36 @@ public class MainActivity extends BaseFragmentActivity {
             }
         }
 
-        initWeb();
-
         vpContent.setNoScroll(false);
-        jumpHealthFragment();
 
         mRxManager.on(Consts.ACTIVITY_MANAGE_LISTENER, new Action1<Message>() {
             @Override
             public void call(Message message) {
+                Intent intent;
                 switch (message.what) {
                     case Consts.CLOSE_ACTIVITY:
                         finish();
                         break;
                     case Consts.CONNECT_DEVICE:
-                        if (which_device.equals("1")){
+                        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                        if (bluetoothAdapter == null) {
+                            Toast.makeText(mActivity, "本机没有找到蓝牙硬件或驱动！", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        // 如果本地蓝牙没有开启，则开启
+                        if (!bluetoothAdapter.isEnabled()) {
+                            // 我们通过startActivityForResult()方法发起的Intent将会在onActivityResult()回调方法中获取用户的选择，比如用户单击了Yes开启，
+                            // 那么将会收到RESULT_OK的结果，
+                            // 如果RESULT_CANCELED则代表用户不愿意开启蓝牙
+                            Intent mIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                            startActivityForResult(mIntent, BLUETOOTH_OPEN_REQUEST);
+                            // 用enable()方法来开启，无需询问用户(实惠无声息的开启蓝牙设备),这时就需要用到android.permission.BLUETOOTH_ADMIN权限。
+                            // mBluetoothAdapter.enable();
+                            // mBluetoothAdapter.disable();//关闭蓝牙
+                            break;
+                        }
+
+                        if (which_device.equals("2")) {
                             blackConnectAction();
                         } else {
                             purpleConnectAction();
@@ -211,8 +294,6 @@ public class MainActivity extends BaseFragmentActivity {
             }
         });
 
-        adapter = new FragmentAdapter(getSupportFragmentManager());
-        vpContent.setAdapter(adapter);
         vpContent.setOffscreenPageLimit(4);
         vpContent.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -252,6 +333,16 @@ public class MainActivity extends BaseFragmentActivity {
 
     }
 
+    private void toggleNotificationListenerService() {
+        PackageManager pm = getPackageManager();
+        pm.setComponentEnabledSetting(new ComponentName(this, MyNotificationService.class),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+
+        pm.setComponentEnabledSetting(new ComponentName(this, MyNotificationService.class),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+
+    }
+
     public void initWeb() {
         //webview初始化
         if (webFragments[0] == null) {
@@ -275,8 +366,20 @@ public class MainActivity extends BaseFragmentActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //一定要保证 mAentWebFragemnt 回调
-        webFragments[prePage].onActivityResult(requestCode, resultCode, data);
+        if (requestCode == BLUETOOTH_OPEN_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                if (which_device.equals("2")) {
+                    blackConnectAction();
+                } else {
+                    purpleConnectAction();
+                }
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(mActivity, "蓝牙设备未开启，无法连接手环", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            //一定要保证 mAentWebFragemnt 回调
+            webFragments[prePage].onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     private class FragmentAdapter extends FragmentPagerAdapter {
@@ -543,7 +646,7 @@ public class MainActivity extends BaseFragmentActivity {
         }
 
         //黑色手环销毁
-        if (BluetoothLeService.getInstance() != null){
+        if (BluetoothLeService.getInstance() != null) {
             BluetoothLeService.getInstance().disconnect();
             BluetoothLeService.getInstance().stopSelf();
         }
@@ -558,17 +661,13 @@ public class MainActivity extends BaseFragmentActivity {
     private ManagerDeviceService managerDeviceService;
     private BluetoothAdapter mBluetoothAdapter;
     private InternalReceiver internalReceiver;
-    Intent notificationIntent;
 
-    private void purpleConnectAction(){
-        notificationIntent = new Intent(mActivity, MyNotificationService.class);
-
-        startService(notificationIntent);
+    private void purpleConnectAction() {
 
         managerDeviceService = new ManagerDeviceService(mActivity);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
-            Toast.makeText(mActivity, "不支持设备链接!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, "本机没有找到蓝牙硬件或驱动！", Toast.LENGTH_SHORT).show();
         } else {
             if (!mBluetoothAdapter.isEnabled()) {
                 Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -682,10 +781,11 @@ public class MainActivity extends BaseFragmentActivity {
     }
 
     boolean isToastFlag = true;
+
     protected void handleReceiver(Context context, Intent intent) {
 
         if (intent.getAction().equals(CommonConfiguration.RESULT_CONNECT_DEVICE_NOTIFICATION)) {
-            if (isToastFlag){
+            if (isToastFlag) {
                 ToastUtil.toast("连接成功！");
                 isToastFlag = false;
             }
@@ -694,14 +794,14 @@ public class MainActivity extends BaseFragmentActivity {
         }
     }
 
-    public void startService(){
+    public void startService() {
         new ConnectDeviceTask().execute();
     }
-    public void stopService(){
-        try{
-            stopService(notificationIntent);
+
+    public void stopService() {
+        try {
             managerDeviceService.stopService();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -711,7 +811,8 @@ public class MainActivity extends BaseFragmentActivity {
     BleScanHelper scanHelper;
     DeviceConnectManager manager;
 
-    private void blackConnectAction(){
+    private void blackConnectAction() {
+        Toast.makeText(getApplicationContext(), "设备连接中", Toast.LENGTH_SHORT).show();
         String mac_address = spUtil.getString("deviceAddress");
         scanHelper = new BleScanHelper(this);
         manager = new DeviceConnectManager(getApplicationContext());
@@ -719,7 +820,7 @@ public class MainActivity extends BaseFragmentActivity {
         scanHelper.startRxAndroidBleScan(new BleScanCallback() {
             @Override
             public void updateUI(BleDevice device) {
-                if (device.getMacAddress().equals(mac_address)){
+                if (device.getMacAddress().equals(mac_address)) {
                     scanHelper.stopRxAndroidBleScan();
                     manager.selectRxAndroidBleDevice(Consts.BLACK_WRISTBAND_NAME, mac_address);
                 }
@@ -729,9 +830,7 @@ public class MainActivity extends BaseFragmentActivity {
         manager.registerReceiverForAllEvent(new DeviceConnect() {
             @Override
             public void connect() {
-                ToastUtil.toast("连接成功！");
-//                Intent intet = new Intent(BlackScanTest.this, ToolActivity.class);
-//                startActivity(intet);
+                Toast.makeText(getApplicationContext(), "连接成功！", Toast.LENGTH_SHORT).show();
             }
 
             @Override

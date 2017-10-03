@@ -93,7 +93,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     //设备是否连接
     boolean isLinked = false;
     //当前连接的设备
-    String which_device = "1";
+    String which_device = "2";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -104,14 +104,18 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
         itemClick();
 
-        which_device = spUtil.getString("which_device", "1");
-        if (which_device.equals("1")){
+        which_device = spUtil.getString("which_device", "2");
+        if (which_device.equals("2")){
+            rlHandUp.setVisibility(View.GONE);
+            rlLoss.setVisibility(View.VISIBLE);
             rlVibrate.setVisibility(View.GONE);
             rlLongSittingAlarm.setVisibility(View.VISIBLE);
             rlHeartRateScan.setVisibility(View.VISIBLE);
 
             b_getSettings();
         } else {
+            rlHandUp.setVisibility(View.VISIBLE);
+            rlLoss.setVisibility(View.GONE);
             rlVibrate.setVisibility(View.VISIBLE);
             rlLongSittingAlarm.setVisibility(View.GONE);
             rlHeartRateScan.setVisibility(View.GONE);
@@ -122,6 +126,13 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     }
 
     private void itemClick() {
+        rlLoss.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
+            @Override
+            public void change(boolean state) {
+                BlackDeviceManager.getInstance().findDevice(state, null);
+            }
+        });
+
         rlLateAlarm.setmOnSetItemClick(new SetItemView.OnSetItemClick() {
             @Override
             public void click() {

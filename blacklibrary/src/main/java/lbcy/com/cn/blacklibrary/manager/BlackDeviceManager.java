@@ -2,12 +2,14 @@ package lbcy.com.cn.blacklibrary.manager;
 
 import android.bluetooth.BluetoothGatt;
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.huichenghe.bleControl.Ble.BleDataForBattery;
 import com.huichenghe.bleControl.Ble.BleDataForDayData;
 import com.huichenghe.bleControl.Ble.BleDataForEachHourData;
 import com.huichenghe.bleControl.Ble.BleDataForFactoryReset;
 import com.huichenghe.bleControl.Ble.BleDataForHRWarning;
+import com.huichenghe.bleControl.Ble.BleDataForQQAndOtherRemine;
 import com.huichenghe.bleControl.Ble.BleDataForRingDelay;
 import com.huichenghe.bleControl.Ble.BleDataForSettingArgs;
 import com.huichenghe.bleControl.Ble.BleDataForSettingParams;
@@ -16,6 +18,7 @@ import com.huichenghe.bleControl.Ble.BleDataForTarget;
 import com.huichenghe.bleControl.Ble.BleDataforSyn;
 import com.huichenghe.bleControl.Ble.BleForFindDevice;
 import com.huichenghe.bleControl.Ble.BleForPhoneAndSmsRemind;
+import com.huichenghe.bleControl.Ble.BleForQQWeiChartFacebook;
 import com.huichenghe.bleControl.Ble.BleForSitRemind;
 import com.huichenghe.bleControl.Ble.BleGattHelperListener;
 import com.huichenghe.bleControl.Ble.BleReadDeviceMenuState;
@@ -24,6 +27,8 @@ import com.huichenghe.bleControl.Ble.DataSendCallback;
 import com.huichenghe.bleControl.Ble.LocalDeviceEntity;
 import com.huichenghe.bleControl.BleGattHelper;
 import com.huichenghe.bleControl.Entity.sitRemindEntity;
+
+import java.io.UnsupportedEncodingException;
 
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.ctl.DeviceController;
@@ -35,17 +40,20 @@ import static lbcy.com.cn.blacklibrary.utils.Util.getDataBinString;
  */
 
 public class BlackDeviceManager implements DeviceController {
+    private final static String QQ = "com.tencent.mobileqq";
+    private final static String WEIXIN = "com.tencent.mm";
+    private final static String MMS = "com.android.mms";
+    private final static String FACEBOOK = "com.facebook.katana";
 
-    private static DeviceController manager;
-    private static Context mContext;
+    private static volatile DeviceController manager;
+    private Context mContext;
 
     private BlackDeviceManager() {
-        if (mContext == null) {
-            throw new NullPointerException("have not init");
-        }
+
     }
 
-    public static void setContext(Context context) {
+    @Override
+    public void setContext(Context context) {
         mContext = context;
     }
 
@@ -282,9 +290,9 @@ public class BlackDeviceManager implements DeviceController {
                 BleGattHelper.getInstance(mContext, new gattHelperListener(callback)));
     }
 
-    class gattHelperListener implements BleGattHelperListener {
+    private class gattHelperListener implements BleGattHelperListener {
         DataCallback callback;
-        public gattHelperListener(DataCallback callback){
+        private gattHelperListener(DataCallback callback){
             this.callback = callback;
         }
 
@@ -326,9 +334,8 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void setDeviceMenuState(boolean isOpen, int position) {
-        int number = position;
         int allData =  0;
-        String all =getDataBinString(allData, number, isOpen);
+        String all =getDataBinString(allData, position, isOpen);
         int dataInt = Integer.parseInt(all, 2);
         BleReadDeviceMenuState.getInstance().sendUpdateSwitchData32(dataInt);
 
@@ -359,5 +366,68 @@ public class BlackDeviceManager implements DeviceController {
     @Override
     public void deleteSitRemind(int number) {
         BleForSitRemind.getInstance().deleteThisItem(number);
+    }
+
+    @Override
+    public void setAppNotification(String type, String title, String content) {
+        //使能开关，0x01代表开
+        BleForQQWeiChartFacebook.getInstance().openRemind((byte)0x0a, (byte)0x01);
+        byte mType;
+        switch (type){
+            case FACEBOOK:
+                mType = 0x03;
+                break;
+            case MMS:
+                mType = 0x04;
+                break;
+            case WEIXIN:
+                mType = 0x01;
+                break;
+            case QQ:
+                mType = 0x02;
+                break;
+            default:
+                mType = 0x00;
+                break;
+        }
+
+        String texts;
+        if (TextUtils.isEmpty(title)){
+            texts = content;
+        } else if (TextUtils.isEmpty(content)){
+            texts = title;
+        } else {
+            texts = title + ":" + content;
+        }
+
+        if (mType == 0x01){
+            texts = "来短信啦";
+        }
+
+        if (TextUtils.isEmpty(texts)) {
+            return;
+        }
+        byte[] dataContent = getCanSendByte(texts);
+        if (dataContent != null && mType != 0x00){
+            BleDataForQQAndOtherRemine.getIntance().sendMessageToDevice(mType, dataContent);
+        }
+
+    }
+
+    private byte[] getCanSendByte(String text) {
+        int max = 32;
+        byte[] dataContent = null;
+        try {
+            dataContent = text.getBytes("utf-8");
+            if (dataContent.length > max) {
+                text = text.substring(0, max / 3);
+                dataContent = text.getBytes("utf-8");
+            } else {
+                dataContent = text.getBytes("utf-8");
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return dataContent;
     }
 }

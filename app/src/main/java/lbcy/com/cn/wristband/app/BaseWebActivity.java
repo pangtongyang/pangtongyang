@@ -2,6 +2,7 @@ package lbcy.com.cn.wristband.app;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -18,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.just.library.AgentWeb;
 import com.just.library.ChromeClientCallbackManager;
 
@@ -28,6 +30,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import lbcy.com.cn.wristband.R;
+import lbcy.com.cn.wristband.entity.LoginData;
+import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxManager;
 import lbcy.com.cn.wristband.widget.webview.WebLayout;
@@ -150,11 +154,6 @@ public abstract class BaseWebActivity extends AppCompatActivity {
 
     private WebViewClient mWebViewClient=new WebViewClient(){
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            return super.shouldOverrideUrlLoading(view, request);
-        }
-
-        @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             //do you  work
             Log.i("Info","BaseWebActivity onPageStarted");
@@ -177,6 +176,7 @@ public abstract class BaseWebActivity extends AppCompatActivity {
             if (view.getUrl().equals(Consts.WEB_HEART_RATE_SPORT) || view.getUrl().equals(Consts.WEB_HEART_RATE_TEST)){
                 view.clearHistory();
             }
+
         }
     };
     private WebChromeClient mWebChromeClient=new WebChromeClient(){

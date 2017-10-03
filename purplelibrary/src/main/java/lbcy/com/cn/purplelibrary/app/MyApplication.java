@@ -12,9 +12,7 @@ import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
  */
 
 public class MyApplication extends Application {
-    private DaoMaster.DevOpenHelper mHelper;
     private SQLiteDatabase db;
-    private DaoMaster mDaoMaster;
     private DaoSession mDaoSession;
     public static MyApplication instance;
 
@@ -23,7 +21,7 @@ public class MyApplication extends Application {
         super.onCreate();
         instance = this;
         setDatabase();
-        PurpleDeviceManager.setContext(this);
+        PurpleDeviceManager.getInstance().setContext(this);
     }
 
     public static MyApplication getInstances() {
@@ -35,10 +33,10 @@ public class MyApplication extends Application {
      */
     private void setDatabase() {
         // 通过 DaoMaster 的内部类 DevOpenHelper，你可以得到一个便利的 SQLiteOpenHelper 对象。
-        mHelper = new DaoMaster.DevOpenHelper(this, "notes-db", null);
+        DaoMaster.DevOpenHelper mHelper = new DaoMaster.DevOpenHelper(this, "notes-db", null);
         db = mHelper.getWritableDatabase();
         // 注意：该数据库连接属于 DaoMaster，所以多个 Session 指的是相同的数据库连接。
-        mDaoMaster = new DaoMaster(db);
+        DaoMaster mDaoMaster = new DaoMaster(db);
         mDaoSession = mDaoMaster.newSession();
     }
 

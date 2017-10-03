@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import lbcy.com.cn.purplelibrary.app.MyApplication;
@@ -27,23 +28,20 @@ import lbcy.com.cn.purplelibrary.utils.SPUtil;
  */
 
 public class PurpleDeviceManager implements DeviceController {
-    private static DeviceController manager;
-    private static Context mContext;
+    private static volatile DeviceController manager = null;
+    private Context mContext;
     private InternalReceiver internalReceiver;
     private SPUtil spUtil;
 
     //普通数据监听
-    DataListener dataListener;
+    private DataListener dataListener;
     //运动数据监听
-    DataListener sportsDataListener;
+    private DataListener sportsDataListener;
     //升级设备监听
-    DataListener uploadDataListener;
+    private DataListener uploadDataListener;
 
 
-    public PurpleDeviceManager() {
-        if (mContext == null) {
-            throw new NullPointerException("have not init");
-        }
+    private PurpleDeviceManager() {
         spUtil = new SPUtil(mContext, CommonConfiguration.SHAREDPREFERENCES_NAME);
         registerReceiver(new String[]{
                 CommonConfiguration.RESULT_ISLINK_DEVICE_NOTIFICATION,
@@ -52,7 +50,8 @@ public class PurpleDeviceManager implements DeviceController {
         });
     }
 
-    public static void setContext(Context context) {
+    @Override
+    public void setContext(Context context) {
         mContext = context;
     }
 
@@ -81,7 +80,7 @@ public class PurpleDeviceManager implements DeviceController {
         try {
 
             mContext.registerReceiver(internalReceiver, intentfilter);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
 
@@ -119,7 +118,7 @@ public class PurpleDeviceManager implements DeviceController {
                 }
             }
         } else if (intent.getAction().equals(CommonConfiguration.RESULT_BLE_SPORTSDATA_NOTIFICATION)){
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
             SportInfoDao sportInfoDao = MyApplication.getInstances().getDaoSession().getSportInfoDao();
             List<SportInfo> list = sportInfoDao.queryBuilder()
                     .where(SportInfoDao.Properties.DateTime.eq(sdf.format(new Date())))

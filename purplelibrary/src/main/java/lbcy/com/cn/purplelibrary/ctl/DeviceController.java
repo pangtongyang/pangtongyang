@@ -1,5 +1,7 @@
 package lbcy.com.cn.purplelibrary.ctl;
 
+import android.content.Context;
+
 import lbcy.com.cn.purplelibrary.entity.AlarmClockInfo;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 
@@ -8,6 +10,11 @@ import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
  */
 
 public interface DeviceController {
+    /**
+     * 设置上下文
+     * @param context 上下文
+     */
+    void setContext(Context context);
     /**
      * 闹钟设置。最多设置两个闹钟
      * @param clock AlarmClockInfo对象，包含闹钟信息

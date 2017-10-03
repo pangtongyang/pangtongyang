@@ -14,7 +14,6 @@ import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.entity.AlarmClockInfo;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 import lbcy.com.cn.purplelibrary.service.ManagerDeviceService;
-import lbcy.com.cn.purplelibrary.service.MyNotificationService;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 
@@ -38,7 +37,6 @@ public class PurpleLogin extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_purple_login);
         ButterKnife.bind(this);
-        startService(new Intent(this, MyNotificationService.class));
         managerDeviceService = new ManagerDeviceService(this);
         spUtil = new SPUtil(this, CommonConfiguration.SHAREDPREFERENCES_NAME);
         spUtil.putString("deviceAddress", "FE:54:B9:7C:CB:FA");
@@ -65,15 +63,15 @@ public class PurpleLogin extends AppCompatActivity {
 //                }
                 break;
             case R.id.btn_setClock:
-                PurpleDeviceManager manager = new PurpleDeviceManager();
-                AlarmClockInfo alarmClockInfo = new AlarmClockInfo();
-                alarmClockInfo.setId(1L);
-                alarmClockInfo.setDid("1");
-                manager.setClock(alarmClockInfo);
-                AlarmClockInfo alarmClockInfo1 = new AlarmClockInfo();
-                alarmClockInfo1.setId(1L);
-                alarmClockInfo1.setDid("2");
-                manager.setClock(alarmClockInfo1);
+//                PurpleDeviceManager manager = new PurpleDeviceManager();
+//                AlarmClockInfo alarmClockInfo = new AlarmClockInfo();
+//                alarmClockInfo.setId(1L);
+//                alarmClockInfo.setDid("1");
+//                manager.setClock(alarmClockInfo);
+//                AlarmClockInfo alarmClockInfo1 = new AlarmClockInfo();
+//                alarmClockInfo1.setId(1L);
+//                alarmClockInfo1.setDid("2");
+//                manager.setClock(alarmClockInfo1);
                 break;
         }
     }

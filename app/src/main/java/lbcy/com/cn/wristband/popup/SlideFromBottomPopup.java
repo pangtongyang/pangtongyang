@@ -9,7 +9,6 @@ import com.jph.takephoto.app.TakePhoto;
 
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.utils.PhotoHelper;
-import lbcy.com.cn.wristband.utils.ToastUtil;
 import razerdp.basepopup.BasePopupWindow;
 
 /**

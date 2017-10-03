@@ -1,16 +1,11 @@
 package lbcy.com.cn.wristband.popup;
 
 import android.app.Activity;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.EditText;
 
 import lbcy.com.cn.wristband.R;
-import lbcy.com.cn.wristband.global.Consts;
-import lbcy.com.cn.wristband.rx.RxBus;
 import razerdp.basepopup.BasePopupWindow;
 
 /**

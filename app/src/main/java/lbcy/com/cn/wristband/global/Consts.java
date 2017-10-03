@@ -1,16 +1,13 @@
 package lbcy.com.cn.wristband.global;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Created by chenjie on 2017/8/7.
  */
 
 public class Consts {
-    //获取位置权限
-    public static final int REQUEST_CODE_ASK_LOCATION_PERMISSIONS = 1024;
+    //服务器地址
+    public static final String BASE_URL = "http://sportapi.myplat.cn:8866/";
+
     public static final String BLACK_WRISTBAND_NAME = "BC_";
     public static final String PURPLE_WRISTBAND_NAME = "BC-02B";
     public static final String SETTING_DB_NAME = "LBCY_CLOCK_DB";
@@ -34,6 +31,8 @@ public class Consts {
     public static final String CLOCK_LISTENER = "ClockListener";
     public static final String ACTIVITY_MANAGE_LISTENER = "ActivityListener";
     public static final String ACTIVITY_SEDENTARY_LISTENER = "SedentaryActivityListener";
+    public static final String ACTIVITY_SCAN_HEART_RATE_LISTENER = "ScanHeartRateActivityListener";
+    public static final String NOTIFICATION_LISTENER = "NotificationListener";
     //更新编辑闹钟页文本信息
     public static final int UPDATE_CLOCK_DATA = 1024;
     //更新闹钟设置页
@@ -46,7 +45,16 @@ public class Consts {
     public static final int CONNECT_DEVICE = 1028;
     //更新久坐提醒时间间隔
     public static final int UPDATE_SEDENTARY_SPACE_TIME = 1029;
+    //更新心率监测时间间隔
+    public static final int UPDATE_SCAN_HEART_RATE = 1030;
+    //推送消息通知
+    public static final int SHOW_MESSAGE_FROM_APPS = 1031;
 
+    //推送消息包名
+    public final static String QQ = "com.tencent.mobileqq";
+    public final static String WEIXIN = "com.tencent.mm";
+    public final static String MMS = "com.android.mms";
+    public final static String FACEBOOK = "com.facebook.katana";
 
     //web页面链接
     public static final String WEB_BASE = "file:///android_asset/www/index.html#";

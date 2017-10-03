@@ -1,13 +1,12 @@
 package lbcy.com.cn.wristband.activity;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -170,4 +169,5 @@ public class SplashActivity extends BaseActivity implements EasyPermissions.Perm
         }
         return false;
     }
+
 }

@@ -28,7 +28,7 @@ public class HelpAdapter extends SecondaryListAdapter<HelpAdapter.GroupItemViewH
         this.context = context;
     }
 
-    public void setData(List datas) {
+    public void setData(List<DataTree<String, String>> datas) {
         dts = datas;
         notifyNewData(dts);
     }

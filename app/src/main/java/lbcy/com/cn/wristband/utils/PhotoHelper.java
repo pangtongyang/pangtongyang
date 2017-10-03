@@ -7,7 +7,6 @@ import android.view.View;
 import com.jph.takephoto.app.TakePhoto;
 import com.jph.takephoto.compress.CompressConfig;
 import com.jph.takephoto.model.CropOptions;
-import com.jph.takephoto.model.LubanOptions;
 import com.jph.takephoto.model.TakePhotoOptions;
 
 import java.io.File;

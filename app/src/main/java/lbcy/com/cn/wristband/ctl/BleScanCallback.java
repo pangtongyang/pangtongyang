@@ -1,6 +1,5 @@
 package lbcy.com.cn.wristband.ctl;
 
-import java.util.HashSet;
 
 import lbcy.com.cn.wristband.entity.BleDevice;
 

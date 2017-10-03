@@ -10,6 +10,11 @@ import lbcy.com.cn.blacklibrary.ble.DataCallback;
 
 public interface DeviceController {
     /**
+     * 设置上下文
+     * @param context 上下文
+     */
+    void setContext(Context context);
+    /**
      * 查找设备
      * @param isFind true -> 查找设备， false -> 取消查找
      * @param callback 回调函数
@@ -90,6 +95,7 @@ public interface DeviceController {
     /**
      * 心率监测频率
      * @param time 表示时间填10表示10分钟监测一次，30就是30分钟一次
+     * 关闭心率监测，设置time:1440
      */
     void setHeartRateFreq(int time);
 
@@ -97,6 +103,7 @@ public interface DeviceController {
      * 设置心率预警值（超过预警值手环就会震动报警）
      * @param maxHR 心率最大值
      * @param minHR 心率最小值
+     * 关闭心率预警，设置min:0，max:200
      */
     void setHeartRateWarning(int maxHR, int minHR);
 
@@ -146,4 +153,12 @@ public interface DeviceController {
      * @param number 删除第几条久坐提醒
      */
     void deleteSitRemind(int number);
+
+    /**
+     * 设置app通知
+     * @param type 通知app名称
+     * @param title 通知标题
+     * @param content 通知内容
+     */
+    void setAppNotification(String type, String title, String content);
 }

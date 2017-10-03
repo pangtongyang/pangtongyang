@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.EditText;
+import android.widget.TextView;
 
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.global.Consts;
@@ -17,21 +17,14 @@ import razerdp.basepopup.BasePopupWindow;
  * Created by 大灯泡 on 2016/1/15.
  * 普通的popup
  */
-public class TypeSettingPersonalPopup extends BasePopupWindow implements View.OnClickListener{
+public class ScanHeartRatePopup extends BasePopupWindow implements View.OnClickListener{
 
     private View popupView;
 
-    public TypeSettingPersonalPopup(Activity context) {
+    public ScanHeartRatePopup(Activity context) {
         super(context);
         bindEvent();
-        loadData();
     }
-
-    private void loadData(){
-
-    }
-
-
 
     @Override
     protected Animation initShowAnimation() {
@@ -46,7 +39,7 @@ public class TypeSettingPersonalPopup extends BasePopupWindow implements View.On
 
     @Override
     public View onCreatePopupView() {
-        popupView= LayoutInflater.from(getContext()).inflate(R.layout.popup_type_setting_personal,null);
+        popupView= LayoutInflater.from(getContext()).inflate(R.layout.popup_scan_heart_rate_setting,null);
         return popupView;
     }
 
@@ -57,9 +50,10 @@ public class TypeSettingPersonalPopup extends BasePopupWindow implements View.On
 
     private void bindEvent() {
         if (popupView!=null){
-            popupView.findViewById(R.id.btn_cancel).setOnClickListener(this);
-            popupView.findViewById(R.id.btn_submit).setOnClickListener(this);
-
+            popupView.findViewById(R.id.rl_10).setOnClickListener(this);
+            popupView.findViewById(R.id.rl_20).setOnClickListener(this);
+            popupView.findViewById(R.id.rl_30).setOnClickListener(this);
+            popupView.findViewById(R.id.rl_60).setOnClickListener(this);
         }
 
     }
@@ -67,18 +61,22 @@ public class TypeSettingPersonalPopup extends BasePopupWindow implements View.On
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.btn_cancel:
-                disappearAnimation();
+            case R.id.rl_10:
+                saveData(((TextView)findViewById(R.id.tv_10)).getText().toString());
                 break;
-            case R.id.btn_submit:
-                EditText editText = (EditText) findViewById(R.id.et_clock);
-                saveData(editText.getText().toString());
-                disappearAnimation();
+            case R.id.rl_20:
+                saveData(((TextView)findViewById(R.id.tv_20)).getText().toString());
+                break;
+            case R.id.rl_30:
+                saveData(((TextView)findViewById(R.id.tv_30)).getText().toString());
+                break;
+            case R.id.rl_60:
+                saveData(((TextView)findViewById(R.id.tv_60)).getText().toString());
                 break;
             default:
                 break;
         }
-
+        disappearAnimation();
     }
 
     private void disappearAnimation(){
@@ -107,9 +105,8 @@ public class TypeSettingPersonalPopup extends BasePopupWindow implements View.On
     private void saveData(String text){
 
         Message message = new Message();
-        message.what = Consts.UPDATE_CLOCK_TYPE_DATA;
+        message.what = Consts.UPDATE_SCAN_HEART_RATE;
         message.obj = text;
-        RxBus.getInstance().post(Consts.CLOCK_LISTENER, message);
+        RxBus.getInstance().post(Consts.ACTIVITY_SCAN_HEART_RATE_LISTENER, message);
     }
-
 }

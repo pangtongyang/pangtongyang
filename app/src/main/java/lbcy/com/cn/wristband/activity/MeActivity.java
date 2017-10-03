@@ -86,7 +86,7 @@ public class MeActivity extends TakePhotoActivity {
     SPUtil spUtil;
 
     //当前连接的设备
-    String which_device = "1";
+    String which_device = "2";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,8 +98,8 @@ public class MeActivity extends TakePhotoActivity {
         itemClick();
 
 
-        which_device = spUtil.getString("which_device", "1");
-        if (which_device.equals("1")){
+        which_device = spUtil.getString("which_device", "2");
+        if (which_device.equals("2")){
             b_getSettings();
         } else {
             p_getSettings();
@@ -172,13 +172,18 @@ public class MeActivity extends TakePhotoActivity {
                 popupWindow.showPopupWindow();
                 break;
             case R.id.btn_quit:
+                //数据销毁
                 spUtil.putString("is_login", "0");
+
+                spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
+                spUtil.putString("js_is_write", "0");
+
                 intent = new Intent(mActivity, LoginActivity.class);
                 startActivity(intent);
-                finish();
                 Message message = new Message();
                 message.what = Consts.CLOSE_ACTIVITY;
                 RxBus.getInstance().post(Consts.ACTIVITY_MANAGE_LISTENER, message);
+                finish();
                 break;
         }
 

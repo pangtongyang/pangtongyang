@@ -17,6 +17,7 @@ import lbcy.com.cn.wristband.app.BaseActivity;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.popup.SedentarySpaceTimeSettingPopup;
 import lbcy.com.cn.wristband.rx.RxManager;
+import lbcy.com.cn.wristband.utils.StringUtil;
 import razerdp.basepopup.BasePopupWindow;
 import rx.functions.Action1;
 
@@ -87,7 +88,7 @@ public class SetSedentaryActivity extends BaseActivity {
         super.onBackPressed();
         saveData();
         b_getSettings_setRemind(rlSedentary.isChecked()?1:0, startSedentary.getText().toString(), endSedentary.getText().toString(),
-                Integer.valueOf(spaceSedentary.getText().toString().replace("分钟", "")));
+                StringUtil.getNumFromString(spaceSedentary.getText().toString()));
     }
 
     @OnClick({R.id.endSedentary, R.id.startSedentary, R.id.spaceSedentary})

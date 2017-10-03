@@ -1,31 +1,37 @@
 package lbcy.com.cn.wristband.app;
 
-import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.os.Message;
 import android.support.multidex.MultiDex;
+import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
 
+import com.just.library.AgentWeb;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.internal.RxBleLog;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.purplelibrary.app.MyApplication;
+import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.entity.DaoMaster;
 import lbcy.com.cn.wristband.entity.DaoSession;
 import lbcy.com.cn.wristband.global.Consts;
+import lbcy.com.cn.wristband.rx.RxManager;
+import rx.functions.Action1;
 
 /**
  * Created by chenjie on 2017/8/6.
  */
 
 public class BaseApplication extends MyApplication {
-    private static final String TAG = BaseApplication.class.getSimpleName();
     private static BaseApplication baseApplication;
     private RxBleClient rxBleClient;
 
@@ -33,6 +39,10 @@ public class BaseApplication extends MyApplication {
     private SQLiteDatabase db;
     private DaoMaster mDaoMaster;
     private DaoSession mDaoSession;
+
+    private RxManager rxManager;
+
+    private SPUtil spUtil;
 
     public final List<String> WEB_TITLE_LIST = new ArrayList<>();
     public final List<String> WEB_URL_LIST = new ArrayList<>();
@@ -55,8 +65,10 @@ public class BaseApplication extends MyApplication {
     public void onCreate() {
         super.onCreate();
         baseApplication = this;
+        spUtil = new SPUtil(this, Consts.SETTING_DB_NAME);
         setDatabase();
-        BlackDeviceManager.setContext(baseApplication);
+
+        BlackDeviceManager.getInstance().setContext(baseApplication);
 
         rxBleClient = RxBleClient.create(this);
         RxBleClient.setLogLevel(RxBleLog.DEBUG);
@@ -68,6 +80,35 @@ public class BaseApplication extends MyApplication {
 //        BluetoothLe.getDefault().init(this, config);
 
         initWebTitle();
+
+        rxManager = new RxManager();
+        rxManager.on(Consts.NOTIFICATION_LISTENER, new Action1<Message>() {
+            @Override
+            public void call(Message message) {
+                Bundle bundle = message.getData();
+                String pkg = bundle.getString("type", "");
+                String title = bundle.getString("title");
+                String content  =bundle.getString("content");
+                String isEnable = "0";
+                switch (pkg){
+                    case Consts.FACEBOOK:
+                        isEnable = spUtil.getString("facebook_switch", "0");
+                        break;
+                    case Consts.MMS:
+                        isEnable = spUtil.getString("sms_switch", "0");
+                        break;
+                    case Consts.WEIXIN:
+                        isEnable = spUtil.getString("wechat_switch", "0");
+                        break;
+                    case Consts.QQ:
+                        isEnable = spUtil.getString("qq_switch", "0");
+                        break;
+                }
+
+                if (isEnable.equals("1"))
+                    BlackDeviceManager.getInstance().setAppNotification(pkg, title, content);
+            }
+        });
     }
 
     public static BaseApplication getBaseApplication() {

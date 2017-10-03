@@ -1,7 +1,6 @@
 package lbcy.com.cn.wristband.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Message;
 import android.support.v7.widget.SwitchCompat;
 import android.view.View;
@@ -12,9 +11,7 @@ import android.widget.TextView;
 import java.util.Calendar;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
-import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
 import lbcy.com.cn.wristband.app.BaseApplication;

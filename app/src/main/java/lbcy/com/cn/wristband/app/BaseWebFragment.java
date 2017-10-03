@@ -1,12 +1,12 @@
 package lbcy.com.cn.wristband.app;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,13 +18,12 @@ import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.just.library.AgentWeb;
 import com.just.library.AgentWebSettings;
 import com.just.library.ChromeClientCallbackManager;
@@ -37,10 +36,11 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.Unbinder;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.activity.WebActivity;
+import lbcy.com.cn.wristband.entity.LoginData;
+import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxManager;
 import lbcy.com.cn.wristband.utils.ScreenUtil;
@@ -122,6 +122,7 @@ public abstract class BaseWebFragment extends Fragment {
                 .setIndicatorColorWithHeight(-1, 2)//设置进度条颜色与高度-1为默认值，2单位为dp
                 .setAgentWebWebSettings(getSettings())//设置 AgentWebSettings
                 .setWebChromeClient(mWebChromeClient) //WebChromeClient
+                .setWebViewClient(mWebViewClient)
                 .setPermissionInterceptor(mPermissionInterceptor) //权限拦截
                 .setReceivedTitleCallback(mCallback)//标题回调
                 .setSecurityType(AgentWeb.SecurityType.strict) //严格模式
@@ -147,9 +148,8 @@ public abstract class BaseWebFragment extends Fragment {
                 return false;
             }
         });
-        WebView webView = mAgentWeb.getWebCreator().get();
-        webView.setWebViewClient(mWebViewClient);
 
+        //设置js调用android方法
         if(mAgentWeb!=null){
             mAgentWeb.getJsInterfaceHolder().addJavaObject("android",new AndroidInterface(mAgentWeb,this.getActivity()));
 
@@ -167,6 +167,9 @@ public abstract class BaseWebFragment extends Fragment {
         return WebDefaultSettingsManager.getInstance();
     }
 
+    //判断localstorage是否已写入
+    private boolean jsIsWrite = false;
+    private String startUrl;
     protected WebViewClient mWebViewClient = new WebViewClient() {
 
         @Override
@@ -174,33 +177,24 @@ public abstract class BaseWebFragment extends Fragment {
             super.onReceivedError(view, request, error);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-//            return shouldOverrideUrlLoading(view, request.getUrl() + "");
-            return false;
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            return super.shouldInterceptRequest(view, request);
         }
 
-
-        //
         @Override
-        public boolean shouldOverrideUrlLoading(final WebView view, String url) {
-            Log.i(TAG, "mWebViewClient shouldOverrideUrlLoading:" + url);
-            //intent:// scheme的处理 如果返回false ， 则交给 DefaultWebClient 处理 ， 默认会打开该Activity  ， 如果Activity不存在则跳到应用市场上去.  true 表示拦截
-            //例如优酷视频播放 ，intent://play?...package=com.youku.phone;end;
-            //优酷想唤起自己应用播放该视频 ， 下面拦截地址返回 true  则会在应用内 H5 播放 ，禁止优酷唤起播放该视频， 如果返回 false ， DefaultWebClient  会根据intent 协议处理 该地址 ， 首先匹配该应用存不存在 ，如果存在 ， 唤起该应用播放 ， 如果不存在 ， 则跳到应用市场下载该应用 .
-            if (url.startsWith("intent://") && url.contains("com.youku.phone"))
-                return true;
-            /*else if (isAlipay(view, url))   //1.2.5开始不用调用该方法了 ，只要引入支付宝sdk即可 ， DefaultWebClient 默认会处理相应url调起支付宝
-                return true;*/
-
-
-            return false;
+        public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+            return super.shouldInterceptRequest(view, url);
         }
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             Log.i(TAG, "url:" + url + " onPageStarted  target:" + getUrl());
+//            if (!jsIsWrite){
+//                startUrl = view.getUrl();
+//                view.loadUrl(Consts.WEB_BASE + "/test.html");
+//            }
         }
 
 
@@ -238,8 +232,29 @@ public abstract class BaseWebFragment extends Fragment {
                 }
 
             }
+
+//            if (view.getUrl().equals(Consts.WEB_BASE + "/test.html") &&!jsIsWrite){
+//                setJsData(view);
+//                view.loadUrl(startUrl);
+//                jsIsWrite = true;
+//            }
         }
     };
+
+    public void setJsData(WebView webView){
+        LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
+        LoginData loginData = loginDataDao.loadAll().get(0);
+        Gson gson = new Gson();
+        String loginJson = gson.toJson(loginData);
+        String js = "window.localStorage.setItem('authInf','" + loginJson + "');";
+        String jsUrl = "javascript:(function({var localStorage = window.localStorage;localStorage.setItem('authInf','" + loginJson + "')})()";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            webView.evaluateJavascript(js, null);
+        } else {
+            webView.loadUrl(jsUrl);
+            webView.reload();
+        }
+    }
 
     protected String getUrl() {
         String target = "";

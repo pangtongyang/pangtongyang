@@ -1,11 +1,8 @@
 package lbcy.com.cn.wristband.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
 import lbcy.com.cn.wristband.global.Consts;

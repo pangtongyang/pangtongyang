@@ -1,8 +1,5 @@
 package lbcy.com.cn.wristband.activity;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.app.Activity;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
 
