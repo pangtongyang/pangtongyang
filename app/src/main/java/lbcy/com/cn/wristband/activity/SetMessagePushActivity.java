@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import butterknife.BindView;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
@@ -58,7 +59,11 @@ public class SetMessagePushActivity extends BaseActivity {
 
                 @Override
                 public void cancel() {
-
+                    rlFacebookPush.setEnable(false);
+                    rlQqPush.setEnable(false);
+                    rlSmsPush.setEnable(false);
+                    rlTelephonePush.setEnable(false);
+                    rlWechatPush.setEnable(false);
                 }
             });
 
@@ -131,7 +136,7 @@ public class SetMessagePushActivity extends BaseActivity {
         switch (requestCode) {
             case NOTIFICATION_PERMISSION_REQUEST:
                 if (!isEnabled()) {
-                    ToastUtil.toast("未获取权限，通知功能将无法使用！");
+                    Toast.makeText(mActivity, "未获取权限，通知功能将无法使用！", Toast.LENGTH_SHORT).show();
                     rlFacebookPush.setEnable(false);
                     rlQqPush.setEnable(false);
                     rlSmsPush.setEnable(false);

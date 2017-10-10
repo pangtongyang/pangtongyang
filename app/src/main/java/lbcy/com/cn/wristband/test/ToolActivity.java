@@ -50,7 +50,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
 //        BluetoothLeService.getInstance().addCallback(
 //                BleGattHelper.getInstance(getApplicationContext(), new gattHelperListener()));
-        BlackDeviceManager.getInstance().startHeartRateListener(new DataCallback() {
+        BlackDeviceManager.getInstance().startHeartRateListener(new DataCallback<byte[]>() {
             @Override
             public void OnSuccess(byte[] data) {
                 runOnUiThread(new Runnable() {
@@ -135,7 +135,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.getdevice:
                 if (butgetdevice.getText().toString().equals("查找设备")) {
                     butgetdevice.setText("取消查找");
-                    BlackDeviceManager.getInstance().findDevice(true, new DataCallback() {
+                    BlackDeviceManager.getInstance().findDevice(true, new DataCallback<byte[]>() {
                         @Override
                         public void OnSuccess(byte[] data) {
                             showdata(data);
@@ -158,7 +158,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.getdaydate:
 
-                BlackDeviceManager.getInstance().getDayData(new DataCallback() {
+                BlackDeviceManager.getInstance().getDayData(new DataCallback<byte[]>() {
                     @Override
                     public void OnSuccess(byte[] data) {
                         int stepAll = FormatUtils.byte2Int(data, 4);
@@ -184,7 +184,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.getbatter:
-                BlackDeviceManager.getInstance().getBattery(new DataCallback() {
+                BlackDeviceManager.getInstance().getBattery(new DataCallback<byte[]>() {
                     @Override
                     public void OnSuccess(byte[] data) {
                         showdata(data);
@@ -206,7 +206,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
                 sendNewDataToDevice(false, 0);  //不明白做什么的
                 break;
             case R.id.geteachhouedata:
-                BlackDeviceManager.getInstance().getEachHourStep(new DataCallback() {
+                BlackDeviceManager.getInstance().getEachHourStep(new DataCallback<byte[]>() {
                     @Override
                     public void OnSuccess(byte[] data) {
                         int step1 = FormatUtils.byte2Int(data, 4);
@@ -230,7 +230,7 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.geteachsleep:
-                BlackDeviceManager.getInstance().getSleepData(new DataCallback() {
+                BlackDeviceManager.getInstance().getSleepData(new DataCallback<byte[]>() {
                     @Override
                     public void OnSuccess(byte[] data) {
                         String stralldata = getsleepdata(data);

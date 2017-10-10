@@ -63,4 +63,5 @@ public class AppPushInfo {
         this.isEnabled = isEnabled;
     }
 
+
 }

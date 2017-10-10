@@ -23,6 +23,7 @@ import lbcy.com.cn.wristband.entity.ClockBean;
 public class AlarmClockListAdapter extends RecyclerArrayAdapter<ClockBean> {
     MyItemClickListener itemClickListener;
     MyItemLongClickListener itemLongClickListener;
+    OnSwitchCheckChangeListener switchCheckChangeListener;
     List<ClockBean> list;
 
     public AlarmClockListAdapter(Context context) {
@@ -40,6 +41,10 @@ public class AlarmClockListAdapter extends RecyclerArrayAdapter<ClockBean> {
 
     public void setMyOnItemLongClickListener(MyItemLongClickListener listener){
         this.itemLongClickListener = listener;
+    }
+
+    public void setOnSwitchCheckedChangeListener(OnSwitchCheckChangeListener listener){
+        this.switchCheckChangeListener = listener;
     }
 
     @Override
@@ -80,6 +85,7 @@ public class AlarmClockListAdapter extends RecyclerArrayAdapter<ClockBean> {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     list.get(getDataPosition()).setSwitchState(b);
+                    switchCheckChangeListener.onCheckedChanged(compoundButton, b, getDataPosition());
                 }
             });
         }
@@ -101,11 +107,15 @@ public class AlarmClockListAdapter extends RecyclerArrayAdapter<ClockBean> {
     }
 
     public interface MyItemClickListener {
-        public void onItemClick(View view, int position);
+        void onItemClick(View view, int position);
     }
 
     public interface MyItemLongClickListener {
-        public void onItemLongClick(View view, int position);
+        void onItemLongClick(View view, int position);
+    }
+
+    public interface OnSwitchCheckChangeListener {
+        void onCheckedChanged(CompoundButton compoundButton, boolean isChecked, int position);
     }
 
     public List<ClockBean> mGetAllData(){

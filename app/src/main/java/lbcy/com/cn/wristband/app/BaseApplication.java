@@ -11,9 +11,13 @@ import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 
 import com.just.library.AgentWeb;
+import com.liulishuo.filedownloader.FileDownloader;
+import com.liulishuo.filedownloader.connection.FileDownloadUrlConnection;
+import com.liulishuo.filedownloader.util.FileDownloadLog;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.internal.RxBleLog;
 
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +29,7 @@ import lbcy.com.cn.wristband.entity.DaoMaster;
 import lbcy.com.cn.wristband.entity.DaoSession;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxManager;
+import lbcy.com.cn.wristband.utils.database.UpgradeHelper;
 import rx.functions.Action1;
 
 /**
@@ -35,7 +40,7 @@ public class BaseApplication extends MyApplication {
     private static BaseApplication baseApplication;
     private RxBleClient rxBleClient;
 
-    private DaoMaster.DevOpenHelper mHelper;
+    private UpgradeHelper mHelper;
     private SQLiteDatabase db;
     private DaoMaster mDaoMaster;
     private DaoSession mDaoSession;
@@ -67,6 +72,15 @@ public class BaseApplication extends MyApplication {
         baseApplication = this;
         spUtil = new SPUtil(this, Consts.SETTING_DB_NAME);
         setDatabase();
+
+        FileDownloader.setupOnApplicationOnCreate(this)
+                .connectionCreator(new FileDownloadUrlConnection
+                        .Creator(new FileDownloadUrlConnection.Configuration()
+                        .connectTimeout(15_000) // set connection timeout.
+                        .readTimeout(15_000) // set read timeout.
+                        .proxy(Proxy.NO_PROXY) // set proxy
+                ))
+                .commit();
 
         BlackDeviceManager.getInstance().setContext(baseApplication);
 
@@ -121,7 +135,8 @@ public class BaseApplication extends MyApplication {
      */
     private void setDatabase() {
         // 通过 DaoMaster 的内部类 DevOpenHelper，你可以得到一个便利的 SQLiteOpenHelper 对象。
-        mHelper = new DaoMaster.DevOpenHelper(this, "bases-db", null);
+        // 通过UpgradeHelper实现数据库平滑升级
+        mHelper = new UpgradeHelper(this, "bases-db");
         db = mHelper.getWritableDatabase();
         // 注意：该数据库连接属于 DaoMaster，所以多个 Session 指的是相同的数据库连接。
         mDaoMaster = new DaoMaster(db);

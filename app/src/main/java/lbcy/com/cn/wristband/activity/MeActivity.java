@@ -14,6 +14,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.huichenghe.bleControl.Ble.BluetoothLeService;
 import com.jph.takephoto.app.TakePhotoActivity;
 import com.jph.takephoto.model.TImage;
@@ -26,16 +29,21 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.hdodenhof.circleimageview.CircleImageView;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.settingitemlibrary.SetItemView;
 import lbcy.com.cn.wristband.R;
+import lbcy.com.cn.wristband.app.BaseApplication;
+import lbcy.com.cn.wristband.entity.LoginData;
+import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.popup.SlideFromBottomPopup;
 import lbcy.com.cn.wristband.rx.RxBus;
-import lbcy.com.cn.wristband.widget.ImageViewPlus;
+import lbcy.com.cn.wristband.rx.RxManager;
 import razerdp.basepopup.BasePopupWindow;
+import rx.functions.Action1;
 
 public class MeActivity extends TakePhotoActivity {
     Activity mActivity;
@@ -45,7 +53,7 @@ public class MeActivity extends TakePhotoActivity {
     @BindView(R.id.rl_top_bar)
     RelativeLayout rlTopBar;
     @BindView(R.id.iv_header)
-    ImageViewPlus ivHeader;
+    CircleImageView ivHeader;
     @BindView(R.id.rl_head)
     LinearLayout rlHead;
     @BindView(R.id.tv_name)
@@ -56,8 +64,8 @@ public class MeActivity extends TakePhotoActivity {
     TextView tvMac;
     @BindView(R.id.tv_macid)
     TextView tvMacid;
-    @BindView(R.id.rl_mac)
-    RelativeLayout rlMac;
+    @BindView(R.id.ll_mac)
+    LinearLayout llMac;
     @BindView(R.id.tv_link)
     TextView tvLink;
     @BindView(R.id.rl_me)
@@ -81,7 +89,7 @@ public class MeActivity extends TakePhotoActivity {
     @BindView(R.id.btn_quit)
     Button btnQuit;
     @BindView(R.id.root_layout)
-    RelativeLayout rootLayout;
+    LinearLayout rootLayout;
     BasePopupWindow popupWindow;
     SPUtil spUtil;
 
@@ -95,8 +103,10 @@ public class MeActivity extends TakePhotoActivity {
         ButterKnife.bind(this);
         mActivity = this;
         spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
-        itemClick();
 
+        initView();
+
+        itemClick();
 
         which_device = spUtil.getString("which_device", "2");
         if (which_device.equals("2")){
@@ -104,6 +114,36 @@ public class MeActivity extends TakePhotoActivity {
         } else {
             p_getSettings();
         }
+
+        RxManager mRxManager = new RxManager();
+
+        //监听关闭所有activity事件
+        mRxManager.on(Consts.CLOSE_ALL_ACTIVITY_LISTENER, new Action1<Message>() {
+            @Override
+            public void call(Message message) {
+                switch (message.what){
+                    case Consts.CLOSE_ALL_ACTIVITY:
+                        finish();
+                        break;
+                }
+            }
+        });
+    }
+
+    private void initView(){
+        LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
+        if (loginDataDao.count() == 0){
+            return;
+        }
+        LoginData loginData = loginDataDao.loadAll().get(0);
+
+        tvName.setText(loginData.getName());
+        tvId.setText(loginData.getAccount_no());
+        tvMacid.setText(loginData.getMac_address());
+        Glide.with(mActivity)
+                .load(loginData.getLogo())
+                .apply(RequestOptions.bitmapTransform(new CenterCrop()).placeholder(R.mipmap.watch).error(R.mipmap.watch))
+                .into(ivHeader);
     }
 
     private void itemClick(){
@@ -172,12 +212,6 @@ public class MeActivity extends TakePhotoActivity {
                 popupWindow.showPopupWindow();
                 break;
             case R.id.btn_quit:
-                //数据销毁
-                spUtil.putString("is_login", "0");
-
-                spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
-                spUtil.putString("js_is_write", "0");
-
                 intent = new Intent(mActivity, LoginActivity.class);
                 startActivity(intent);
                 Message message = new Message();

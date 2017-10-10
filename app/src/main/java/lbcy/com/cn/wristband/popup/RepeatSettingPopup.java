@@ -41,6 +41,13 @@ public class RepeatSettingPopup extends BasePopupWindow implements View.OnClickL
         } else if (data.equals("每日")) {
             for (int i=0; i<7; i++){
                 week[i] = true;
+                images[0].setVisibility(View.VISIBLE);
+                images[1].setVisibility(View.VISIBLE);
+                images[2].setVisibility(View.VISIBLE);
+                images[3].setVisibility(View.VISIBLE);
+                images[4].setVisibility(View.VISIBLE);
+                images[5].setVisibility(View.VISIBLE);
+                images[6].setVisibility(View.VISIBLE);
             }
         } else {
             if (data.contains("周一")) {

@@ -5,7 +5,10 @@ import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Toast;
 
+import com.huichenghe.bleControl.Ble.BluetoothLeService;
 import com.jude.easyrecyclerview.EasyRecyclerView;
 import com.jude.easyrecyclerview.decoration.DividerDecoration;
 
@@ -13,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.adapter.AlarmClockListAdapter;
@@ -37,6 +41,8 @@ public class AlarmClockListActivity extends BaseActivity {
     SPUtil spUtil;
     Intent getIntent;
     boolean isLateClock;
+    String which_device = "2";
+    long mUpdateTime; //更新switch时间(防止重复更新)
 
     @Override
     protected int getLayoutId() {
@@ -45,10 +51,12 @@ public class AlarmClockListActivity extends BaseActivity {
 
     @Override
     protected void initData() {
+        spUtil = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
+        which_device = spUtil.getString("which_device", "2");
+
         getIntent = getIntent();
         isLateClock = getIntent.getBooleanExtra("is_late_clock", false);
 
-        spUtil = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
         clockBeanDao = BaseApplication.getBaseApplication().getBaseDaoSession().getClockBeanDao();
         if (isLateClock){
             list = clockBeanDao.queryBuilder().where(ClockBeanDao.Properties.Type.eq("迟到提醒")).build().list();
@@ -56,18 +64,34 @@ public class AlarmClockListActivity extends BaseActivity {
             list = clockBeanDao.queryBuilder().where(ClockBeanDao.Properties.Type.notEq("迟到提醒")).build().list();
         }
 
-
+        for (ClockBean clock : list){
+            if (clock.getText().equals("只响一次")){
+                long mCurrentTime = System.currentTimeMillis();
+                if (clock.getBookTime() <= mCurrentTime && clock.getSwitchState()){
+                    clock.setSwitchState(false);
+                }
+            }
+        }
     }
 
     @Override
     protected void initView() {
-        setTitle(getResources().getString(R.string.activity_device_clock));
+        if (isLateClock){
+            setTitle(getResources().getString(R.string.activity_device_late));
+        } else {
+            setTitle(getResources().getString(R.string.activity_device_clock));
+        }
+
         setRightIcon(R.mipmap.add);
 
         //新增闹钟
         rightClick(new OnRightClickListener() {
             @Override
             public void click() {
+                if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()){
+                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 clock_num = adapter.getCount();
                 int clock_sum = 0;
                 if (isLateClock){
@@ -108,17 +132,25 @@ public class AlarmClockListActivity extends BaseActivity {
                 DialogUtil.showDialog(mActivity, "是否删除当前闹钟？", new DialogUtil.DialogListener() {
                     @Override
                     public void submit() {
-                        clockBeanDao = BaseApplication.getBaseApplication().getBaseDaoSession().getClockBeanDao();
-                        list.clear();
-                        list = adapter.getAllData();
-                        clockBeanDao.delete(list.get(position));
-                        list.remove(position);
-                        for (int i = position; i < list.size(); i++){
-                            list.get(i).setPosition(list.get(i).getPosition() - 1);
+                        if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+                            clockBeanDao = BaseApplication.getBaseApplication().getBaseDaoSession().getClockBeanDao();
+                            list.clear();
+                            list = adapter.getAllData();
+
+                            BlackDeviceManager.getInstance().deleteClock(list.get(position).getNumber());
+                            clockBeanDao.delete(list.get(position));
+
+                            list.remove(position);
+                            for (int i = position; i < list.size(); i++){
+                                list.get(i).setPosition(list.get(i).getPosition() - 1);
+                            }
+                            clockBeanDao.updateInTx(list);
+                            adapter.remove(position);
+                            adapter.notifyDataSetChanged();
+                        } else {
+                            Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
                         }
-                        clockBeanDao.updateInTx(list);
-                        adapter.remove(position);
-                        adapter.notifyDataSetChanged();
+
                     }
 
                     @Override
@@ -127,6 +159,33 @@ public class AlarmClockListActivity extends BaseActivity {
                     }
                 });
 
+
+            }
+        });
+
+        adapter.setOnSwitchCheckedChangeListener(new AlarmClockListAdapter.OnSwitchCheckChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked, int position) {
+                if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+                    list.clear();
+                    list = adapter.getAllData();
+                    if (isChecked){
+                        if (which_device.equals("2"))
+                            b_setClock(position);
+                        else
+                            p_setClock(position);
+                    } else {
+                        BlackDeviceManager.getInstance().deleteClock(list.get(position).getNumber());
+                    }
+                } else {
+                    if (System.currentTimeMillis() - mUpdateTime > 300){
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        ClockBean clock = adapter.getItem(position);
+                        clock.setSwitchState(!isChecked);
+                        adapter.update(clock, position);
+                        mUpdateTime = System.currentTimeMillis();
+                    }
+                }
 
             }
         });
@@ -184,4 +243,47 @@ public class AlarmClockListActivity extends BaseActivity {
             spUtil.putString("clock_num", String.valueOf(adapter.getCount()));
     }
 
+    /**************************************************************************/
+    //紫色手环连接相关
+    private void p_setClock(int position){
+
+    }
+
+    /**************************************************************************/
+    //黑色手环相关
+    private void b_setClock(int position){
+        list.clear();
+        list = adapter.mGetAllData();
+        List<String> repeat_days = new ArrayList<>();
+        String str = list.get(position).getText();
+        switch (str){
+            case "只响一次":
+                for (int i=0;i<7;i++){
+                    repeat_days.add("无");
+                }
+                break;
+            case "每天":
+                for (int i=0;i<7;i++){
+                    repeat_days.add("有");
+                }
+                break;
+            default:
+                repeat_days.add(str.contains("周一") ? "有" : "无");
+                repeat_days.add(str.contains("周二") ? "有" : "无");
+                repeat_days.add(str.contains("周三") ? "有" : "无");
+                repeat_days.add(str.contains("周四") ? "有" : "无");
+                repeat_days.add(str.contains("周五") ? "有" : "无");
+                repeat_days.add(str.contains("周六") ? "有" : "无");
+                repeat_days.add(str.contains("周日") ? "有" : "无");
+                break;
+        }
+        BlackDeviceManager.getInstance().
+                setClock(list.get(position).getNumber(),
+                        list.get(position).getType(),
+                        (Integer.valueOf(list.get(position).getHour())),
+                        (Integer.valueOf(list.get(position).getMinute())),
+                        repeat_days);
+    }
+
+    /**************************************************************************/
 }

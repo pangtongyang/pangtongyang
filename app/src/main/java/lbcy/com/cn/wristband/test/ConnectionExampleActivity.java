@@ -66,7 +66,7 @@ public class ConnectionExampleActivity extends RxAppCompatActivity {
     public void findDevice() {
         if (isFind) {
 
-            BlackDeviceManager.getInstance().findDevice(isFind, new DataCallback() {
+            BlackDeviceManager.getInstance().findDevice(isFind, new DataCallback<byte[]>() {
                 @Override
                 public void OnSuccess(byte[] data) {
                     runOnUiThread(new Runnable() {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_layout"
@@ -9,175 +9,174 @@
     android:orientation="vertical"
     tools:context="lbcy.com.cn.wristband.activity.MeActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="230dp"
+        android:background="@drawable/user_bg"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/rl_top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/width_50">
+
+            <ImageView
+                android:id="@+id/iv_back"
+                android:layout_width="@dimen/width_50"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/btn_back_bg"
+                android:clickable="true"
+                android:onClick="onBackPressed"
+                android:padding="@dimen/padding_13"
+                android:src="@mipmap/back_white" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/rl_head"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.8"
+                android:gravity="center_horizontal"
+                android:paddingBottom="@dimen/padding_40">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/iv_header"
+                    android:layout_width="@dimen/width_100"
+                    android:layout_height="@dimen/width_100"
+                    android:layout_gravity="center"
+                    android:src="@mipmap/watch"
+                    app:civ_border_color="@color/white"
+                    app:civ_border_width="2dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/rl_me"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/tv_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:gravity="start"
+                        android:text="@string/fragment_me_setting"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/textsize_22"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tv_name"
+                        android:layout_marginTop="@dimen/margin_10"
+                        android:gravity="start"
+                        android:text="1234645625235145"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/textsize_16" />
+
+                    <LinearLayout
+                        android:id="@+id/ll_version"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_below="@+id/tv_id">
+
+                        <TextView
+                            android:id="@+id/tv_version"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margin_5"
+                            android:text="固件版本："
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/textsize_16" />
+
+                        <TextView
+                            android:id="@+id/tv_version_content"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margin_5"
+                            android:layout_toEndOf="@+id/tv_version"
+                            android:gravity="center"
+                            android:text="A1:B2:C3:D4:E5:F6"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/textsize_14" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_link"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/ll_version"
+                        android:layout_marginTop="@dimen/margin_10"
+                        android:drawablePadding="@dimen/padding_5"
+                        android:drawableStart="@drawable/app_circle_red"
+                        android:gravity="start"
+                        android:text="设备尚未连接"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/textsize_14" />
+
+                    <RelativeLayout
+                        android:id="@+id/rl_battery"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tv_link">
+
+                        <ImageView
+                            android:id="@+id/iv_battery"
+                            android:layout_width="20dp"
+                            android:layout_height="30dp"
+                            android:src="@mipmap/power_green"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/textsize_16" />
+
+                        <TextView
+                            android:id="@+id/tv_battery"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_toEndOf="@+id/iv_battery"
+                            android:gravity="start"
+                            android:text="100%"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/textsize_14" />
+                    </RelativeLayout>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:scrollbars="none"
+        android:background="@color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="230dp"
-                android:background="@drawable/user_bg"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:id="@+id/rl_top_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/width_50">
-
-                    <ImageView
-                        android:id="@+id/iv_back"
-                        android:layout_width="@dimen/width_50"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentTop="true"
-                        android:background="@drawable/btn_back_bg"
-                        android:clickable="true"
-                        android:onClick="onBackPressed"
-                        android:padding="@dimen/padding_13"
-                        android:src="@mipmap/back_white" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:id="@+id/rl_head"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1.5"
-                        android:paddingBottom="@dimen/padding_40"
-                        android:gravity="center_horizontal">
-
-
-                        <lbcy.com.cn.wristband.widget.ImageViewPlus
-                            android:id="@+id/iv_header"
-                            android:layout_width="@dimen/width_100"
-                            android:layout_height="@dimen/width_100"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="@dimen/margin_10"
-                            android:scaleType="fitXY"
-                            android:src="@mipmap/watch" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/rl_me"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <TextView
-                                android:id="@+id/tv_name"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:gravity="start"
-                                android:text="@string/fragment_me_setting"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/textsize_22"
-                                android:textStyle="bold"
-                                android:layout_alignParentTop="true"
-                                android:layout_alignParentStart="true" />
-
-                            <TextView
-                                android:id="@+id/tv_id"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_below="@+id/tv_name"
-                                android:layout_marginTop="@dimen/margin_10"
-                                android:gravity="start"
-                                android:text="1234645625235145"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/textsize_16" />
-
-                            <RelativeLayout
-                                android:id="@+id/rl_version"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_below="@+id/tv_id">
-
-                                <TextView
-                                    android:id="@+id/tv_version"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/margin_5"
-                                    android:text="固件版本：  "
-                                    android:textColor="@color/white"
-                                    android:textSize="@dimen/textsize_16" />
-
-                                <TextView
-                                    android:id="@+id/tv_version_content"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/margin_5"
-                                    android:layout_toEndOf="@+id/tv_version"
-                                    android:gravity="center"
-                                    android:text="A1B2C3D4E5F6"
-                                    android:textColor="@color/white"
-                                    android:textSize="@dimen/textsize_16" />
-                            </RelativeLayout>
-
-                            <TextView
-                                android:id="@+id/tv_link"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentStart="true"
-                                android:layout_below="@+id/rl_version"
-                                android:layout_marginTop="@dimen/margin_10"
-                                android:drawableStart="@drawable/app_circle_red"
-                                android:drawablePadding="@dimen/padding_5"
-                                android:gravity="start"
-                                android:text="设备尚未连接"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/textsize_14" />
-
-                            <RelativeLayout
-                                android:id="@+id/rl_battery"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_below="@+id/tv_link">
-
-                                <ImageView
-                                    android:id="@+id/iv_battery"
-                                    android:layout_width="20dp"
-                                    android:layout_height="30dp"
-                                    android:src="@mipmap/power_green"
-                                    android:textColor="@color/white"
-                                    android:textSize="@dimen/textsize_16" />
-
-                                <TextView
-                                    android:id="@+id/tv_battery"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_centerVertical="true"
-                                    android:layout_toEndOf="@+id/iv_battery"
-                                    android:gravity="start"
-                                    android:text="100%"
-                                    android:textColor="@color/white"
-                                    android:textSize="@dimen/textsize_14" />
-                            </RelativeLayout>
-
-                        </RelativeLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </LinearLayout>
 
             <lbcy.com.cn.settingitemlibrary.SetItemView
                 android:id="@+id/rl_hand_up"
@@ -275,4 +274,4 @@
 
         </LinearLayout>
     </ScrollView>
-</RelativeLayout>
+</LinearLayout>

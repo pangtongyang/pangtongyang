@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -35,6 +36,7 @@ import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxManager;
 import lbcy.com.cn.wristband.widget.webview.WebLayout;
+import rx.functions.Action1;
 
 /**
  * Created by chenjie on 2017/9/5.
@@ -96,6 +98,18 @@ public abstract class BaseWebActivity extends AppCompatActivity {
             mAgentWeb.getJsInterfaceHolder().addJavaObject("android",new AndroidInterface(mAgentWeb, mActivity));
 
         }
+
+        //监听关闭所有activity事件
+        mRxManager.on(Consts.CLOSE_ALL_ACTIVITY_LISTENER, new Action1<Message>() {
+            @Override
+            public void call(Message message) {
+                switch (message.what){
+                    case Consts.CLOSE_ALL_ACTIVITY:
+                        finish();
+                        break;
+                }
+            }
+        });
     }
 
     @OnClick({R.id.iv_back, R.id.iv_righticon})

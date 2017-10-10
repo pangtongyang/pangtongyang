@@ -2,6 +2,10 @@ package lbcy.com.cn.blacklibrary.ctl;
 
 import android.content.Context;
 
+import com.huichenghe.bleControl.upgrande.UpdateVersionTask;
+
+import java.util.List;
+
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
 
 /**
@@ -19,31 +23,31 @@ public interface DeviceController {
      * @param isFind true -> 查找设备， false -> 取消查找
      * @param callback 回调函数
      */
-    void findDevice(boolean isFind, DataCallback callback);
+    void findDevice(boolean isFind, DataCallback<byte[]> callback);
 
     /**
      * 获取当天手环所有用户数据
      * @param callback 回调函数
      */
-    void getDayData(DataCallback callback);
+    void getDayData(DataCallback<byte[]> callback);
 
     /**
      * 获取手环电池电量
      * @param callback 回调函数
      */
-    void getBattery(DataCallback callback);
+    void getBattery(DataCallback<byte[]> callback);
 
     /**
      * 获取每小时步数（卡路里？）
      * @param callback 回调函数
      */
-    void getEachHourStep(DataCallback callback);
+    void getEachHourStep(DataCallback<byte[]> callback);
 
     /**
      * 获取睡眠数据(昨天和今天)
      * @param callback 回调函数
      */
-    void getSleepData(DataCallback callback);
+    void getSleepData(DataCallback<byte[]> callback);
 
     /**
      * 是否开启电话提醒
@@ -63,7 +67,7 @@ public interface DeviceController {
      * 设置同步时间
      * @param callback 回调函数
      */
-    void synTime(DataCallback callback);
+    void synTime(DataCallback<byte[]> callback);
 
     /**
      * 设置时间格式
@@ -81,7 +85,7 @@ public interface DeviceController {
      * 获取实时心率
      * @param callback 回调函数，返回心率16进制值
      */
-    void startHeartRateListener(DataCallback callback);
+    void startHeartRateListener(DataCallback<byte[]> callback);
 
     /**
      * 睡眠和运动目标设置
@@ -161,4 +165,39 @@ public interface DeviceController {
      * @param content 通知内容
      */
     void setAppNotification(String type, String title, String content);
+
+    /**
+     * 设置闹钟
+     * @param num 闹钟编号
+     * @param type 闹钟类型
+     * @param hour 小时
+     * @param minute 分钟
+     * @param repeat_days 重复天
+     */
+    void setClock(int num, String type, int hour, int minute, List<String> repeat_days);
+
+    /**
+     * 删除闹钟
+     * @param num 闹钟编号
+     */
+    void deleteClock(int num);
+
+    /**
+     * 获取硬件版本号
+     * @param callback 版本号回调
+     */
+    void getHardwareVersion(DataCallback<String> callback);
+
+    /**
+     * 硬件版本升级
+     * @param filepath 文件路径
+     * @param listener 升级过程监听
+     */
+    void updateHardwareVersion(String filepath, UpdateVersionTask.UpdateListener listener);
+
+    /**
+     * 停止升级
+     * @param updateTask 升级过程的updateTask
+     */
+    void stopUpdate(UpdateVersionTask updateTask);
 }

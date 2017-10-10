@@ -171,7 +171,6 @@ public class DeviceConnectManager {
 
     public void selectRxAndroidBleDevice(String name, String macAddress) {
         LocalDeviceEntity deviceEntity = new LocalDeviceEntity(name, macAddress, -50, null);// 获取设备实体类
-        Toast.makeText(mContext, "设备连接中", Toast.LENGTH_SHORT).show();
         if (BluetoothLeService.getInstance() != null) {
 
             BluetoothLeService.getInstance().connect(deviceEntity);

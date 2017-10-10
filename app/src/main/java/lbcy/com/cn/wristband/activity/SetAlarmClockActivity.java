@@ -8,10 +8,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
+import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
 import lbcy.com.cn.wristband.app.BaseApplication;
@@ -21,6 +25,7 @@ import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.popup.RepeatSettingPopup;
 import lbcy.com.cn.wristband.popup.TypeSettingPopup;
 import lbcy.com.cn.wristband.rx.RxBus;
+import lbcy.com.cn.wristband.utils.DateUtil;
 import lbcy.com.cn.wristband.widget.timepicker.TimePickView;
 import razerdp.basepopup.BasePopupWindow;
 import rx.functions.Action1;
@@ -52,12 +57,16 @@ public class SetAlarmClockActivity extends BaseActivity {
     @BindView(R.id.rl_type)
     RelativeLayout rlType;
 
+    SPUtil spUtil;
+    String which_device = "2";
     BasePopupWindow popupWindow;
     String ClockTAG;
     ClockBean mClockBean;
     ClockBeanDao clockBeanDao;
 
     boolean isLateClock;
+
+    int number = 0; //闹钟编号
 
     @Override
     protected int getLayoutId() {
@@ -66,6 +75,9 @@ public class SetAlarmClockActivity extends BaseActivity {
 
     @Override
     protected void initData() {
+        spUtil = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
+        which_device = spUtil.getString("which_device","2");
+
         Intent intent = getIntent();
         ClockTAG = intent.getStringExtra("TAG");
         isLateClock = intent.getBooleanExtra("is_late_clock", false);
@@ -75,7 +87,20 @@ public class SetAlarmClockActivity extends BaseActivity {
         //初始化闹钟数据对象
         if (ClockTAG.equals("-1")){
             mClockBean = new ClockBean();
+            List<ClockBean> clockBeanList = clockBeanDao
+                    .queryBuilder()
+                    .orderAsc(ClockBeanDao.Properties.Number)
+                    .build().list();
+            number = 0;
+            for (ClockBean clockBean: clockBeanList){
+                if (clockBean.getNumber() == number)
+                    number++;
+                else
+                    break;
+            }
+            mClockBean.setNumber(number);
         } else {
+
             if (isLateClock){
                 mClockBean = clockBeanDao.queryBuilder()
                         .where(ClockBeanDao.Properties.Type.eq("迟到提醒"),
@@ -85,6 +110,8 @@ public class SetAlarmClockActivity extends BaseActivity {
                         .where(ClockBeanDao.Properties.Type.notEq("迟到提醒"),
                                 ClockBeanDao.Properties.Position.eq(ClockTAG)).build().unique();
             }
+
+            number = mClockBean.getNumber();
         }
     }
 
@@ -154,13 +181,31 @@ public class SetAlarmClockActivity extends BaseActivity {
                 mClockBean.setSwitchState(true);
                 mClockBean.setText(tvRighttext.getText().toString());
                 mClockBean.setType(tvTypeRight.getText().toString());
+                // 处理只响一次闹钟开关自动关闭问题
+                if (tvRighttext.getText().toString().equals("只响一次")){
+                    String bookTimeStr;
+                    if ((mClockBean.getHour()+":"+mClockBean.getMinute()).compareTo(DateUtil.getCurrentTime_H_m()) > 0){
+                        bookTimeStr = DateUtil.getCurrentTime_Y_M_d(false) + " " + mClockBean.getHour()+":"+mClockBean.getMinute();
+                    } else{
+                        bookTimeStr = DateUtil.getCurrentTime_Y_M_d(true) + " " + mClockBean.getHour()+":"+mClockBean.getMinute();
+                    }
+                    long bookTime = DateUtil.getBookMillis(bookTimeStr);
+                    mClockBean.setBookTime(bookTime);
+                }
 
-
-
+                //发送更新数据请求
                 Message message = new Message();
                 message.what = Consts.UPDATE_ALL_CLOCK_DATA;
                 message.obj = mClockBean;
                 RxBus.getInstance().post(Consts.CLOCK_LISTENER, message);
+
+                //调用sdk设置闹钟
+                if (which_device.equals("2")){
+                    b_setClock();
+                } else {
+                    p_setClock();
+                }
+
                 finish();
             }
         });
@@ -198,10 +243,51 @@ public class SetAlarmClockActivity extends BaseActivity {
     }
 
     BasePopupWindow getPopupRepeatSetting() {
+        mClockBean.setText(tvRighttext.getText().toString());
         return new RepeatSettingPopup(this, mClockBean);
     }
     BasePopupWindow getPopupTypeSetting() {
         return new TypeSettingPopup(this);
     }
 
+    /**************************************************************************/
+    //紫色手环连接相关
+    private void p_setClock(){
+    }
+
+    /**************************************************************************/
+    //黑色手环相关
+    private void b_setClock(){
+        List<String> repeat_days = new ArrayList<>();
+        String str = tvRighttext.getText().toString();
+        switch (str){
+            case "只响一次":
+                for (int i=0;i<7;i++){
+                    repeat_days.add("无");
+                }
+                break;
+            case "每天":
+                for (int i=0;i<7;i++){
+                    repeat_days.add("有");
+                }
+                break;
+            default:
+                repeat_days.add(str.contains("周一") ? "有" : "无");
+                repeat_days.add(str.contains("周二") ? "有" : "无");
+                repeat_days.add(str.contains("周三") ? "有" : "无");
+                repeat_days.add(str.contains("周四") ? "有" : "无");
+                repeat_days.add(str.contains("周五") ? "有" : "无");
+                repeat_days.add(str.contains("周六") ? "有" : "无");
+                repeat_days.add(str.contains("周日") ? "有" : "无");
+                break;
+        }
+        BlackDeviceManager.getInstance().
+                setClock(number,
+                tvTypeRight.getText().toString(),
+                timepicker.getSelectTime()[0],
+                timepicker.getSelectTime()[1],
+                repeat_days);
+    }
+
+    /**************************************************************************/
 }

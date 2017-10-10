@@ -39,13 +39,13 @@ public class MyNotificationService extends NotificationListenerService {
 
     @Override
     public void onDestroy() {
+        //不得关闭当前service，否则将无法收到消息回调
         super.onDestroy();
-        cancelAllNotifications();
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        if (device_type.equals("1")){
+        if (device_type.equals("2")){
             blackPostHandler(sbn);
         } else {
             purplePostHandler(sbn);

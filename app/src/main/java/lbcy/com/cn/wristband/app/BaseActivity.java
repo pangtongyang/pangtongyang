@@ -1,6 +1,7 @@
 package lbcy.com.cn.wristband.app;
 
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -9,7 +10,9 @@ import android.widget.TextView;
 
 import butterknife.ButterKnife;
 import lbcy.com.cn.wristband.R;
+import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxManager;
+import rx.functions.Action1;
 
 /**
  * Created by chenjie on 2017/9/5.
@@ -46,6 +49,18 @@ public abstract class BaseActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 onRightClickListener.click();
+            }
+        });
+
+        //监听关闭所有activity事件
+        mRxManager.on(Consts.CLOSE_ALL_ACTIVITY_LISTENER, new Action1<Message>() {
+            @Override
+            public void call(Message message) {
+                switch (message.what){
+                    case Consts.CLOSE_ALL_ACTIVITY:
+                        finish();
+                        break;
+                }
             }
         });
     }

@@ -74,19 +74,15 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    //支持包用于5.0以下系统
-    //Butterknife
-    //easypermission
-    //rxandroidble
+
     compile project(':blacklibrary')
     compile project(':purplelibrary')
     compile project(':settingitemlibrary')
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:design:26.+'
-    compile 'com.android.support:cardview-v7:26.+'
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.jakewharton:butterknife:8.8.0'
+    compile 'com.jakewharton:butterknife:8.8.0'//Butterknife
     compile 'pub.devrel:easypermissions:1.0.0' //权限获取库
     compile 'com.polidea.rxandroidble:rxandroidble:1.3.3' //蓝牙扫描库
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
@@ -102,8 +98,12 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.3.0' //网络请求
     compile 'com.squareup.retrofit2:converter-gson:2.3.0' //json解析
     compile 'com.squareup.retrofit2:adapter-rxjava:2.3.0' //rxjava
-    compile 'com.squareup.okhttp3:okhttp:3.9.0'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0' //okhttp
+    compile 'com.squareup.okhttp3:logging-interceptor:3.9.0' //http log
+    compile 'de.hdodenhof:circleimageview:2.1.0' //圆形头像库
+    compile 'com.github.bumptech.glide:glide:4.1.1' //glide官方库
+    compile 'com.liulishuo.filedownloader:library:1.6.6' //文件下载库
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
 }

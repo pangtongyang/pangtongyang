@@ -54,7 +54,8 @@ public class LoginActivity extends BaseActivity {
     @BindView(R.id.btn_login)
     Button btnLogin;
 
-    SPUtil spUtil;
+    SPUtil spUtilUser;
+    SPUtil spUtilSetting;
 
     @Override
     protected int getLayoutId() {
@@ -63,16 +64,18 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
+        spUtilUser = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
+        spUtilSetting = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
+        clearData();
     }
 
     @Override
     protected void initView() {
         setTitle(getResources().getString(R.string.activity_login_et_btn_login));
         hideBackButton();
-        etName.setText(spUtil.getString("userName",""));
-        etPassword.setText(spUtil.getString("password",""));
-        if (spUtil.getString("login_type","card").equals("card")){
+        etName.setText(spUtilUser.getString("userName",""));
+        etPassword.setText(spUtilUser.getString("password",""));
+        if (spUtilUser.getString("login_type","card").equals("card")){
             tvOtherlogin.setText(R.string.activity_login_by_phone);
             etName.setInputType(InputType.TYPE_CLASS_TEXT);
         } else {
@@ -140,22 +143,35 @@ public class LoginActivity extends BaseActivity {
         loginBean.getData().setAppType("2");
 
         if (tvOtherlogin.getText().toString().equals(getString(R.string.activity_login_by_phone))){
-            spUtil.putString("login_type", "card");
+            spUtilUser.putString("login_type", "card");
         } else {
-            spUtil.putString("login_type", "phone");
+            spUtilUser.putString("login_type", "phone");
         }
-        spUtil.putString("is_login", "1");
-        spUtil.putString("userName", etName.getText().toString().trim());
-        spUtil.putString("password", etPassword.getText().toString().trim());
-        spUtil.putString("which_device", "2"); //1 -> 紫色 2 -> 黑色
-//        spUtil.putString("which_device", loginBean.getData().getDevice_type()); //1 -> 紫色 2 -> 黑色
-        spUtil.putString("deviceName", "wristband");
-//        spUtil.putString("deviceAddress", "FE:54:B9:7C:CB:FA"); //紫色test
-        spUtil.putString("deviceAddress", "CD:96:8C:EC:EE:B3"); //黑色test
-//        spUtil.putString("deviceAddress", loginBean.getData().getMac_address());
+        //设置是否已登录
+        spUtilUser.putString("is_login", "1");
+        //设置用户名
+        spUtilUser.putString("userName", etName.getText().toString().trim());
+        //设置密码
+        spUtilUser.putString("password", etPassword.getText().toString().trim());
+        //设置设备类型
+        spUtilUser.putString("which_device", "2"); //1 -> 紫色 2 -> 黑色
+//        spUtilUser.putString("which_device", loginBean.getData().getDevice_type()); //1 -> 紫色 2 -> 黑色
+        //设置设备名称
+        spUtilUser.putString("deviceName", "wristband");
+//        spUtilUser.putString("deviceAddress", "FE:54:B9:7C:CB:FA"); //紫色test
+        //设置设备mac地址
+        spUtilUser.putString("deviceAddress", "CD:96:8C:EC:EE:B3"); //黑色test
+//        spUtilUser.putString("deviceAddress", loginBean.getData().getMac_address());
+        //设置token
+        spUtilUser.putString("token", Consts.PRE_TOKEN_STR + loginBean.getData().getToken());
+
+        //设置setting数据库设备类型
+        spUtilSetting.putString("which_device", "2"); //1 -> 紫色 2 -> 黑色
+        //设置setting数据库token
+        spUtilSetting.putString("token", Consts.PRE_TOKEN_STR + loginBean.getData().getToken());
 
         LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
-        if (loginDataDao.loadAll().size() == 0){
+        if (loginDataDao.count() == 0){
             loginDataDao.insert(loginBean.getData());
         } else {
             loginDataDao.deleteAll();
@@ -164,36 +180,37 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void clearData(){
-        spUtil.clearData();
+        //数据销毁
+        spUtilUser.putString("is_login", "0");
+        spUtilUser.putString("js_is_write", "0");
+
+        spUtilSetting.clearData();
     }
 
     private void loginAction(){
         LoginTo loginTo = new LoginTo();
         loginTo.setAccount_no(etName.getText().toString().trim());
         loginTo.setPassword(etPassword.getText().toString().trim());
-        NetManager.loginAction(loginTo).enqueue(new Callback<LoginBean>() {
+        NetManager.loginAction(loginTo, new NetManager.NetCallBack<LoginBean>() {
             @Override
-            public void onResponse(@NonNull Call<LoginBean> call, @NonNull Response<LoginBean> response) {
-                if (response.isSuccessful()){
-                    LoginBean loginBean = response.body();
-                    if (loginBean != null && loginBean.getCode() == 200){
-                        saveData(loginBean);
+            public void onResponse(Call<LoginBean> call, Response<LoginBean> response) {
+                LoginBean loginBean = response.body();
+                if (loginBean != null && loginBean.getCode() == 200){
+                    saveData(loginBean);
 
-                        Intent intent = new Intent(mActivity, MainActivity.class);
-                        intent.putExtra("isSplashed", true);
-                        startActivity(intent);
+                    Intent intent = new Intent(mActivity, MainActivity.class);
+                    intent.putExtra("isSplashed", true);
+                    startActivity(intent);
 
-                        finish();
-                    } else {
-                        clearData();
-                        Toast.makeText(mActivity, loginBean != null ?loginBean.getMessage().toString():"登录失败！", Toast.LENGTH_SHORT).show();
-                    }
+                    finish();
+                } else {
+                    Toast.makeText(mActivity, loginBean != null ?loginBean.getMessage().toString():"登录失败！", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<LoginBean> call, @NonNull Throwable t) {
-                Toast.makeText(mActivity, getString(R.string.network_timeout), Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<LoginBean> call, Throwable t) {
+
             }
         });
     }

@@ -7,6 +7,18 @@ package lbcy.com.cn.wristband.global;
 public class Consts {
     //服务器地址
     public static final String BASE_URL = "http://sportapi.myplat.cn:8866/";
+    //固件升级服务器根地址
+    public static final String BASE_HARDWARE_URL = "http://bracelet.cositea.com:8089/bracelet/";
+    //token前缀
+    public static final String PRE_TOKEN_STR = "X-Auth-Token ";
+    //临时文件存储文件夹
+    public static final String FILE_DOWNLOAD_CACHE_DIR = "cache";
+    //固件MCU升级临时文件名
+    public static final String FILE_MCU_NAME = "mcu.bin";
+    //固件蓝牙升级临时文件名
+    public static final String FILE_BLUETOOTH_NAME = "bluetooth.bin";
+    //固件硬件升级临时文件名
+    public static final String FILE_HARDWARE_NAME = "hardware.bin";
 
     public static final String BLACK_WRISTBAND_NAME = "BC_";
     public static final String PURPLE_WRISTBAND_NAME = "BC-02B";
@@ -28,11 +40,14 @@ public class Consts {
 
 
     //订阅消息
+    public static final String CLOSE_ALL_ACTIVITY_LISTENER = "CloseAllActivityListener";
     public static final String CLOCK_LISTENER = "ClockListener";
     public static final String ACTIVITY_MANAGE_LISTENER = "ActivityListener";
     public static final String ACTIVITY_SEDENTARY_LISTENER = "SedentaryActivityListener";
     public static final String ACTIVITY_SCAN_HEART_RATE_LISTENER = "ScanHeartRateActivityListener";
     public static final String NOTIFICATION_LISTENER = "NotificationListener";
+    //关闭所有activity
+    public static final int CLOSE_ALL_ACTIVITY = 1023;
     //更新编辑闹钟页文本信息
     public static final int UPDATE_CLOCK_DATA = 1024;
     //更新闹钟设置页

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_layout"
@@ -9,147 +9,145 @@
     android:orientation="vertical"
     tools:context="lbcy.com.cn.wristband.activity.MeActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="230dp"
+        android:background="@drawable/user_bg"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/rl_top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/width_50">
+
+            <ImageView
+                android:id="@+id/iv_back"
+                android:layout_width="@dimen/width_50"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/btn_back_bg"
+                android:clickable="true"
+                android:onClick="onBackPressed"
+                android:padding="@dimen/padding_13"
+                android:src="@mipmap/back_white" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/padding_50">
+
+            <LinearLayout
+                android:id="@+id/rl_head"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.8"
+                android:gravity="center_horizontal">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/iv_header"
+                    android:layout_width="@dimen/width_100"
+                    android:layout_height="@dimen/width_100"
+                    android:layout_gravity="center"
+                    app:civ_border_width="2dp"
+                    app:civ_border_color="@color/white"
+                    android:src="@mipmap/watch"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/rl_me"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/tv_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="张大帅"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/textsize_22"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tv_name"
+                        android:layout_marginTop="@dimen/margin_10"
+                        android:gravity="start"
+                        android:text="1234645625235145"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/textsize_16" />
+
+                    <LinearLayout
+                        android:id="@+id/ll_mac"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_below="@+id/tv_id">
+
+                        <TextView
+                            android:id="@+id/tv_mac"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margin_5"
+                            android:text="MAC地址："
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/textsize_16" />
+
+                        <TextView
+                            android:id="@+id/tv_macid"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margin_5"
+                            android:gravity="center"
+                            android:text="AA:BB:CC:DD:EE:FF"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/textsize_14" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_link"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="11dp"
+                        android:drawableStart="@drawable/app_circle_red"
+                        android:drawablePadding="@dimen/padding_5"
+                        android:gravity="start"
+                        android:maxLines="1"
+                        android:text="设备尚未连接"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/textsize_14"
+                        android:layout_below="@+id/ll_mac"
+                        android:layout_alignParentStart="true" />
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true">
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="230dp"
-                android:background="@drawable/user_bg"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:id="@+id/rl_top_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/width_50">
-
-                    <ImageView
-                        android:id="@+id/iv_back"
-                        android:layout_width="@dimen/width_50"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentTop="true"
-                        android:background="@drawable/btn_back_bg"
-                        android:clickable="true"
-                        android:onClick="onBackPressed"
-                        android:padding="@dimen/padding_13"
-                        android:src="@mipmap/back_white" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:paddingBottom="@dimen/padding_50">
-
-                    <LinearLayout
-                        android:id="@+id/rl_head"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1.5"
-                        android:gravity="center_horizontal">
-
-
-                        <lbcy.com.cn.wristband.widget.ImageViewPlus
-                            android:id="@+id/iv_header"
-                            android:layout_width="@dimen/width_100"
-                            android:layout_height="@dimen/width_100"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="@dimen/margin_10"
-                            android:scaleType="fitXY"
-                            android:src="@mipmap/watch" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/rl_me"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <TextView
-                                android:id="@+id/tv_name"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:gravity="start"
-                                android:text="张大帅"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/textsize_22"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tv_id"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_below="@+id/tv_name"
-                                android:layout_marginTop="@dimen/margin_10"
-                                android:gravity="start"
-                                android:text="1234645625235145"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/textsize_16" />
-
-                            <RelativeLayout
-                                android:id="@+id/rl_mac"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_below="@+id/tv_id">
-
-                                <TextView
-                                    android:id="@+id/tv_mac"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/margin_5"
-                                    android:text="MAC地址：  "
-                                    android:textColor="@color/white"
-                                    android:textSize="@dimen/textsize_16" />
-
-                                <TextView
-                                    android:id="@+id/tv_macid"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/margin_5"
-                                    android:layout_toEndOf="@+id/tv_mac"
-                                    android:gravity="center"
-                                    android:text="A1B2C3D4E5F6"
-                                    android:textColor="@color/white"
-                                    android:textSize="@dimen/textsize_16" />
-                            </RelativeLayout>
-
-                            <TextView
-                                android:id="@+id/tv_link"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="11dp"
-                                android:drawableStart="@drawable/app_circle_red"
-                                android:drawablePadding="@dimen/padding_5"
-                                android:gravity="start"
-                                android:maxLines="1"
-                                android:text="设备尚未连接"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/textsize_14"
-                                android:layout_below="@+id/rl_mac"
-                                android:layout_alignParentStart="true" />
-                        </RelativeLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </LinearLayout>
 
             <lbcy.com.cn.settingitemlibrary.SetItemView
                 android:id="@+id/rl_disturb"
@@ -247,4 +245,4 @@
 
         </LinearLayout>
     </ScrollView>
-</RelativeLayout>
+</LinearLayout>

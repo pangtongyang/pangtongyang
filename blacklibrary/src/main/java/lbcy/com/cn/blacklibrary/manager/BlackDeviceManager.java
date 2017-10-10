@@ -5,10 +5,12 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.huichenghe.bleControl.Ble.BleDataForBattery;
+import com.huichenghe.bleControl.Ble.BleDataForCustomRemind;
 import com.huichenghe.bleControl.Ble.BleDataForDayData;
 import com.huichenghe.bleControl.Ble.BleDataForEachHourData;
 import com.huichenghe.bleControl.Ble.BleDataForFactoryReset;
 import com.huichenghe.bleControl.Ble.BleDataForHRWarning;
+import com.huichenghe.bleControl.Ble.BleDataForHardVersion;
 import com.huichenghe.bleControl.Ble.BleDataForQQAndOtherRemine;
 import com.huichenghe.bleControl.Ble.BleDataForRingDelay;
 import com.huichenghe.bleControl.Ble.BleDataForSettingArgs;
@@ -27,8 +29,11 @@ import com.huichenghe.bleControl.Ble.DataSendCallback;
 import com.huichenghe.bleControl.Ble.LocalDeviceEntity;
 import com.huichenghe.bleControl.BleGattHelper;
 import com.huichenghe.bleControl.Entity.sitRemindEntity;
+import com.huichenghe.bleControl.Utils.FormatUtils;
+import com.huichenghe.bleControl.upgrande.UpdateVersionTask;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.ctl.DeviceController;
@@ -69,7 +74,9 @@ public class BlackDeviceManager implements DeviceController {
     }
 
     @Override
-    public void findDevice(boolean isFind, final DataCallback callback) {
+    public void findDevice(boolean isFind, final DataCallback<byte[]> callback) {
+        if (BleForFindDevice.getBleForFindDeviceInstance() == null)
+            return;
         BleForFindDevice.getBleForFindDeviceInstance().setListener(new DataSendCallback() {
             @Override
             public void sendSuccess(byte[] bytes) {
@@ -86,11 +93,13 @@ public class BlackDeviceManager implements DeviceController {
 
             }
         });
-        BleForFindDevice.getBleForFindDeviceInstance().findConnectedDevice(isFind?(byte)0x00:(byte)0x01);
+        BleForFindDevice.getBleForFindDeviceInstance().findConnectedDevice(isFind ? (byte) 0x00 : (byte) 0x01);
     }
 
     @Override
-    public void getDayData(final DataCallback callback) {
+    public void getDayData(final DataCallback<byte[]> callback) {
+        if (BleDataForDayData.getDayDataInstance(mContext) == null)
+            return;
         BleDataForDayData.getDayDataInstance(mContext).setOnDayDataListener(new DataSendCallback() {
             @Override
             public void sendSuccess(byte[] receiveData) {
@@ -122,7 +131,9 @@ public class BlackDeviceManager implements DeviceController {
     }
 
     @Override
-    public void getBattery(final DataCallback callback) {
+    public void getBattery(final DataCallback<byte[]> callback) {
+        if (BleDataForBattery.getInstance() == null)
+            return;
         BleDataForBattery.getInstance().setBatteryListener(new DataSendCallback() {
             @Override
             public void sendSuccess(byte[] receiveData) {
@@ -144,7 +155,9 @@ public class BlackDeviceManager implements DeviceController {
     }
 
     @Override
-    public void getEachHourStep(final DataCallback callback) {
+    public void getEachHourStep(final DataCallback<byte[]> callback) {
+        if (BleDataForEachHourData.getEachHourDataInstance() == null)
+            return;
         BleDataForEachHourData.getEachHourDataInstance().setOnBleDataReceListener(new DataSendCallback() {
             @Override
             public void sendSuccess(byte[] receiveData) {
@@ -175,7 +188,9 @@ public class BlackDeviceManager implements DeviceController {
     }
 
     @Override
-    public void getSleepData(final DataCallback callback) {
+    public void getSleepData(final DataCallback<byte[]> callback) {
+        if (BleDataForSleepData.getInstance(mContext) == null)
+            return;
         BleDataForSleepData.getInstance(mContext).setOnSleepDataRecever(new DataSendCallback() {
             @Override
             public void sendSuccess(byte[] receiveData) {
@@ -222,6 +237,8 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void phoneRemind(boolean isOn) {
+        if (BleForPhoneAndSmsRemind.getInstance() == null)
+            return;
         if (isOn) {
             BleForPhoneAndSmsRemind.getInstance().openPhoneRemine((byte) 0x03, (byte) 0x01);
         } else {
@@ -231,6 +248,8 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void isPhoneRemind(boolean isCalled, String phoneNum, String name) {
+        if (BleForPhoneAndSmsRemind.getInstance() == null)
+            return;
         if (isCalled) {
             BleForPhoneAndSmsRemind.getInstance().beginPhoneRemind(phoneNum, name, BleForPhoneAndSmsRemind.startPhoneRemindToDevice);
         } else {
@@ -239,8 +258,10 @@ public class BlackDeviceManager implements DeviceController {
     }
 
     @Override
-    public void synTime(final DataCallback callback) {
+    public void synTime(final DataCallback<byte[]> callback) {
         BleDataforSyn syn = BleDataforSyn.getSynInstance();
+        if (syn == null)
+            return;
         syn.setDataSendCallback(new DataSendCallback() {
             @Override
             public void sendSuccess(byte[] receveData) {
@@ -262,6 +283,8 @@ public class BlackDeviceManager implements DeviceController {
     @Override
     public void setTimeStyle(boolean is24, DataCallback callback) {
         BleDataForSettingArgs setArgs = BleDataForSettingArgs.getInstance(mContext);
+        if (setArgs == null)
+            return;
         setArgs.setDataSendCallback(new DataSendCallback() {
             @Override
             public void sendSuccess(byte[] receveData) {
@@ -280,19 +303,23 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void factoryReset() {
+        if (BleDataForFactoryReset.getBleDataInstance() == null)
+            return;
         BleDataForFactoryReset.getBleDataInstance().settingFactoryReset();
     }
 
     @Override
-    public void startHeartRateListener(DataCallback callback) {
-
+    public void startHeartRateListener(DataCallback<byte[]> callback) {
+        if (BluetoothLeService.getInstance() == null)
+            return;
         BluetoothLeService.getInstance().addCallback(
                 BleGattHelper.getInstance(mContext, new gattHelperListener(callback)));
     }
 
     private class gattHelperListener implements BleGattHelperListener {
-        DataCallback callback;
-        private gattHelperListener(DataCallback callback){
+        DataCallback<byte[]> callback;
+
+        private gattHelperListener(DataCallback<byte[]> callback) {
             this.callback = callback;
         }
 
@@ -313,17 +340,24 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void setTarget(int stepTarget, int sleepTimes, int sleepHour, int sleepMinute) {
+        if (BleDataForTarget.getInstance() == null)
+            return;
         BleDataForTarget.getInstance().sendTargetToDevice(stepTarget, sleepTimes, sleepHour, sleepMinute);
     }
 
     @Override
     public void setHeartRateFreq(int time) {
-        BleDataForSettingArgs.getInstance(mContext).setHeartReatArgs((byte)(int)time);
+        if (BleDataForSettingArgs.getInstance(mContext) == null) {
+            return;
+        }
+        BleDataForSettingArgs.getInstance(mContext).setHeartReatArgs((byte) (int) time);
     }
 
     @Override
     public void setHeartRateWarning(int maxHR, int minHR) {
-        BleDataForHRWarning.getInstance().closeOrOpenWarning( maxHR, minHR, (byte)0x00);
+        if (BleDataForHRWarning.getInstance() == null)
+            return;
+        BleDataForHRWarning.getInstance().closeOrOpenWarning(maxHR, minHR, (byte) 0x00);
     }
 
     @Override
@@ -334,16 +368,18 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void setDeviceMenuState(boolean isOpen, int position) {
-        int allData =  0;
-        String all =getDataBinString(allData, position, isOpen);
+        int allData = 0;
+        String all = getDataBinString(allData, position, isOpen);
         int dataInt = Integer.parseInt(all, 2);
+        if (BleReadDeviceMenuState.getInstance() == null)
+            return;
         BleReadDeviceMenuState.getInstance().sendUpdateSwitchData32(dataInt);
 
     }
 
     @Override
-    public void setAllMenuState(boolean []data) {
-        for (int i = 0; i< data.length; i++) {
+    public void setAllMenuState(boolean[] data) {
+        for (int i = 0; i < data.length; i++) {
             setDeviceMenuState(data[i], i);
             try {
                 Thread.sleep(300);
@@ -355,25 +391,33 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void ringDelay(int time) {
+        if (BleDataForRingDelay.getDelayInstance() == null)
+            return;
         BleDataForRingDelay.getDelayInstance().settingDelayData(time);
     }
 
     @Override
     public void setSitRemind(int number, int isOpen, String beginTime, String endTime, int duration) {
+        if (BleForSitRemind.getInstance() == null)
+            return;
         BleForSitRemind.getInstance().setSitData(new sitRemindEntity(number, isOpen, beginTime, endTime, duration));
     }
 
     @Override
     public void deleteSitRemind(int number) {
+        if (BleForSitRemind.getInstance() == null)
+            return;
         BleForSitRemind.getInstance().deleteThisItem(number);
     }
 
     @Override
     public void setAppNotification(String type, String title, String content) {
+        if (BleForQQWeiChartFacebook.getInstance() == null)
+            return;
         //使能开关，0x01代表开
-        BleForQQWeiChartFacebook.getInstance().openRemind((byte)0x0a, (byte)0x01);
+        BleForQQWeiChartFacebook.getInstance().openRemind((byte) 0x0a, (byte) 0x01);
         byte mType;
-        switch (type){
+        switch (type) {
             case FACEBOOK:
                 mType = 0x03;
                 break;
@@ -392,15 +436,15 @@ public class BlackDeviceManager implements DeviceController {
         }
 
         String texts;
-        if (TextUtils.isEmpty(title)){
+        if (TextUtils.isEmpty(title)) {
             texts = content;
-        } else if (TextUtils.isEmpty(content)){
+        } else if (TextUtils.isEmpty(content)) {
             texts = title;
         } else {
             texts = title + ":" + content;
         }
 
-        if (mType == 0x01){
+        if (mType == 0x01) {
             texts = "来短信啦";
         }
 
@@ -408,7 +452,10 @@ public class BlackDeviceManager implements DeviceController {
             return;
         }
         byte[] dataContent = getCanSendByte(texts);
-        if (dataContent != null && mType != 0x00){
+        if (BleDataForQQAndOtherRemine.getIntance() == null) {
+            return;
+        }
+        if (dataContent != null && mType != 0x00) {
             BleDataForQQAndOtherRemine.getIntance().sendMessageToDevice(mType, dataContent);
         }
 
@@ -429,5 +476,204 @@ public class BlackDeviceManager implements DeviceController {
             e.printStackTrace();
         }
         return dataContent;
+    }
+
+    @Override
+    public void setClock(int num, String type, int hour, int minute, List<String> repeat_days) {
+        byte[] byteToSend; //发送的数据
+        byte[] typeNameBytes = null; //闹钟类型byte数组
+        int len; //闹钟类型存储空间
+        byte weekByte = 0; //判别星期
+        byte typeInByte;
+
+        //闹钟类型字符串转byte数组
+        try {
+            typeNameBytes = type.getBytes("Unicode");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        if (typeNameBytes == null)
+            return;
+
+        //开辟闹钟类型存储空间
+        if (typeNameBytes[0] == (byte) 0xff && typeNameBytes[1] == (byte) 0xfe) {
+            len = typeNameBytes.length - 2;
+        } else {
+            len = typeNameBytes.length;
+        }
+
+        //闹钟类型byte标识
+        switch (type) {
+            case "迟到提醒":
+                typeInByte = (byte) 0x06;
+                break;
+            case "运动":
+                typeInByte = (byte) 0x01;
+                break;
+            case "约会":
+                typeInByte = (byte) 0x02;   //不确定？？？
+                break;
+            case "喝水":
+                typeInByte = (byte) 0x03;
+                break;
+            case "吃药":
+                typeInByte = (byte) 0x04;
+                break;
+            case "睡眠":
+                typeInByte = (byte) 0x05;
+                break;
+            default:
+                typeInByte = (byte) 0x06;
+                break;
+        }
+
+        //判别星期
+        for (int i = 0; i < 7; i++) {
+            String s = repeat_days.get(i);
+            if (!s.equals("无")) {
+                weekByte |= ((byte) 0x01 << i);
+            }
+        }
+
+        //闹钟类型是否为自定义，是的话
+        if (typeInByte == 6)
+            byteToSend = new byte[2 + len + 3 + 2];
+        else
+            byteToSend = new byte[2 + 3 + 2];
+
+        //整合数据
+        int index = 0; //标志位
+        byteToSend[index] = 0x01;
+        index++;
+        //整合此条提醒的编号
+        byteToSend[index] = (byte) (num & 0xff);
+        index++;
+        // 整合提醒类型
+        byteToSend[index] = (byte) (typeInByte & 0xff);
+        index++;
+        // 整合提醒时间总数，可以有多条数据，这里只需要一条
+        byteToSend[index] = 1;
+        index++;
+        // 整合提醒时间
+        byteToSend[index] = (byte) hour;
+        index++;
+        byteToSend[index] = (byte) minute;
+        index++;
+        // 整合重复天
+        byteToSend[index] = weekByte;
+        index++;
+        // 整合提醒名称，此部分数据只在自定义提醒名称时发送
+        if (typeInByte == 6) {
+            if (typeNameBytes[0] == (byte) 0xff && typeNameBytes[1] == (byte) 0xfe) {
+                System.arraycopy(typeNameBytes, 2, byteToSend, index, typeNameBytes.length - 2);
+            } else {
+                System.arraycopy(typeNameBytes, 0, byteToSend, index, typeNameBytes.length);
+            }
+        }
+
+        if (BleDataForCustomRemind.getCustomRemindDataInstance() == null)
+            return;
+        BleDataForCustomRemind.getCustomRemindDataInstance().setOnRequesCallback(new DataSendCallback() {
+            @Override
+            public void sendSuccess(byte[] receveData) {
+            }
+
+            @Override
+            public void sendFailed() {
+
+            }
+
+            @Override
+            public void sendFinished() {
+                //Do something
+            }
+        });
+        // 数据整合完成，向手环发送
+        BleDataForCustomRemind.getCustomRemindDataInstance().setCustomRingSettings(byteToSend);
+
+
+    }
+
+    @Override
+    public void deleteClock(int num) {
+        if (BleDataForCustomRemind.getCustomRemindDataInstance() == null)
+            return;
+        BleDataForCustomRemind.getCustomRemindDataInstance().deletePx((byte) num);
+    }
+
+    @Override
+    public void getHardwareVersion(final DataCallback<String> callback) {
+        BleDataForHardVersion.getInstance().setDataSendCallback(new DataSendCallback() {
+            @Override
+            public void sendSuccess(byte[] bufferTmp) {
+                byte bluetooth, soft;
+                byte[] hardVersion = new byte[bufferTmp.length - 4];
+                System.arraycopy(bufferTmp, 0, hardVersion, 0, bufferTmp.length - 4);
+                hardVersion = reversionBytes(hardVersion);
+                bluetooth = bufferTmp[bufferTmp.length - 4];
+                soft = bufferTmp[bufferTmp.length - 3];
+
+                String versionString = String.valueOf(Integer.valueOf(FormatUtils.bytesToHexString(hardVersion), 16)) + "/"
+                        + formatTheVersion(parseTheHexString(bluetooth)) + "/"
+                        + formatTheVersion(parseTheHexString(soft));
+                callback.OnSuccess(versionString);
+            }
+
+            @Override
+            public void sendFailed() {
+            }
+
+            @Override
+            public void sendFinished() {
+            }
+        });
+        BleDataForHardVersion.getInstance().requestHardVersion();
+    }
+
+    private byte[] reversionBytes(byte[] hardVersion)
+    {
+        byte[] reV = new byte[hardVersion.length];
+        for (int i = 0; i < hardVersion.length; i++)
+        {
+            reV[i] = hardVersion[hardVersion.length - i - 1];
+        }
+        return reV;
+    }
+
+    private static String parseTheHexString(byte hard)
+    {
+        byte a = (byte)(hard >> 4);
+        byte b = (byte)(hard & 0x0f);
+        String a1 = Integer.toHexString(a);
+        String b1 = Integer.toHexString(b);
+        return a1 + "" + b1;
+    }
+
+    private String formatTheVersion(String version)
+    {
+        String one = version.substring(0, 1);
+        String two = version.substring(1);
+        int twoInt = Integer.parseInt(two, 16);
+        if(twoInt < 10)
+        {
+            two = "0" + twoInt;
+        }
+        else
+        {
+            two = twoInt + "";
+        }
+        return one + "." + two;
+    }
+
+    @Override
+    public void updateHardwareVersion(String filepath, UpdateVersionTask.UpdateListener listener) {
+        UpdateVersionTask updateTask;
+        updateTask = new UpdateVersionTask(mContext, listener);
+        updateTask.execute(filepath);
+    }
+
+    @Override
+    public void stopUpdate(UpdateVersionTask updateTask) {
+        updateTask.setTaskCancel();
     }
 }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,6 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.huichenghe.bleControl.Ble.BluetoothLeService;
 import com.jph.takephoto.app.TakePhotoActivity;
 import com.jph.takephoto.model.TImage;
@@ -24,6 +28,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.hdodenhof.circleimageview.CircleImageView;
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
@@ -31,9 +36,15 @@ import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.settingitemlibrary.SetItemView;
 import lbcy.com.cn.wristband.R;
+import lbcy.com.cn.wristband.app.BaseApplication;
+import lbcy.com.cn.wristband.entity.LoginData;
+import lbcy.com.cn.wristband.entity.LoginDataDao;
+import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.popup.SlideFromBottomPopup;
-import lbcy.com.cn.wristband.widget.ImageViewPlus;
+import lbcy.com.cn.wristband.popup.UpdatePopup;
+import lbcy.com.cn.wristband.rx.RxManager;
 import razerdp.basepopup.BasePopupWindow;
+import rx.functions.Action1;
 
 public class DeviceSettingActivity extends TakePhotoActivity {
     Activity mActivity;
@@ -44,7 +55,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     @BindView(R.id.rl_top_bar)
     RelativeLayout rlTopBar;
     @BindView(R.id.iv_header)
-    ImageViewPlus ivHeader;
+    CircleImageView ivHeader;
     @BindView(R.id.rl_head)
     LinearLayout rlHead;
     @BindView(R.id.tv_name)
@@ -55,8 +66,8 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     TextView tvVersion;
     @BindView(R.id.tv_version_content)
     TextView tvVersionContent;
-    @BindView(R.id.rl_version)
-    RelativeLayout rlVersion;
+    @BindView(R.id.ll_version)
+    LinearLayout llVersion;
     @BindView(R.id.tv_link)
     TextView tvLink;
     @BindView(R.id.iv_battery)
@@ -86,7 +97,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     @BindView(R.id.rl_upgrade)
     SetItemView rlUpgrade;
     @BindView(R.id.root_layout)
-    RelativeLayout rootLayout;
+    LinearLayout rootLayout;
 
     SPUtil spUtil;
 
@@ -102,6 +113,8 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         ButterKnife.bind(this);
         mActivity = this;
         spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
+
+        initView();
         itemClick();
 
         which_device = spUtil.getString("which_device", "2");
@@ -123,6 +136,37 @@ public class DeviceSettingActivity extends TakePhotoActivity {
             p_getSettings();
         }
 
+        RxManager mRxManager = new RxManager();
+
+        //监听关闭所有activity事件
+        mRxManager.on(Consts.CLOSE_ALL_ACTIVITY_LISTENER, new Action1<Message>() {
+            @Override
+            public void call(Message message) {
+                switch (message.what){
+                    case Consts.CLOSE_ALL_ACTIVITY:
+                        finish();
+                        break;
+                }
+            }
+        });
+    }
+
+    private void initView(){
+        LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
+        if (loginDataDao.count() == 0){
+            return;
+        }
+        LoginData loginData = loginDataDao.loadAll().get(0);
+
+        tvId.setText(loginData.getAccount_no());
+        tvVersionContent.setText(loginData.getMac_address());
+        Glide.with(mActivity)
+                .load(loginData.getLogo())
+                .apply(RequestOptions
+                        .bitmapTransform(new CenterCrop())
+                        .placeholder(R.mipmap.watch)
+                        .error(R.mipmap.watch))
+                .into(ivHeader);
     }
 
     private void itemClick() {
@@ -178,7 +222,8 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         rlUpgrade.setmOnSetItemClick(new SetItemView.OnSetItemClick() {
             @Override
             public void click() {
-
+                popupWindow = getUpdatePopup();
+                popupWindow.showPopupWindow();
             }
         });
     }
@@ -196,6 +241,9 @@ public class DeviceSettingActivity extends TakePhotoActivity {
 
     BasePopupWindow getPopup() {
         return new SlideFromBottomPopup(this, getTakePhoto());
+    }
+    BasePopupWindow getUpdatePopup() {
+        return new UpdatePopup(this, 1, "手环升级-测试", "http://cdn.llsapp.com/android/LLS-v4.0-595-20160908-143200.apk");
     }
 
     @Override
@@ -290,7 +338,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
 
         if (BlackDeviceManager.getInstance() != null){
             //心率实时获取方法，包含其他方法回调，需要提前调用
-            BlackDeviceManager.getInstance().startHeartRateListener(new DataCallback() {
+            BlackDeviceManager.getInstance().startHeartRateListener(new DataCallback<byte[]>() {
                 @Override
                 public void OnSuccess(byte[] data) {
 
@@ -309,7 +357,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         }
 
         if (BlackDeviceManager.getInstance() != null){
-            BlackDeviceManager.getInstance().getBattery(new DataCallback() {
+            BlackDeviceManager.getInstance().getBattery(new DataCallback<byte[]>() {
                 @Override
                 public void OnSuccess(byte[] data) {
                     runOnUiThread(new Runnable() {

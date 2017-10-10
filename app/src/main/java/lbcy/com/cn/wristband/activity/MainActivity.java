@@ -35,7 +35,9 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.ble.DeviceConnect;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.blacklibrary.manager.DeviceConnectManager;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
@@ -49,14 +51,20 @@ import lbcy.com.cn.wristband.ctl.BleScanCallback;
 import lbcy.com.cn.wristband.entity.BleDevice;
 import lbcy.com.cn.wristband.entity.LoginData;
 import lbcy.com.cn.wristband.entity.LoginDataDao;
+import lbcy.com.cn.wristband.entity.UserInfoBean;
+import lbcy.com.cn.wristband.entity.UserInfoData;
+import lbcy.com.cn.wristband.entity.UserInfoDataDao;
 import lbcy.com.cn.wristband.fragment.WebFragment;
 import lbcy.com.cn.wristband.global.Consts;
+import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.service.MyNotificationService;
 import lbcy.com.cn.wristband.utils.BleScanHelper;
 import lbcy.com.cn.wristband.utils.HandlerTip;
 import lbcy.com.cn.wristband.utils.ToastUtil;
 import lbcy.com.cn.wristband.widget.NoScrollViewPager;
 import lbcy.com.cn.wristband.widget.webview.WebLayout;
+import retrofit2.Call;
+import retrofit2.Response;
 import rx.functions.Action1;
 
 /**
@@ -129,6 +137,7 @@ public class MainActivity extends BaseFragmentActivity {
 
     // 当前连接的设备
     String which_device = "2";
+    String token;
 
     // 判断localStorage是否已写入
     // 注意退出登录时，务必修改spUtil:SHAREDPREFERENCES_NAME存储的js_is_write值为0
@@ -148,6 +157,7 @@ public class MainActivity extends BaseFragmentActivity {
 
                 adapter = new FragmentAdapter(getSupportFragmentManager());
                 vpContent.setAdapter(adapter);
+                jumpHealthFragment();
                 isWebInit = true;
             }
         }
@@ -155,7 +165,7 @@ public class MainActivity extends BaseFragmentActivity {
 
     public boolean setJsData(WebView webView) {
         LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
-        if (loginDataDao.loadAll().size() == 0)
+        if (loginDataDao.count() == 0)
             return false;
         LoginData loginData = loginDataDao.loadAll().get(0);
         Gson gson = new Gson();
@@ -207,15 +217,32 @@ public class MainActivity extends BaseFragmentActivity {
     @Override
     protected void initData() {
         toggleNotificationListenerService();
+
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
+        token = spUtil.getString("token", "");
     }
 
     @Override
     protected void initView() {
 
-        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
+
+        if (!isSplashed)
+            isSplashed = getIntent().getBooleanExtra("isSplashed", false); //判断是否从登录页跳转
+
+        if (!isSplashed) {
+            startActivity(new Intent(mActivity, SplashActivity.class));
+            //判断是否已登录
+            String isLogin = spUtil.getString("is_login", "0");
+            if (isLogin.equals("0")) {
+                finish();
+                return;
+            }
+        }
+
+        jsIsWrite = spUtil.getString("js_is_write", "0").equals("1");
         which_device = spUtil.getString("which_device", "2");
 
-        jsIsWrite = spUtil.getString("js_is_write", "0").equals("0");
+        setSelected(tvBottom1);
 
         if (!jsIsWrite) {
             //预加载localStorage
@@ -234,6 +261,7 @@ public class MainActivity extends BaseFragmentActivity {
 
             adapter = new FragmentAdapter(getSupportFragmentManager());
             vpContent.setAdapter(adapter);
+            jumpHealthFragment();
         }
 
 
@@ -241,19 +269,6 @@ public class MainActivity extends BaseFragmentActivity {
         textViews[1] = tvBottom2;
         textViews[2] = tvBottom3;
         textViews[3] = tvBottom4;
-
-        if (!isSplashed)
-            isSplashed = getIntent().getBooleanExtra("isSplashed", false); //判断是否从登录页跳转
-
-        if (!isSplashed) {
-            startActivity(new Intent(mActivity, SplashActivity.class));
-            //判断是否已登录
-            String isLogin = spUtil.getString("is_login", "0");
-            if (isLogin.equals("0")) {
-                finish();
-                return;
-            }
-        }
 
         vpContent.setNoScroll(false);
 
@@ -289,6 +304,9 @@ public class MainActivity extends BaseFragmentActivity {
                         } else {
                             purpleConnectAction();
                         }
+
+                        //获取用户基本信息
+                        getUserInfoAction();
                         break;
                 }
             }
@@ -377,7 +395,7 @@ public class MainActivity extends BaseFragmentActivity {
                 Toast.makeText(mActivity, "蓝牙设备未开启，无法连接手环", Toast.LENGTH_SHORT).show();
             }
         } else {
-            //一定要保证 mAentWebFragemnt 回调
+            //一定要保证 mAgentWebFragment 回调
             webFragments[prePage].onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -620,12 +638,12 @@ public class MainActivity extends BaseFragmentActivity {
 
             } else {
                 finish();
-                HandlerTip.getInstance().postDelayed(500, new HandlerTip.HandlerCallback() {
-                    @Override
-                    public void postDelayed() {
-                        System.exit(0);
-                    }
-                });
+//                HandlerTip.getInstance().postDelayed(500, new HandlerTip.HandlerCallback() {
+//                    @Override
+//                    public void postDelayed() {
+//                        System.exit(0);
+//                    }
+//                });
             }
             return true;
         }
@@ -655,6 +673,37 @@ public class MainActivity extends BaseFragmentActivity {
         if (manager != null)
             manager.stopService();
     }
+
+    // 获取用户基本信息
+    private void getUserInfoAction(){
+        NetManager.getUserInfoAction(token, new NetManager.NetCallBack<UserInfoBean>() {
+            @Override
+            public void onResponse(Call<UserInfoBean> call, Response<UserInfoBean> response) {
+                UserInfoBean userInfoBean = response.body();
+                if ((userInfoBean != null ? userInfoBean.getCode() : 0) == 200){
+                    saveData(userInfoBean.getData());
+                } else {
+                    Toast.makeText(mActivity, userInfoBean != null ? userInfoBean.getMessage().toString() : "用户基本信息获取失败！", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserInfoBean> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void saveData(UserInfoData data){
+        UserInfoDataDao dataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getUserInfoDataDao();
+        if (dataDao.count() == 0){
+            dataDao.insert(data);
+        } else {
+            data.setMId(dataDao.loadAll().get(0).getMId());
+            dataDao.update(data);
+        }
+    }
+
 
     /**************************************************************************/
     //紫色手环连接相关
@@ -831,6 +880,23 @@ public class MainActivity extends BaseFragmentActivity {
             @Override
             public void connect() {
                 Toast.makeText(getApplicationContext(), "连接成功！", Toast.LENGTH_SHORT).show();
+                // 时间同步
+                BlackDeviceManager.getInstance().synTime(new DataCallback<byte[]>() {
+                    @Override
+                    public void OnSuccess(byte[] data) {
+
+                    }
+
+                    @Override
+                    public void OnFailed() {
+
+                    }
+
+                    @Override
+                    public void OnFinished() {
+
+                    }
+                });
             }
 
             @Override

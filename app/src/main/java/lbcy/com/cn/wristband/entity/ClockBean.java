@@ -11,15 +11,17 @@ import org.greenrobot.greendao.annotation.Id;
 public class ClockBean {
     @Id
     Long id;
-    String hour;
-    String minute;
-    String text;
-    String type;
-    boolean switchState;
-    int position;//位置
-    @Generated(hash = 843244155)
+    private String hour;
+    private String minute;
+    private String text;
+    private String type;
+    private boolean switchState;
+    private int position;//位置
+    private int number;//编号
+    private long bookTime;
+    @Generated(hash = 365033467)
     public ClockBean(Long id, String hour, String minute, String text, String type,
-            boolean switchState, int position) {
+            boolean switchState, int position, int number, long bookTime) {
         this.id = id;
         this.hour = hour;
         this.minute = minute;
@@ -27,6 +29,8 @@ public class ClockBean {
         this.type = type;
         this.switchState = switchState;
         this.position = position;
+        this.number = number;
+        this.bookTime = bookTime;
     }
     @Generated(hash = 513947775)
     public ClockBean() {
@@ -72,6 +76,18 @@ public class ClockBean {
     }
     public void setPosition(int position) {
         this.position = position;
+    }
+    public int getNumber() {
+        return this.number;
+    }
+    public void setNumber(int number) {
+        this.number = number;
+    }
+    public long getBookTime() {
+        return this.bookTime;
+    }
+    public void setBookTime(long bookTime) {
+        this.bookTime = bookTime;
     }
 
 
