@@ -131,7 +131,7 @@ public class BasicBodyActivity extends BaseActivity {
             BlackDeviceManager.getInstance().setBodyItem(height, weight, gender, birth);
             Toast.makeText(mActivity, "身高体重设置成功！", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(mActivity, "设备未连接！", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, "手环未连接！", Toast.LENGTH_SHORT).show();
         }
     }
     /**************************************************************************/

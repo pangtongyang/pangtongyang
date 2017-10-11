@@ -603,6 +603,9 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void getHardwareVersion(final DataCallback<String> callback) {
+        if (BleDataForHardVersion.getInstance() == null){
+            return;
+        }
         BleDataForHardVersion.getInstance().setDataSendCallback(new DataSendCallback() {
             @Override
             public void sendSuccess(byte[] bufferTmp) {
@@ -666,10 +669,11 @@ public class BlackDeviceManager implements DeviceController {
     }
 
     @Override
-    public void updateHardwareVersion(String filepath, UpdateVersionTask.UpdateListener listener) {
+    public UpdateVersionTask updateHardwareVersion(String filepath, UpdateVersionTask.UpdateListener listener) {
         UpdateVersionTask updateTask;
         updateTask = new UpdateVersionTask(mContext, listener);
         updateTask.execute(filepath);
+        return updateTask;
     }
 
     @Override

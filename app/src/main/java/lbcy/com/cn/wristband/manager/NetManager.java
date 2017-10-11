@@ -239,7 +239,7 @@ public class NetManager {
      * @param softversion 当前MCU版本
      * @param hardversion 当前硬件版本
      * @param blueversion 当前蓝牙版本
-     * @param language 语言，默认bjhc
+     * @param language 语言，默认zh-cn
      * @param callBack 回调函数
      */
     public static void getUpdateListAction(String product,String softversion,

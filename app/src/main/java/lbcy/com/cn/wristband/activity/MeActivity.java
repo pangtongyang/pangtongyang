@@ -130,6 +130,16 @@ public class MeActivity extends TakePhotoActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (which_device.equals("2")){
+            b_getSettings();
+        } else {
+            p_getSettings();
+        }
+    }
+
     private void initView(){
         LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
         if (loginDataDao.count() == 0){

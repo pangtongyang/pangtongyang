@@ -55,6 +55,26 @@ public class DialogUtil {
         builder.create().show();
     }
 
+    // 定义一个显示标题、消息的对话框,添加listener
+    public static void showDialog(final Context ctx, String title
+            , String msg, DialogListener listener) {
+        // 创建一个AlertDialog.Builder对象
+        AlertDialog.Builder builder = new AlertDialog.Builder(ctx)
+                .setTitle(title).setMessage(msg).setCancelable(true);
+        builder.setPositiveButton("确定", new OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                listener.submit();
+            }
+        });
+        builder.setNegativeButton("取消", new OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                listener.cancel();
+            }
+        });
+        builder.create().show();
+    }
+
     public interface DialogListener {
         void submit();
 

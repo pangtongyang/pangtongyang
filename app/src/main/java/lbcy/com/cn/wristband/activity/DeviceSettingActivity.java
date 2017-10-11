@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -24,6 +25,7 @@ import com.jph.takephoto.model.TResult;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,13 +39,19 @@ import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.settingitemlibrary.SetItemView;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
+import lbcy.com.cn.wristband.entity.HardwareUpdateBean;
 import lbcy.com.cn.wristband.entity.LoginData;
 import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
+import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.popup.SlideFromBottomPopup;
 import lbcy.com.cn.wristband.popup.UpdatePopup;
 import lbcy.com.cn.wristband.rx.RxManager;
+import lbcy.com.cn.wristband.utils.DialogUtil;
+import lbcy.com.cn.wristband.utils.HandlerTip;
 import razerdp.basepopup.BasePopupWindow;
+import retrofit2.Call;
+import retrofit2.Response;
 import rx.functions.Action1;
 
 public class DeviceSettingActivity extends TakePhotoActivity {
@@ -151,6 +159,16 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (which_device.equals("2")){
+            b_getSettings();
+        } else {
+            p_getSettings();
+        }
+    }
+
     private void initView(){
         LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
         if (loginDataDao.count() == 0){
@@ -222,8 +240,11 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         rlUpgrade.setmOnSetItemClick(new SetItemView.OnSetItemClick() {
             @Override
             public void click() {
-                popupWindow = getUpdatePopup();
-                popupWindow.showPopupWindow();
+                if (which_device.equals("2")){
+                    b_getVersion();
+                } else {
+                    p_getVersion();
+                }
             }
         });
     }
@@ -242,8 +263,9 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     BasePopupWindow getPopup() {
         return new SlideFromBottomPopup(this, getTakePhoto());
     }
-    BasePopupWindow getUpdatePopup() {
-        return new UpdatePopup(this, 1, "手环升级-测试", "http://cdn.llsapp.com/android/LLS-v4.0-595-20160908-143200.apk");
+
+    BasePopupWindow getUpdatePopup(HardwareUpdateBean updateBean) {
+        return new UpdatePopup(this, updateBean);
     }
 
     @Override
@@ -303,10 +325,11 @@ public class DeviceSettingActivity extends TakePhotoActivity {
                     @Override
                     public void run() {
                         tvLink.setText(data.toString());
-                        if (data.toString().equals("设备已经连接"))
+                        if (data.toString().equals("设备已经连接")){
                             tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_green), null, null, null);
-                        else
+                        } else {
                             tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_red), null, null, null);
+                        }
                     }
                 });
             }
@@ -323,6 +346,11 @@ public class DeviceSettingActivity extends TakePhotoActivity {
                         ? R.mipmap.power_yellow : R.mipmap.power_green));
             }
         });
+    }
+
+    // 获取固件版本号
+    private void p_getVersion(){
+
     }
 
     /**************************************************************************/
@@ -384,6 +412,73 @@ public class DeviceSettingActivity extends TakePhotoActivity {
             });
         }
 
+    }
+
+    // 获取固件版本号
+    private void b_getVersion(){
+        if (BluetoothLeService.getInstance()== null || !BluetoothLeService.getInstance().isConnectedDevice()){
+            Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        BlackDeviceManager.getInstance().getHardwareVersion(new DataCallback<String>() {
+            @Override
+            public void OnSuccess(String data) {
+                String softVersion = data.split("/")[2];
+                String hardVersion = data.split("/")[0];
+                String blueVersion = data.split("/")[1];
+                HandlerTip.getInstance().getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        b_getUpdateListFromNet(softVersion, hardVersion, blueVersion);
+                    }
+                });
+            }
+
+            @Override
+            public void OnFailed() {
+
+            }
+
+            @Override
+            public void OnFinished() {
+
+            }
+        });
+    }
+
+    private void b_getUpdateListFromNet(String soft, String hard, String blue){
+        NetManager.getUpdateListAction("bjhc", soft, hard, blue, "zh-cn", new NetManager.NetCallBack<HardwareUpdateBean>() {
+            @Override
+            public void onResponse(Call<HardwareUpdateBean> call, Response<HardwareUpdateBean> response) {
+                HardwareUpdateBean updateBean = response.body();
+                if ((updateBean != null ? updateBean.getResult() : 0) == 1){
+                    StringBuilder content = new StringBuilder();
+                    for (HardwareUpdateBean.ParamBean param : updateBean.getParam()){
+                        content.append(String.format(Locale.getDefault(), "发现%s新版本，\n当前版本%s，新版本%s，\n", param.getType(), param.getNewVersion(), param.getOldVersion()));
+                    }
+                    content.append("是否现在进行更新？");
+                    DialogUtil.showDialog(mActivity, "固件更新", content.toString(), new DialogUtil.DialogListener() {
+                        @Override
+                        public void submit() {
+                            popupWindow = getUpdatePopup(updateBean);
+                            popupWindow.showPopupWindow();
+                        }
+
+                        @Override
+                        public void cancel() {
+
+                        }
+                    });
+                } else {
+                    Toast.makeText(mActivity, "获取更新列表失败!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HardwareUpdateBean> call, Throwable t) {
+
+            }
+        });
     }
 
     /**************************************************************************/

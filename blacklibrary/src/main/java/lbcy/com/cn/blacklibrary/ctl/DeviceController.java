@@ -193,7 +193,7 @@ public interface DeviceController {
      * @param filepath 文件路径
      * @param listener 升级过程监听
      */
-    void updateHardwareVersion(String filepath, UpdateVersionTask.UpdateListener listener);
+    UpdateVersionTask updateHardwareVersion(String filepath, UpdateVersionTask.UpdateListener listener);
 
     /**
      * 停止升级

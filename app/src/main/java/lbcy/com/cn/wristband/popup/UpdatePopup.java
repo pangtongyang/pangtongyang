@@ -1,18 +1,17 @@
 package lbcy.com.cn.wristband.popup;
 
 import android.app.Activity;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.huichenghe.bleControl.upgrande.UpdateVersionTask;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
 import com.liulishuo.filedownloader.FileDownloader;
@@ -22,11 +21,12 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 
-import butterknife.BindView;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
+import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
+import lbcy.com.cn.wristband.entity.HardwareUpdateBean;
 import lbcy.com.cn.wristband.global.Consts;
-import lbcy.com.cn.wristband.rx.RxBus;
 import razerdp.basepopup.BasePopupWindow;
 
 /**
@@ -48,31 +48,29 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
     private String title;
     private String filepath;
     private String url;
+    HardwareUpdateBean updateBean; //更新相关信息
+    int updateNum = 0; //待更新固件数量
 
     int type = 1;
-    int updateStatus = 0; // 0 -> 下载过程 1 -> 升级过程
+    int downloadStatus = 0; // 0 ~ updateNum -> 下载过程 updateNum -> 升级过程
+    int updateStatus = -1; // 当前升级进行中的固件
     int downloadId;
 
     /**
-     *
+     * 批量更新
      * @param context 上下文
-     * @param type 升级类型 1 -> MCU 2 -> BLUETOOTH 3 -> HARDWARE
-     * @param title 标题
-     * @param url 文件下载网址
+     * @param updateBean 固件升级相关信息
      */
-    public UpdatePopup(Activity context, int type, String title, String url) {
+    public UpdatePopup(Activity context, HardwareUpdateBean updateBean){
         super(context);
         bindEvent();
-        this.title = title;
-        this.url = url;
-        this.type = type;
-        filepath = FileDownloadUtils.getDefaultSaveRootPath() + File.separator + Consts.FILE_DOWNLOAD_CACHE_DIR + File.separator +
-                (type==1 ? Consts.FILE_MCU_NAME : (type==2 ? Consts.FILE_BLUETOOTH_NAME : Consts.FILE_HARDWARE_NAME));
+        this.updateBean = updateBean;
+        updateNum = updateBean.getParam().size();
         doing();
     }
 
     private void doing(){
-        downloadId = createDownloadTask(type).start();
+        downloadId = createDownloadTask().start();
     }
 
     @Override
@@ -116,7 +114,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_cancel:
-                if (updateStatus == 1){
+                if (downloadStatus == updateNum){
                     Toast.makeText(BaseApplication.getBaseApplication(), "升级过程中，禁止取消", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -125,7 +123,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
 
                 break;
             case R.id.btn_pause_cont:
-                if (updateStatus == 1){
+                if (downloadStatus == updateNum){
                     Toast.makeText(BaseApplication.getBaseApplication(), "升级过程中，禁止暂停", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -134,7 +132,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
                     FileDownloader.getImpl().pause(downloadId);
                 } else {
                     btnPauseCont.setText(getContext().getString(R.string.pause));
-                    downloadId = createDownloadTask(type).start();
+                    downloadId = createDownloadTask().start();
                 }
 
                 break;
@@ -145,6 +143,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
 
     }
 
+    // 关闭弹窗，销毁本地固件
     private void disappearAnimation() {
         AlphaAnimation disappearAnimation = new AlphaAnimation(1, 0);
         disappearAnimation.setDuration(300);
@@ -158,8 +157,21 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
 
             @Override
             public void onAnimationEnd(Animation animation) {
+                filepath = FileDownloadUtils.getDefaultSaveRootPath() + File.separator +
+                        Consts.FILE_DOWNLOAD_CACHE_DIR + File.separator + Consts.FILE_MCU_NAME;
                 new File(filepath).delete();
                 new File(FileDownloadUtils.getTempPath(filepath)).delete();
+
+                filepath = FileDownloadUtils.getDefaultSaveRootPath() + File.separator +
+                        Consts.FILE_DOWNLOAD_CACHE_DIR + File.separator + Consts.FILE_BLUETOOTH_NAME;
+                new File(filepath).delete();
+                new File(FileDownloadUtils.getTempPath(filepath)).delete();
+
+                filepath = FileDownloadUtils.getDefaultSaveRootPath() + File.separator +
+                        Consts.FILE_DOWNLOAD_CACHE_DIR + File.separator + Consts.FILE_HARDWARE_NAME;
+                new File(filepath).delete();
+                new File(FileDownloadUtils.getTempPath(filepath)).delete();
+
                 dismiss();
             }
 
@@ -170,16 +182,42 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
         });
     }
 
-    // type 1 -> MCU 2 -> BLUETOOTH 3 -> HARDWARE
-    private BaseDownloadTask createDownloadTask(int type){
+    // 设置固件本地存储目录
+    private String setFilePath(String type){
+        String path;
+        // 根据实际情况做更改
+        switch (updateBean.getParam().get(downloadStatus).getType()) {
+            case "mcu":
+                path = FileDownloadUtils.getDefaultSaveRootPath() + File.separator +
+                        Consts.FILE_DOWNLOAD_CACHE_DIR + File.separator + Consts.FILE_MCU_NAME;
+                break;
+            case "bluetooth":
+                path = FileDownloadUtils.getDefaultSaveRootPath() + File.separator +
+                        Consts.FILE_DOWNLOAD_CACHE_DIR + File.separator + Consts.FILE_BLUETOOTH_NAME;
+                break;
+            case "hardware":
+                path = FileDownloadUtils.getDefaultSaveRootPath() + File.separator +
+                        Consts.FILE_DOWNLOAD_CACHE_DIR + File.separator + Consts.FILE_HARDWARE_NAME;
+                break;
+            default:
+                path = FileDownloadUtils.getDefaultSaveRootPath() + File.separator +
+                        Consts.FILE_DOWNLOAD_CACHE_DIR + File.separator + Consts.FILE_HARDWARE_NAME;
+                break;
+        }
+        return path;
+    }
+
+    // 固件下载
+    private BaseDownloadTask createDownloadTask(){
         final ViewHolder tag;
         final String url;
         boolean isDir = false;
         String path;
 
-        url = this.url;
+        url = updateBean.getParam().get(downloadStatus).getUrl();
         tag = new ViewHolder(new WeakReference<>(this), pbDoing, tvSpeed);
-        path = filepath;
+
+        path = setFilePath(updateBean.getParam().get(downloadStatus).getType());
 
         return FileDownloader.getImpl().create(url)
                 .setPath(path, isDir)
@@ -201,7 +239,13 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
                     @Override
                     protected void completed(BaseDownloadTask task) {
                         ((ViewHolder) task.getTag()).updateCompleted(task);
-                        updateStatus = 1;
+                        downloadStatus++;
+                        if (downloadStatus == updateNum){
+                            pbDoing.setIndeterminate(true);
+                            updating();
+                        } else {
+                            downloadId = createDownloadTask().start();
+                        }
                     }
 
                     @Override
@@ -224,6 +268,45 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
                         ((ViewHolder) task.getTag()).updateConnected(etag, task.getFilename());
                     }
                 });
+    }
+
+    // 固件升级
+    private void updating(){
+        SPUtil spUtil = new SPUtil(getContext(), Consts.SETTING_DB_NAME);
+        String which_device = spUtil.getString("which_device", "2");
+
+        updateStatus++;
+        if (updateStatus == updateNum){
+            pbDoing.setIndeterminate(false);
+            pbDoing.setMax(1);
+            pbDoing.setProgress(1);
+            tvSpeed.setText("固件升级成功！");
+            Toast.makeText(BaseApplication.getBaseApplication(), "固件升级成功！", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (which_device.equals("2")){
+            tvSpeed.setText(String.format(Locale.getDefault(), "固件升级中.. %d/2", (updateStatus+1)));
+            String path = setFilePath(updateBean.getParam().get(updateStatus).getType());
+            BlackDeviceManager.getInstance().updateHardwareVersion(path, new UpdateVersionTask.UpdateListener() {
+                @Override
+                public void onProgress(int i) {
+
+                }
+
+                @Override
+                public void onUpdateSuccess() {
+                    updating();
+                }
+
+                @Override
+                public void onUpdateFailed() {
+                    pbDoing.setIndeterminate(false);
+                    Toast.makeText(BaseApplication.getBaseApplication(), "固件升级失败！", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            //紫色手环升级逻辑
+        }
     }
 
     private static class ViewHolder {
