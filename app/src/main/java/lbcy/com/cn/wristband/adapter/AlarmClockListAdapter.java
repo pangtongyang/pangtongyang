@@ -84,8 +84,10 @@ public class AlarmClockListAdapter extends RecyclerArrayAdapter<ClockBean> {
             switchCom.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    list.get(getDataPosition()).setSwitchState(b);
-                    switchCheckChangeListener.onCheckedChanged(compoundButton, b, getDataPosition());
+                    if (getDataPosition()>=0 && getDataPosition() < list.size()){
+                        list.get(getDataPosition()).setSwitchState(b);
+                        switchCheckChangeListener.onCheckedChanged(compoundButton, b, getDataPosition());
+                    }
                 }
             });
         }
@@ -118,7 +120,4 @@ public class AlarmClockListAdapter extends RecyclerArrayAdapter<ClockBean> {
         void onCheckedChanged(CompoundButton compoundButton, boolean isChecked, int position);
     }
 
-    public List<ClockBean> mGetAllData(){
-        return list;
-    }
 }

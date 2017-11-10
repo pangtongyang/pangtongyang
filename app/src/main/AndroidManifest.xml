@@ -12,8 +12,11 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <uses-feature android:name="android.hardware.location.gps" />
 
@@ -100,6 +103,9 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.MyMessageDetailActivity"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".service.MyNotificationService"
@@ -111,10 +117,11 @@
             </intent-filter>
         </service>
 
-
         <activity android:name=".test.PurpleLogin">
 
         </activity>
+
+
 
     </application>
 

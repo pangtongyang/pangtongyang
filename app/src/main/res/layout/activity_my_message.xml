@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/mainBackColor"
     android:orientation="vertical"
-    tools:context="lbcy.com.cn.wristband.activity.MyMessageActivity">
+    tools:context="lbcy.com.cn.wristband.activity.MyMessageActivityTest">
 
     <View
         android:layout_width="match_parent"

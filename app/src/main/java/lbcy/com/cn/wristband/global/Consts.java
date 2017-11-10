@@ -20,15 +20,19 @@ public class Consts {
     //固件硬件升级临时文件名
     public static final String FILE_HARDWARE_NAME = "hardware.bin";
 
+    //紫色手环服务名称
+    public static final String PURPLE_SERVICE_ACTION_NAME = "lbcy.com.cn.purplelibrary.service.PurpleBLEService";
+
     public static final String BLACK_WRISTBAND_NAME = "BC_";
     public static final String PURPLE_WRISTBAND_NAME = "BC-02B";
-    public static final String SETTING_DB_NAME = "LBCY_CLOCK_DB";
+    public static final String SETTING_DB_NAME = "wisgen_health";
     public static final String USER_DB_NAME = "LBCY_USER_DB";
 
     public static final String URL_KEY = "url_key";
 
     //闹钟最大数量
-    public static final int CLOCK_MAX_NUM = 7;
+    public static final int CLOCK_MAX_NUM_BLACK = 7;
+    public static final int CLOCK_MAX_NUM_PURPLE = 2;
 
 
     //Activity request
@@ -64,15 +68,23 @@ public class Consts {
     public static final int UPDATE_SCAN_HEART_RATE = 1030;
     //推送消息通知
     public static final int SHOW_MESSAGE_FROM_APPS = 1031;
+    //打开蓝牙请求
+    public static final int REQUEST_ENABLE_BT = 1032;
+
+    public static final int RELOAD_DATA = 1033;
 
     //推送消息包名
     public final static String QQ = "com.tencent.mobileqq";
     public final static String WEIXIN = "com.tencent.mm";
     public final static String MMS = "com.android.mms";
     public final static String FACEBOOK = "com.facebook.katana";
+    public final static String INCALL = "com.android.incallui";
+    public final static String NOTRECEIVECALL = "com.android.server.telecom";
 
     //web页面链接
     public static final String WEB_BASE = "file:///android_asset/www/index.html#";
+    //js加载页
+    public static final String WEB_TEST = "file:///android_asset/test.html";
     //首页
     public static final String WEB_INDEX = WEB_BASE + "/";
     //运动排名页
@@ -115,6 +127,7 @@ public class Consts {
 
     public static final String []WEB_INDEXES = {WEB_INDEX, WEB_HEART_RATE_INDEX, WEB_SLEEP_INDEX,
             WEB_CLASS_TODAY, WEB_CLASS_WEEK, WEB_CLASS_MONTH, WEB_EXPERT, WEB_HEALTH, WEB_STAR};
+
 
 
 }

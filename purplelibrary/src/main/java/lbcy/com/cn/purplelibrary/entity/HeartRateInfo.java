@@ -63,4 +63,6 @@ public class HeartRateInfo {
         this.content = content;
     }
 
+
+
 }

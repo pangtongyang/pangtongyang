@@ -85,4 +85,35 @@ public class Util {
         }
         return i;
     }
+
+    public static String bytesToHexString(byte[] src) {
+        StringBuilder stringBuilder = new StringBuilder("");
+        if(src != null && src.length > 0) {
+            for(int i = 0; i < src.length; ++i) {
+                int v = src[i] & 255;
+                String hv = Integer.toHexString(v);
+                if(hv.length() < 2) {
+                    stringBuilder.append(0);
+                }
+
+                stringBuilder.append(hv);
+            }
+
+            return stringBuilder.toString();
+        } else {
+            return null;
+        }
+    }
+
+    public static StringBuilder bytesToString(byte[] src){
+        StringBuilder stringBuilder = new StringBuilder("");
+        if(src != null && src.length > 0) {
+            for (byte aSrc : src) {
+                stringBuilder.append(aSrc);
+            }
+            return stringBuilder;
+        } else {
+            return null;
+        }
+    }
 }

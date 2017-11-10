@@ -532,10 +532,11 @@
                         android:id="@+id/appCompatSeekBar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="90000"
+                        android:max="99999"
+                        android:progress="50000"
                         android:maxHeight="@dimen/width_30"
-                        android:layout_marginStart="@dimen/margin_5"
-                        android:layout_marginEnd="@dimen/margin_15"
+                        android:layout_marginStart="-5dp"
+                        android:layout_marginEnd="-5dp"
                         android:progressDrawable="@drawable/seekbar_background_style"
                         android:thumb="@drawable/seekbar_thumb_style"
                         android:splitTrack="false" />
@@ -564,7 +565,7 @@
                             android:layout_gravity="center"
                             android:layout_weight="1"
                             android:gravity="center_vertical|center"
-                            android:text="     30000"
+                            android:text="30000"
                             android:textColor="@color/text_dark_gray"
                             android:textSize="@dimen/textsize_16" />
 
@@ -574,7 +575,7 @@
                             android:layout_gravity="center"
                             android:gravity="center_vertical|center"
                             android:layout_weight="1"
-                            android:text="  60000"
+                            android:text="60000"
                             android:textColor="@color/text_dark_gray"
                             android:textSize="@dimen/textsize_16" />
 
@@ -585,7 +586,7 @@
                             android:gravity="center_vertical|center"
                             android:layout_marginEnd="-25dp"
                             android:layout_weight="1"
-                            android:text="90000"
+                            android:text="99999"
                             android:textColor="@color/text_dark_gray"
                             android:textSize="@dimen/textsize_16" />
 
@@ -602,35 +603,37 @@
                         android:padding="@dimen/padding_5">
 
                         <TextView
+                            android:id="@+id/tv_walk"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:gravity="start|center"
                             android:text="步行 "
+                            android:autoLink="all"
                             android:textColor="@color/text_dark_gray"
-                            android:textSize="@dimen/textsize_14" />
+                            android:textSize="@dimen/textsize_16" />
 
-                        <TextView
-                            android:id="@+id/walk_minutes"
-                            android:layout_width="wrap_content"
-                            android:layout_height="@dimen/width_40"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/rectangle_gray"
-                            android:gravity="start|center"
-                            android:paddingEnd="5dp"
-                            android:paddingStart="5dp"
-                            android:text="15"
-                            android:textColor="@color/black_text"
-                            android:textSize="@dimen/textsize_22" />
+                        <!--<TextView-->
+                            <!--android:id="@+id/walk_minutes"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="@dimen/width_40"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:background="@drawable/rectangle_gray"-->
+                            <!--android:gravity="start|center"-->
+                            <!--android:paddingEnd="5dp"-->
+                            <!--android:paddingStart="5dp"-->
+                            <!--android:text="15"-->
+                            <!--android:textColor="@color/black_text"-->
+                            <!--android:textSize="@dimen/textsize_22" />-->
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:gravity="start|center"
-                            android:text=" 分钟"
-                            android:textColor="@color/text_dark_gray"
-                            android:textSize="@dimen/textsize_14" />
+                        <!--<TextView-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:gravity="start|center"-->
+                            <!--android:text=" 分钟"-->
+                            <!--android:textColor="@color/text_dark_gray"-->
+                            <!--android:textSize="@dimen/textsize_14" />-->
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -644,6 +647,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tv_run"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
@@ -651,29 +655,29 @@
                             android:gravity="start|center"
                             android:text="跑步 "
                             android:textColor="@color/text_dark_gray"
-                            android:textSize="@dimen/textsize_14" />
+                            android:textSize="@dimen/textsize_16" />
 
-                        <TextView
-                            android:id="@+id/run_minutes"
-                            android:layout_width="wrap_content"
-                            android:layout_height="@dimen/width_40"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/rectangle_gray"
-                            android:gravity="start|center"
-                            android:paddingEnd="5dp"
-                            android:paddingStart="5dp"
-                            android:text="15"
-                            android:textColor="@color/black_text"
-                            android:textSize="@dimen/textsize_22" />
+                        <!--<TextView-->
+                            <!--android:id="@+id/run_minutes"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="@dimen/width_40"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:background="@drawable/rectangle_gray"-->
+                            <!--android:gravity="start|center"-->
+                            <!--android:paddingEnd="5dp"-->
+                            <!--android:paddingStart="5dp"-->
+                            <!--android:text="15"-->
+                            <!--android:textColor="@color/black_text"-->
+                            <!--android:textSize="@dimen/textsize_22" />-->
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:gravity="start|center"
-                            android:text=" 分钟"
-                            android:textColor="@color/text_dark_gray"
-                            android:textSize="@dimen/textsize_14" />
+                        <!--<TextView-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:gravity="start|center"-->
+                            <!--android:text=" 分钟"-->
+                            <!--android:textColor="@color/text_dark_gray"-->
+                            <!--android:textSize="@dimen/textsize_14" />-->
                     </LinearLayout>
 
                     <Button

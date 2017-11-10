@@ -6,10 +6,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.settingitemlibrary.SetItemView;
 import lbcy.com.cn.wristband.R;
@@ -50,7 +52,7 @@ public class ScanHeartRateActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        spUtil = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
         popupWindow = getPopUp();
     }
 
@@ -69,9 +71,16 @@ public class ScanHeartRateActivity extends BaseActivity {
             }
         });
 
+
         rlPredictHeartRate.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
+
+                if (etMaxHeartRate.getText().toString().equals("") || etMinHeartRate.getText().toString().equals("")){
+                    Toast.makeText(mActivity, "心率预警值为空", Toast.LENGTH_SHORT).show();
+                    rlPredictHeartRate.setChecked(false);
+                    return;
+                }
                 BlackDeviceManager.getInstance().setHeartRateWarning(state
                         ? Integer.valueOf(etMaxHeartRate.getText().toString()) : 200, state
                         ? Integer.valueOf(etMinHeartRate.getText().toString()) : 0);

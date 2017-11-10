@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -31,18 +33,22 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
-import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
+import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManagerNew;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.settingitemlibrary.SetItemView;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.entity.LoginData;
 import lbcy.com.cn.wristband.entity.LoginDataDao;
+import lbcy.com.cn.wristband.entity.MessageBean;
 import lbcy.com.cn.wristband.global.Consts;
+import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.popup.SlideFromBottomPopup;
 import lbcy.com.cn.wristband.rx.RxBus;
 import lbcy.com.cn.wristband.rx.RxManager;
 import razerdp.basepopup.BasePopupWindow;
+import retrofit2.Call;
+import retrofit2.Response;
 import rx.functions.Action1;
 
 public class MeActivity extends TakePhotoActivity {
@@ -95,10 +101,17 @@ public class MeActivity extends TakePhotoActivity {
 
     //当前连接的设备
     String which_device = "2";
+    String token = "";
+    String footPrintUrl = "";
+    String isUploaded = "0";
+
+    LoginDataDao loginDataDao;
+    LoginData loginData;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.NoActionBarTheme);
         setContentView(R.layout.activity_me);
         ButterKnife.bind(this);
         mActivity = this;
@@ -106,12 +119,22 @@ public class MeActivity extends TakePhotoActivity {
 
         initView();
 
+        which_device = spUtil.getString("which_device", "2");
+        token = spUtil.getString("token", "");
+        isUploaded = spUtil.getString("is_uploaded", "0");
+
+        // 获取个人足迹链接地址
+        getFootPrintUrl();
+
         itemClick();
 
-        which_device = spUtil.getString("which_device", "2");
         if (which_device.equals("2")){
+            rlDisturb.setVisibility(View.GONE);
+
             b_getSettings();
         } else {
+            rlDisturb.setVisibility(View.VISIBLE);
+
             p_getSettings();
         }
 
@@ -141,11 +164,13 @@ public class MeActivity extends TakePhotoActivity {
     }
 
     private void initView(){
-        LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
+        getState();
+
+        loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
         if (loginDataDao.count() == 0){
             return;
         }
-        LoginData loginData = loginDataDao.loadAll().get(0);
+        loginData = loginDataDao.loadAll().get(0);
 
         tvName.setText(loginData.getName());
         tvId.setText(loginData.getAccount_no());
@@ -157,6 +182,25 @@ public class MeActivity extends TakePhotoActivity {
     }
 
     private void itemClick(){
+        rlDisturb.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
+            @Override
+            public void change(boolean state) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String is_connected = spUtil.getString("is_connected", "0");
+                        if (is_connected.equals("0")){
+                            rlDisturb.setChecked(!state);
+                            Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        PurpleDeviceManagerNew.getInstance().setDisturb(state);
+                    }
+                });
+
+            }
+        });
+
         rlStatistics.setmOnSetItemClick(new SetItemView.OnSetItemClick() {
             @Override
             public void click() {
@@ -176,7 +220,13 @@ public class MeActivity extends TakePhotoActivity {
         rlFootprint.setmOnSetItemClick(new SetItemView.OnSetItemClick() {
             @Override
             public void click() {
-
+                if (footPrintUrl.equals("")){
+                    Toast.makeText(mActivity, "个人足迹尚未获取，请稍后重试", Toast.LENGTH_SHORT).show();
+                } else {
+                    Intent intent = new Intent(mActivity, WebActivity.class);
+                    intent.putExtra("url", footPrintUrl);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -184,6 +234,7 @@ public class MeActivity extends TakePhotoActivity {
             @Override
             public void click() {
                 Intent intent = new Intent(mActivity, BasicBodyActivity.class);
+                intent.putExtra("login", false);
                 startActivity(intent);
             }
         });
@@ -218,6 +269,14 @@ public class MeActivity extends TakePhotoActivity {
         Intent intent;
         switch (v.getId()){
             case R.id.iv_header:
+                // 已上传头像，不能修改
+                isUploaded = spUtil.getString("is_uploaded", "0");
+                if (isUploaded.equals("1"))
+                    return;
+                if (!spUtil.getString("logo", "").equals("")){
+                    return;
+                }
+
                 popupWindow = getPopup();
                 popupWindow.showPopupWindow();
                 break;
@@ -257,10 +316,24 @@ public class MeActivity extends TakePhotoActivity {
 
     private void showImg(ArrayList<TImage> images){
         popupWindow.dismiss();
+
         if (images.size() == 1) {
-            Bitmap bitmap = getLoacalBitmap(images.get(0).getCompressPath());
-            ivHeader.setImageBitmap(bitmap);
+            uploadAvatarAction(images.get(0).getCompressPath());
         }
+    }
+
+    private void getState(){
+        rlDisturb.setChecked(spUtil.getString("rl_disturb", "0").equals("1"));
+    }
+
+    private void saveState(){
+        spUtil.putString("rl_disturb", rlDisturb.isChecked() ? "1" : "0");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        saveState();
     }
 
     /**
@@ -283,25 +356,74 @@ public class MeActivity extends TakePhotoActivity {
         finish();
     }
 
+    private void getFootPrintUrl(){
+        NetManager.getUserPathAction(token, new NetManager.NetCallBack<MessageBean>() {
+            @Override
+            public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
+                MessageBean message = response.body();
+                if ((message != null ? message.getCode() : 0) == 200){
+                    footPrintUrl = message.getData().toString();
+                } else {
+                    Toast.makeText(BaseApplication.getBaseApplication(), "个人足迹获取失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MessageBean> call, Throwable t) {
+
+            }
+        });
+    }
+
+    // 上传头像
+    private void uploadAvatarAction(String path){
+        NetManager.uploadAvatarAction(token, path, new NetManager.NetCallBack<MessageBean>() {
+            @Override
+            public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
+                MessageBean message = response.body();
+                if ((message != null ? message.getCode() : 0) == 200){
+                    if (Looper.myLooper() == Looper.getMainLooper()){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Glide.get(mActivity).clearDiskCache();
+                                if (loginData == null || loginDataDao == null){
+                                    loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
+                                    loginData = loginDataDao.loadAll().get(0);
+                                }
+                                loginData.setLogo(message.getData().toString());
+                                loginDataDao.update(loginData);
+                            }
+                        }).start();
+                    }
+                    Toast.makeText(mActivity, "头像上传成功！", Toast.LENGTH_SHORT).show();
+                    Bitmap bitmap = getLoacalBitmap(path);
+                    ivHeader.setImageBitmap(bitmap);
+
+                    spUtil.putString("is_uploaded", "1");
+                } else {
+                    Toast.makeText(mActivity, "头像上传失败！", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MessageBean> call, Throwable t) {
+
+            }
+        });
+    }
 
     /**************************************************************************/
     //紫色手环连接相关
     private void p_getSettings(){
-        PurpleDeviceManager.getInstance().isLinked(new PurpleDeviceManager.DataListener() {
-            @Override
-            public void getData(Object data) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        tvLink.setText(data.toString());
-                        if (data.toString().equals("设备已经连接"))
-                            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_green), null, null, null);
-                        else
-                            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_red), null, null, null);
-                    }
-                });
-            }
-        });
+        String is_connected = spUtil.getString("is_connected", "0");
+        if (is_connected.equals("1")){
+            tvLink.setText("设备已经连接");
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_green), null, null, null);
+        } else {
+            tvLink.setText("设备尚未连接");
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_red), null, null, null);
+        }
     }
 
     /**************************************************************************/

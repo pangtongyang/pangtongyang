@@ -78,7 +78,6 @@ public class PurpleDeviceManager implements DeviceController {
             internalReceiver = new InternalReceiver();
         }
         try {
-
             mContext.registerReceiver(internalReceiver, intentfilter);
         } catch (Exception ignored) {
 

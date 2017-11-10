@@ -632,13 +632,14 @@ public class DeviceService extends Service {
                 createLink(deviceAddress, deviceName);
             }
         } else if (intent.getAction().equals(CommonConfiguration.ISLINK_DEVICE_NOTIFICATION)) {
-            intent.setAction(CommonConfiguration.RESULT_ISLINK_DEVICE_NOTIFICATION);
-            if (isWorked() && bleService != null && bleService.initialize()) {
-                intent.putExtra("isLink", true);
+            Intent mIntent = new Intent();
+            mIntent.setAction(CommonConfiguration.RESULT_ISLINK_DEVICE_NOTIFICATION);
+            if (bleService != null && bleService.initialize()) {
+                mIntent.putExtra("isLink", true);
             } else {
-                intent.putExtra("isLink", false);
+                mIntent.putExtra("isLink", false);
             }
-            sendBroadcast(intent);
+            sendBroadcast(mIntent);
         }
 
     }

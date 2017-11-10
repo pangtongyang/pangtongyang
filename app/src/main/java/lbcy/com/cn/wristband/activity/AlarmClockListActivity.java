@@ -17,6 +17,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
+import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManagerNew;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.adapter.AlarmClockListAdapter;
@@ -51,7 +53,7 @@ public class AlarmClockListActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        spUtil = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
         which_device = spUtil.getString("which_device", "2");
 
         getIntent = getIntent();
@@ -88,10 +90,19 @@ public class AlarmClockListActivity extends BaseActivity {
         rightClick(new OnRightClickListener() {
             @Override
             public void click() {
-                if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()){
-                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
-                    return;
+                if (which_device.equals("2")){
+                    if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()){
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } else {
+                    String is_connected = spUtil.getString("is_connected", "0");
+                    if (is_connected.equals("0")){
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                 }
+
                 clock_num = adapter.getCount();
                 int clock_sum = 0;
                 if (isLateClock){
@@ -99,14 +110,16 @@ public class AlarmClockListActivity extends BaseActivity {
                 } else {
                     clock_sum = clock_num + Integer.valueOf(spUtil.getString("late_clock_num", "0"));
                 }
-                if (clock_sum < Consts.CLOCK_MAX_NUM){
+                if (clock_sum < (which_device.equals("2")?Consts.CLOCK_MAX_NUM_BLACK:Consts.CLOCK_MAX_NUM_PURPLE)){
                     clockBeanDao = BaseApplication.getBaseApplication().getBaseDaoSession().getClockBeanDao();
                     Intent intent = new Intent(mActivity, SetAlarmClockActivity.class);
                     intent.putExtra("TAG", "-1");
                     intent.putExtra("is_late_clock", isLateClock);
                     startActivity(intent);
                 } else {
-                    ToastUtil.toast("闹钟数量超限，最多设置7个闹钟（包括迟到闹钟）");
+                    ToastUtil.toast("闹钟数量超限，最多设置"+
+                            (which_device.equals("2")?Consts.CLOCK_MAX_NUM_BLACK:Consts.CLOCK_MAX_NUM_PURPLE)+
+                            "个闹钟（包括迟到闹钟）");
                 }
             }
         });
@@ -132,12 +145,38 @@ public class AlarmClockListActivity extends BaseActivity {
                 DialogUtil.showDialog(mActivity, "是否删除当前闹钟？", new DialogUtil.DialogListener() {
                     @Override
                     public void submit() {
-                        if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+                        if (which_device.equals("2")){
+                            if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+                                clockBeanDao = BaseApplication.getBaseApplication().getBaseDaoSession().getClockBeanDao();
+                                list.clear();
+                                list = adapter.getAllData();
+
+                                BlackDeviceManager.getInstance().deleteClock(list.get(position).getNumber());
+                                clockBeanDao.delete(list.get(position));
+
+                                list.remove(position);
+                                for (int i = position; i < list.size(); i++){
+                                    list.get(i).setPosition(list.get(i).getPosition() - 1);
+                                }
+                                clockBeanDao.updateInTx(list);
+                                adapter.remove(position);
+                                adapter.notifyDataSetChanged();
+                            } else {
+                                Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            String is_connected = spUtil.getString("is_connected", "0");
+                            if (is_connected.equals("0")){
+                                Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
                             clockBeanDao = BaseApplication.getBaseApplication().getBaseDaoSession().getClockBeanDao();
                             list.clear();
                             list = adapter.getAllData();
 
-                            BlackDeviceManager.getInstance().deleteClock(list.get(position).getNumber());
+                            PurpleDeviceManagerNew.getInstance().setAlarm(list.get(position).getNumber(),
+                                    0, 0, "0-0-0-0-0-0-0", false);
+
                             clockBeanDao.delete(list.get(position));
 
                             list.remove(position);
@@ -147,10 +186,7 @@ public class AlarmClockListActivity extends BaseActivity {
                             clockBeanDao.updateInTx(list);
                             adapter.remove(position);
                             adapter.notifyDataSetChanged();
-                        } else {
-                            Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
                         }
-
                     }
 
                     @Override
@@ -166,26 +202,42 @@ public class AlarmClockListActivity extends BaseActivity {
         adapter.setOnSwitchCheckedChangeListener(new AlarmClockListAdapter.OnSwitchCheckChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked, int position) {
-                if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
-                    list.clear();
-                    list = adapter.getAllData();
-                    if (isChecked){
-                        if (which_device.equals("2"))
+                if (which_device.equals("2")){
+                    if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+                        list.clear();
+                        list = adapter.getAllData();
+                        if (isChecked){
                             b_setClock(position);
-                        else
-                            p_setClock(position);
+                        } else {
+                            BlackDeviceManager.getInstance().deleteClock(list.get(position).getNumber());
+                        }
                     } else {
-                        BlackDeviceManager.getInstance().deleteClock(list.get(position).getNumber());
+                        if (System.currentTimeMillis() - mUpdateTime > 300){
+                            Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                            ClockBean clock = adapter.getItem(position);
+                            clock.setSwitchState(!isChecked);
+                            adapter.update(clock, position);
+                            mUpdateTime = System.currentTimeMillis();
+                        }
                     }
                 } else {
-                    if (System.currentTimeMillis() - mUpdateTime > 300){
-                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
-                        ClockBean clock = adapter.getItem(position);
-                        clock.setSwitchState(!isChecked);
-                        adapter.update(clock, position);
-                        mUpdateTime = System.currentTimeMillis();
+                    String is_connected = spUtil.getString("is_connected", "0");
+                    if (is_connected.equals("0")){
+                        if (System.currentTimeMillis() - mUpdateTime > 300){
+                            Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                            ClockBean clock = adapter.getItem(position);
+                            clock.setSwitchState(!isChecked);
+                            adapter.update(clock, position);
+                            mUpdateTime = System.currentTimeMillis();
+                        }
+                        return;
                     }
+
+                    list.clear();
+                    list = adapter.getAllData();
+                    p_setClock(position, isChecked);
                 }
+
 
             }
         });
@@ -231,9 +283,7 @@ public class AlarmClockListActivity extends BaseActivity {
         super.onDestroy();
         //activity销毁前更新所有数据
         list.clear();
-        if (adapter.mGetAllData() != null){
-            list = adapter.mGetAllData();
-        }
+        list = adapter.getAllData();
         clockBeanDao = BaseApplication.getBaseApplication().getBaseDaoSession().getClockBeanDao();
         clockBeanDao.updateInTx(list);
 
@@ -244,16 +294,61 @@ public class AlarmClockListActivity extends BaseActivity {
     }
 
     /**************************************************************************/
-    //紫色手环连接相关
-    private void p_setClock(int position){
+    /**
+     * 紫色手环相关
+     * @param position 列表item位置
+     * @param state 开关状态
+     */
+    private void p_setClock(int position, boolean state){
+        list.clear();
+        list = adapter.getAllData();
+        ClockBean clock = list.get(position);
+        String str = clock.getText();
+        int w1 = 0;
+        int w2 = 0;
+        int w3 = 0;
+        int w4 = 0;
+        int w5 = 0;
+        int w6 = 0;
+        int w7 = 0;
+        String week;
 
+        switch (str){
+            case "只响一次":
+                // 手环bug，不设置重复时间，闹钟不响
+                w1=w2=w3=w4=w5=w6=w7=1;
+                break;
+            case "每天":
+                w1=w2=w3=w4=w5=w6=w7=1;
+                break;
+            default:
+                if (str.contains("周一"))
+                    w1 = 1;
+                if (str.contains("周二"))
+                    w2 = 1;
+                if (str.contains("周三"))
+                    w3 = 1;
+                if (str.contains("周四"))
+                    w4 = 1;
+                if (str.contains("周五"))
+                    w5 = 1;
+                if (str.contains("周六"))
+                    w6 = 1;
+                if (str.contains("周日"))
+                    w7 = 1;
+                break;
+        }
+        week = w6+"-"+w5+"-"+w4+"-"+w3+"-"+w2+"-"+w1+"-"+w7;
+
+        PurpleDeviceManagerNew.getInstance().setAlarm(clock.getNumber(),
+                Integer.valueOf(clock.getHour()), Integer.valueOf(clock.getMinute()), week, state);
     }
 
     /**************************************************************************/
     //黑色手环相关
     private void b_setClock(int position){
         list.clear();
-        list = adapter.mGetAllData();
+        list = adapter.getAllData();
         List<String> repeat_days = new ArrayList<>();
         String str = list.get(position).getText();
         switch (str){

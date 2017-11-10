@@ -27,7 +27,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.SplashTheme);
+        setTheme(R.style.NoActionBarTheme);
         setContentView(R.layout.activity_base);
         mActivity = this;
         mRxManager = new RxManager();

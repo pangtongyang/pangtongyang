@@ -30,11 +30,15 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
+import lbcy.com.cn.purplelibrary.utils.PurpleBleScan;
+import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.entity.LoginData;
 import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxManager;
+import lbcy.com.cn.wristband.utils.DialogUtil;
 import lbcy.com.cn.wristband.widget.webview.WebLayout;
 import rx.functions.Action1;
 
@@ -64,18 +68,23 @@ public abstract class BaseWebActivity extends AppCompatActivity {
     AgentWeb.PreAgentWeb preAgentWeb;
     String targetUrl = "";
 
+    private String mWhich_device;
+
     List<String> webHistoryUrls = new ArrayList<>();
     public boolean isBackPressed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.SplashTheme);
+        setTheme(R.style.NoActionBarTheme);
         setContentView(R.layout.activity_base);
         ButterKnife.bind(this);
         baseContentview.setVisibility(View.GONE);
         mActivity = this;
         mRxManager = new RxManager();
+        SPUtil mSpUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
+        mWhich_device = mSpUtil.getString("which_device", "2");
+
         initData();
         initView();
         loadData();
@@ -116,8 +125,7 @@ public abstract class BaseWebActivity extends AppCompatActivity {
     public void onClick(View v){
         switch (v.getId()){
             case R.id.iv_back:
-                if (!mAgentWeb.back())
-                    finish();
+                onBackPressed();
                 break;
             case R.id.iv_righticon:
                 onRightClickListener.click();
@@ -255,5 +263,34 @@ public abstract class BaseWebActivity extends AppCompatActivity {
         return mAgentWeb.handleKeyEvent(keyCode, event) || super.onKeyDown(keyCode, event);
     }
 
+    @Override
+    public void onBackPressed() {
+        // 心率运动模式弹窗确认
+        if (mAgentWeb.getWebCreator().get().getUrl().equals(Consts.WEB_HEART_RATE_TEST)){
+            DialogUtil.showDialog(mActivity, "提示", "运动模式中，确定离开当前页面？", new DialogUtil.DialogListener() {
+                @Override
+                public void submit() {
+                    finish();
+                }
 
+                @Override
+                public void cancel() {
+
+                }
+            });
+            return;
+        }
+        if (mAgentWeb.getWebCreator().get().getUrl().equals(Consts.WEB_HEART_RATE_DETAIL) || mAgentWeb.getWebCreator().get().getUrl().equals(Consts.WEB_HEART_RATE_SPORT)){
+            if(mWhich_device.equals("2")){
+
+            } else {
+//                PurpleBleScan.getInstance().stopScan();
+            }
+            finish();
+            return;
+        }
+
+        if (!mAgentWeb.back())
+            finish();
+    }
 }

@@ -11,6 +11,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.regex.Pattern;
+
 import butterknife.BindView;
 import butterknife.OnClick;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
@@ -18,6 +20,7 @@ import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
 import lbcy.com.cn.wristband.app.BaseApplication;
+import lbcy.com.cn.wristband.entity.BasicBodyBean;
 import lbcy.com.cn.wristband.entity.LoginBean;
 import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.entity.LoginTo;
@@ -37,7 +40,10 @@ import retrofit2.Response;
  */
 
 public class LoginActivity extends BaseActivity {
-
+    /**
+     * 正则表达式：验证手机号
+     */
+    public static final String REGEX_MOBILE = "^((17[0-9])|(14[0-9])|(13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$";
 
     @BindView(R.id.iv_name)
     ImageView ivName;
@@ -55,7 +61,8 @@ public class LoginActivity extends BaseActivity {
     Button btnLogin;
 
     SPUtil spUtilUser;
-    SPUtil spUtilSetting;
+
+    int type = 1; // 1 -> 证件号登录， 2 -> 手机号登录
 
     @Override
     protected int getLayoutId() {
@@ -65,7 +72,6 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void initData() {
         spUtilUser = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
-        spUtilSetting = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
         clearData();
     }
 
@@ -102,9 +108,13 @@ public class LoginActivity extends BaseActivity {
         etPassword.setText("");
 
         if (tvOtherlogin.getText().toString().equals(getResources().getString(R.string.activity_login_by_phone))) {
+            type = 2;
             etName.setHint(R.string.bindPhone);
+            etName.setInputType(InputType.TYPE_CLASS_PHONE);
             tvOtherlogin.setText(R.string.activity_login_by_other);
         } else {
+            type = 1;
+            etName.setInputType(InputType.TYPE_CLASS_TEXT);
             etName.setHint(R.string.activity_login_et_name_hint);
             tvOtherlogin.setText(R.string.activity_login_by_phone);
         }
@@ -135,12 +145,19 @@ public class LoginActivity extends BaseActivity {
             DialogUtil.showDialog(mActivity, "密码为空！", false);
             return false;
         }
+        if (type == 2){
+            String text = etName.getText().toString().trim();
+            if (!Pattern.matches(REGEX_MOBILE, text)){
+                DialogUtil.showDialog(mActivity, "手机号错误！", false);
+                return false;
+            }
+        }
 
         return true;
     }
 
     private void saveData(LoginBean loginBean){
-        loginBean.getData().setAppType("2");
+        loginBean.getData().setAppType("2"); //表示android手机
 
         if (tvOtherlogin.getText().toString().equals(getString(R.string.activity_login_by_phone))){
             spUtilUser.putString("login_type", "card");
@@ -154,21 +171,19 @@ public class LoginActivity extends BaseActivity {
         //设置密码
         spUtilUser.putString("password", etPassword.getText().toString().trim());
         //设置设备类型
-        spUtilUser.putString("which_device", "2"); //1 -> 紫色 2 -> 黑色
-//        spUtilUser.putString("which_device", loginBean.getData().getDevice_type()); //1 -> 紫色 2 -> 黑色
+//        spUtilUser.putString("which_device", "2"); //1 -> 紫色 2 -> 黑色
+        spUtilUser.putString("which_device", loginBean.getData().getDevice_type()); //1 -> 紫色 2 -> 黑色
         //设置设备名称
         spUtilUser.putString("deviceName", "wristband");
 //        spUtilUser.putString("deviceAddress", "FE:54:B9:7C:CB:FA"); //紫色test
+//        spUtilUser.putString("deviceAddress", "E3:85:C9:36:63:70"); //紫色test
         //设置设备mac地址
-        spUtilUser.putString("deviceAddress", "CD:96:8C:EC:EE:B3"); //黑色test
-//        spUtilUser.putString("deviceAddress", loginBean.getData().getMac_address());
+//        spUtilUser.putString("deviceAddress", "CD:96:8C:EC:EE:B3"); //黑色test
+        spUtilUser.putString("deviceAddress", loginBean.getData().getMac_address());
         //设置token
         spUtilUser.putString("token", Consts.PRE_TOKEN_STR + loginBean.getData().getToken());
-
-        //设置setting数据库设备类型
-        spUtilSetting.putString("which_device", "2"); //1 -> 紫色 2 -> 黑色
-        //设置setting数据库token
-        spUtilSetting.putString("token", Consts.PRE_TOKEN_STR + loginBean.getData().getToken());
+        //添加logo
+        spUtilUser.putString("logo", loginBean.getData().getLogo());
 
         LoginDataDao loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
         if (loginDataDao.count() == 0){
@@ -181,10 +196,11 @@ public class LoginActivity extends BaseActivity {
 
     private void clearData(){
         //数据销毁
+        spUtilUser.clearData();
         spUtilUser.putString("is_login", "0");
         spUtilUser.putString("js_is_write", "0");
 
-        spUtilSetting.clearData();
+        BaseApplication.getBaseApplication().cleanDB();
     }
 
     private void loginAction(){
@@ -197,12 +213,8 @@ public class LoginActivity extends BaseActivity {
                 LoginBean loginBean = response.body();
                 if (loginBean != null && loginBean.getCode() == 200){
                     saveData(loginBean);
+                    getBodyData();
 
-                    Intent intent = new Intent(mActivity, MainActivity.class);
-                    intent.putExtra("isSplashed", true);
-                    startActivity(intent);
-
-                    finish();
                 } else {
                     Toast.makeText(mActivity, loginBean != null ?loginBean.getMessage().toString():"登录失败！", Toast.LENGTH_SHORT).show();
                 }
@@ -210,6 +222,37 @@ public class LoginActivity extends BaseActivity {
 
             @Override
             public void onFailure(Call<LoginBean> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void getBodyData(){
+        NetManager.getBodyDataAction(spUtilUser.getString("token", ""), new NetManager.NetCallBack<BasicBodyBean>() {
+            @Override
+            public void onResponse(Call<BasicBodyBean> call, Response<BasicBodyBean> response) {
+                BasicBodyBean bodyBean = response.body();
+                if (bodyBean != null && bodyBean.getCode() == 200){
+                    if (bodyBean.getData().getHeight() != 0 && bodyBean.getData().getWeight() != 0){
+                        spUtilUser.putString("body_data", "1");
+                        Intent intent = new Intent(mActivity, MainActivity.class);
+                        intent.putExtra("isSplashed", true);
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(mActivity, BasicBodyActivity.class);
+                        intent.putExtra("login", true);
+                        startActivity(intent);
+                    }
+
+                    finish();
+                } else {
+                    clearData();
+                    Toast.makeText(mActivity, bodyBean != null ?bodyBean.getMessage().toString():"登录失败！", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicBodyBean> call, Throwable t) {
 
             }
         });

@@ -44,10 +44,10 @@ public interface DeviceController {
     void getEachHourStep(DataCallback<byte[]> callback);
 
     /**
-     * 获取睡眠数据(昨天和今天)
+     * 获取睡眠数据(昨天和今天 22:00--10:00)
      * @param callback 回调函数
      */
-    void getSleepData(DataCallback<byte[]> callback);
+    void getSleepData(DataCallback<String> callback);
 
     /**
      * 是否开启电话提醒
@@ -193,11 +193,29 @@ public interface DeviceController {
      * @param filepath 文件路径
      * @param listener 升级过程监听
      */
-    UpdateVersionTask updateHardwareVersion(String filepath, UpdateVersionTask.UpdateListener listener);
+    void updateHardwareVersion(Context context, String filepath, UpdateVersionTask.UpdateListener listener);
 
     /**
      * 停止升级
      * @param updateTask 升级过程的updateTask
      */
     void stopUpdate(UpdateVersionTask updateTask);
+
+    /**
+     * 获取整天的心率数据
+     * @param callback 回调
+     */
+    void getDayHeartRateData(DataCallback<byte[]> callback);
+
+    /**
+     * 开启实时心率扫描
+     * @param toScan 是否开启，true -> 是， false -> 否
+     */
+    void heartScan(boolean toScan);
+
+    /**
+     * 设备防丢
+     * @param isOpen 是否开启该功能
+     */
+    void lostRemind(boolean isOpen);
 }

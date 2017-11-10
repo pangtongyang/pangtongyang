@@ -2,15 +2,18 @@ package lbcy.com.cn.blacklibrary.manager;
 
 import android.bluetooth.BluetoothGatt;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.text.TextUtils;
 
 import com.huichenghe.bleControl.Ble.BleDataForBattery;
 import com.huichenghe.bleControl.Ble.BleDataForCustomRemind;
 import com.huichenghe.bleControl.Ble.BleDataForDayData;
+import com.huichenghe.bleControl.Ble.BleDataForDayHeartReatData;
 import com.huichenghe.bleControl.Ble.BleDataForEachHourData;
 import com.huichenghe.bleControl.Ble.BleDataForFactoryReset;
 import com.huichenghe.bleControl.Ble.BleDataForHRWarning;
 import com.huichenghe.bleControl.Ble.BleDataForHardVersion;
+import com.huichenghe.bleControl.Ble.BleDataForOnLineMovement;
 import com.huichenghe.bleControl.Ble.BleDataForQQAndOtherRemine;
 import com.huichenghe.bleControl.Ble.BleDataForRingDelay;
 import com.huichenghe.bleControl.Ble.BleDataForSettingArgs;
@@ -19,6 +22,7 @@ import com.huichenghe.bleControl.Ble.BleDataForSleepData;
 import com.huichenghe.bleControl.Ble.BleDataForTarget;
 import com.huichenghe.bleControl.Ble.BleDataforSyn;
 import com.huichenghe.bleControl.Ble.BleForFindDevice;
+import com.huichenghe.bleControl.Ble.BleForLostRemind;
 import com.huichenghe.bleControl.Ble.BleForPhoneAndSmsRemind;
 import com.huichenghe.bleControl.Ble.BleForQQWeiChartFacebook;
 import com.huichenghe.bleControl.Ble.BleForSitRemind;
@@ -33,7 +37,10 @@ import com.huichenghe.bleControl.Utils.FormatUtils;
 import com.huichenghe.bleControl.upgrande.UpdateVersionTask;
 
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.ctl.DeviceController;
@@ -98,6 +105,7 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void getDayData(final DataCallback<byte[]> callback) {
+
         if (BleDataForDayData.getDayDataInstance(mContext) == null)
             return;
         BleDataForDayData.getDayDataInstance(mContext).setOnDayDataListener(new DataSendCallback() {
@@ -188,38 +196,51 @@ public class BlackDeviceManager implements DeviceController {
     }
 
     @Override
-    public void getSleepData(final DataCallback<byte[]> callback) {
+    public void getSleepData(final DataCallback<String> callback) {
         if (BleDataForSleepData.getInstance(mContext) == null)
             return;
         BleDataForSleepData.getInstance(mContext).setOnSleepDataRecever(new DataSendCallback() {
             @Override
             public void sendSuccess(byte[] receiveData) {
-                callback.OnSuccess(receiveData);
-//                String stralldata = getsleepdata(receveData);
-//
-//                // 截取昨天的数据, 从数据末尾截取12个字符，代表两个小时
-//                String y = "";
-//                if (stralldata.length() > 1) {
-//                    String res = stralldata.replaceAll("\\d{12}$", "");
-//                    y = stralldata.replaceAll(res, "");
-//                }
-//                // 截取今天的数据， 从数据开头截取60个字符，代表10小时
-//                String t = "";
-//                if (stralldata.length() > 0) {
-//                    t = stralldata.substring(0, 60);
-//                }
-//                String allData = y + t;
-//                int start = 0;
-//                String first = allData.replaceAll("^[0, 3]+", "");
-//                start = allData.length() - first.length();
-//                String second = allData.replaceAll("[0, 3]+$", "");
-//                int end = allData.length() - second.length();
-//                final String finalString = first.replaceAll("[0, 3]+$", "");
-//                Log.i("huang", "全部数据开始位置：" + start);
-//                Log.i("huang", "全部数据结束位置：" + end);
-//                //05-11 11:05:27.119: I/SleepDataHelper(25991): 全部数据最终数据：22322222222222222222233222212222232322222222
-//
-//                showdatastring(finalString);
+
+                String dataString = "";
+                for (int i = 4; i < 40; i++)        // 遍历字节数组
+                {
+                    byte buffer = receiveData[i];     // 取出一个字节赋值给buffer
+
+                    for (int j = 0; j < 4; j++)     // 循环取出两位
+                    {
+                        byte a = (byte) ((buffer >> (j * 2)) & (byte) 0x03);   // 取出两位
+                        int ai = a & (byte) 0x03;
+                        dataString = dataString + String.valueOf(ai);
+                    }
+                }
+
+                // 截取昨天的数据, 从数据末尾截取12个字符，代表两个小时
+                String y = "";
+                if (dataString.length() > 1) {
+                    String res = dataString.replaceAll("\\d{12}$", "");
+                    y = dataString.replaceAll(res, "");
+                }
+                // 截取今天的数据， 从数据开头截取60个字符，代表10小时
+                String t = "";
+                if (dataString.length() > 0) {
+                    t = dataString.substring(0, 60);
+                }
+                String allData = y + t;
+
+                int day = (receiveData[0] & 0xff) - 1;
+                int month = (receiveData[1] & 0xff);
+                int year = (receiveData[2] & 0xff) + 2000;
+                Calendar calendarData = Calendar.getInstance();
+                calendarData.set(year, (month - 1), day);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String yes = format.format(calendarData.getTime());
+                calendarData.set(year, (month - 1), day+1);
+                String today = format.format(calendarData.getTime());
+
+
+                callback.OnSuccess(allData + "###" + yes + "###" + today);
 
             }
 
@@ -444,7 +465,7 @@ public class BlackDeviceManager implements DeviceController {
             texts = title + ":" + content;
         }
 
-        if (mType == 0x01) {
+        if (mType == 0x04) {
             texts = "来短信啦";
         }
 
@@ -669,15 +690,82 @@ public class BlackDeviceManager implements DeviceController {
     }
 
     @Override
-    public UpdateVersionTask updateHardwareVersion(String filepath, UpdateVersionTask.UpdateListener listener) {
+    public void updateHardwareVersion(final Context context, final String filepath, final UpdateVersionTask.UpdateListener listener) {
         UpdateVersionTask updateTask;
-        updateTask = new UpdateVersionTask(mContext, listener);
+        updateTask = new UpdateVersionTask(context, listener);
         updateTask.execute(filepath);
-        return updateTask;
     }
 
     @Override
     public void stopUpdate(UpdateVersionTask updateTask) {
         updateTask.setTaskCancel();
+    }
+
+    @Override
+    public void getDayHeartRateData(final DataCallback<byte[]> callback) {
+        BleDataForDayHeartReatData.getHRDataInstance(mContext).setOnHrDataRecever(new DataSendCallback() {
+            @Override
+            public void sendSuccess(byte[] bytes) {
+                callback.OnSuccess(bytes);
+            }
+
+            @Override
+            public void sendFailed() {
+
+            }
+
+            @Override
+            public void sendFinished() {
+
+            }
+        });
+        BleDataForDayHeartReatData.getHRDataInstance(mContext).requestHeartReatDataAll();
+    }
+
+    @Override
+    public void heartScan(boolean toScan) {
+        if (BleDataForOnLineMovement.getBleDataForOutlineInstance() != null){
+            BleDataForOnLineMovement.getBleDataForOutlineInstance().setOnSendRecever(new DataSendCallback() {
+                @Override
+                public void sendSuccess(byte[] bytes) {
+
+                }
+
+                @Override
+                public void sendFailed() {
+
+                }
+
+                @Override
+                public void sendFinished() {
+
+                }
+            });
+            BleDataForOnLineMovement.getBleDataForOutlineInstance().sendHRDataToDevice((byte) (toScan?0x01:0x02));
+        }
+    }
+
+    @Override
+    public void lostRemind(boolean isOpen) {
+        if (BleForLostRemind.getInstance() != null){
+            BleForLostRemind.getInstance().openAndHandler(isOpen);
+            BleForLostRemind.getInstance().setLostListener(new DataSendCallback() {
+                @Override
+                public void sendSuccess(byte[] bytes) {
+
+                }
+
+                @Override
+                public void sendFailed() {
+
+                }
+
+                @Override
+                public void sendFinished() {
+
+                }
+            });
+            BleForLostRemind.getInstance().requestAndHandler();
+        }
     }
 }

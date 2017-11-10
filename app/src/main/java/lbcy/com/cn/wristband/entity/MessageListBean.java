@@ -1,5 +1,8 @@
 package lbcy.com.cn.wristband.entity;
 
+import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Id;
+
 import java.util.List;
 
 /**
@@ -16,7 +19,7 @@ public class MessageListBean {
 
     private int code;
     private Object message;
-    private List<DataBean> data;
+    private List<MessageListData> data;
 
     public int getCode() {
         return code;
@@ -34,57 +37,12 @@ public class MessageListBean {
         this.message = message;
     }
 
-    public List<DataBean> getData() {
+    public List<MessageListData> getData() {
         return data;
     }
 
-    public void setData(List<DataBean> data) {
+    public void setData(List<MessageListData> data) {
         this.data = data;
     }
 
-    public static class DataBean {
-        /**
-         * id : 123
-         * abstracts : 消息摘要
-         * time : 2017-09-10 00:30:00
-         * status : 1
-         */
-
-        private int id;
-        private String abstracts;
-        private String time;
-        private int status;
-
-        public int getId() {
-            return id;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public String getAbstracts() {
-            return abstracts;
-        }
-
-        public void setAbstracts(String abstracts) {
-            this.abstracts = abstracts;
-        }
-
-        public String getTime() {
-            return time;
-        }
-
-        public void setTime(String time) {
-            this.time = time;
-        }
-
-        public int getStatus() {
-            return status;
-        }
-
-        public void setStatus(int status) {
-            this.status = status;
-        }
-    }
 }

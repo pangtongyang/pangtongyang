@@ -230,34 +230,34 @@ public class ToolActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.geteachsleep:
-                BlackDeviceManager.getInstance().getSleepData(new DataCallback<byte[]>() {
+                BlackDeviceManager.getInstance().getSleepData(new DataCallback<String>() {
                     @Override
-                    public void OnSuccess(byte[] data) {
-                        String stralldata = getsleepdata(data);
-
-                        // 截取昨天的数据, 从数据末尾截取12个字符，代表两个小时
-                        String y = "";
-                        if (stralldata.length() > 1) {
-                            String res = stralldata.replaceAll("\\d{12}$", "");
-                            y = stralldata.replaceAll(res, "");
-                        }
-                        // 截取今天的数据， 从数据开头截取60个字符，代表10小时
-                        String t = "";
-                        if (stralldata.length() > 0) {
-                            t = stralldata.substring(0, 60);
-                        }
-                        String allData = y + t;
-                        int start = 0;
-                        String first = allData.replaceAll("^[0, 3]+", "");
-                        start = allData.length() - first.length();
-                        String second = allData.replaceAll("[0, 3]+$", "");
-                        int end = allData.length() - second.length();
-                        final String finalString = first.replaceAll("[0, 3]+$", "");
-                        Log.i("huang", "全部数据开始位置：" + start);
-                        Log.i("huang", "全部数据结束位置：" + end);
-                        //05-11 11:05:27.119: I/SleepDataHelper(25991): 全部数据最终数据：22322222222222222222233222212222232322222222
-
-                        showdatastring(finalString);
+                    public void OnSuccess(String data) {
+//                        String stralldata = getsleepdata(data);
+//
+//                        // 截取昨天的数据, 从数据末尾截取12个字符，代表两个小时
+//                        String y = "";
+//                        if (stralldata.length() > 1) {
+//                            String res = stralldata.replaceAll("\\d{12}$", "");
+//                            y = stralldata.replaceAll(res, "");
+//                        }
+//                        // 截取今天的数据， 从数据开头截取60个字符，代表10小时
+//                        String t = "";
+//                        if (stralldata.length() > 0) {
+//                            t = stralldata.substring(0, 60);
+//                        }
+//                        String allData = y + t;
+//                        int start = 0;
+//                        String first = allData.replaceAll("^[0, 3]+", "");
+//                        start = allData.length() - first.length();
+//                        String second = allData.replaceAll("[0, 3]+$", "");
+//                        int end = allData.length() - second.length();
+//                        final String finalString = first.replaceAll("[0, 3]+$", "");
+//                        Log.i("huang", "全部数据开始位置：" + start);
+//                        Log.i("huang", "全部数据结束位置：" + end);
+//                        //05-11 11:05:27.119: I/SleepDataHelper(25991): 全部数据最终数据：22322222222222222222233222212222232322222222
+//
+//                        showdatastring(finalString);
                     }
 
                     @Override

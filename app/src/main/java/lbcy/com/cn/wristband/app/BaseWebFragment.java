@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -30,6 +31,9 @@ import com.just.library.ChromeClientCallbackManager;
 import com.just.library.DownLoadResultListener;
 import com.just.library.PermissionInterceptor;
 import com.just.library.WebDefaultSettingsManager;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +46,10 @@ import lbcy.com.cn.wristband.activity.WebActivity;
 import lbcy.com.cn.wristband.entity.LoginData;
 import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
+import lbcy.com.cn.wristband.rx.RxBus;
 import lbcy.com.cn.wristband.rx.RxManager;
 import lbcy.com.cn.wristband.utils.ScreenUtil;
+import lbcy.com.cn.wristband.widget.SmartRefreshWebLayout;
 
 import static lbcy.com.cn.wristband.global.Consts.URL_KEY;
 
@@ -61,6 +67,7 @@ public abstract class BaseWebFragment extends Fragment {
 
     public boolean loadIndexUrl = false;
 
+    private SmartRefreshWebLayout mSmartRefreshWebLayout=null;
     protected AgentWeb mAgentWeb;
     AgentWeb.PreAgentWeb preAgentWeb;
 
@@ -116,6 +123,38 @@ public abstract class BaseWebFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mSmartRefreshWebLayout = new SmartRefreshWebLayout(mActivity);
+
+        final SmartRefreshLayout mSmartRefreshLayout= (SmartRefreshLayout) this.mSmartRefreshWebLayout.getLayout();
+
+        mSmartRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(RefreshLayout refreshlayout) {
+                Message message = new Message();
+                message.what = Consts.RELOAD_DATA;
+                RxBus.getInstance().post(Consts.ACTIVITY_MANAGE_LISTENER, message);
+                mAgentWeb.getLoader().reload();
+
+                mSmartRefreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSmartRefreshLayout.finishRefresh();
+                    }
+                },2000);
+            }
+        });
+//        mSmartRefreshLayout.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View view, MotionEvent motionEvent) {
+//                if (mAgentWeb.getWebCreator().get().getScrollY() == 0 && mAgentWeb.getWebCreator().get().getUrl().contains(Consts.WEB_STAR)){
+//                    mSmartRefreshLayout.requestDisallowInterceptTouchEvent(true);
+//                } else {
+//                    mSmartRefreshLayout.requestDisallowInterceptTouchEvent(false);
+//                }
+//
+//                return false;
+//            }
+//        });
 
         preAgentWeb = AgentWeb.with(this)//
                 .setAgentWebParent((ViewGroup) view, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))//传入AgentWeb的父控件
@@ -129,25 +168,26 @@ public abstract class BaseWebFragment extends Fragment {
                 .addDownLoadResultListener(mDownLoadResultListener) //下载回调
                 .openParallelDownload()//打开并行下载 , 默认串行下载
                 .setNotifyIcon(R.mipmap.download)
+                .setWebLayout(mSmartRefreshWebLayout)
                 .createAgentWeb()//创建AgentWeb
                 .ready();//设置 WebSettings
 
         mAgentWeb = preAgentWeb.go(getUrl());
 
-        mAgentWeb.getWebCreator().get().setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (view.getScrollY() == 0 && ((WebView) view).getUrl().contains(Consts.WEB_STAR)){
-                    if (motionEvent.getY() <= ScreenUtil.dip2px(mActivity, 133)) {
-                        ((WebView) view).requestDisallowInterceptTouchEvent(true);
-                    } else {
-                        ((WebView) view).requestDisallowInterceptTouchEvent(false);
-                    }
-                }
-
-                return false;
-            }
-        });
+//        mAgentWeb.getWebCreator().get().setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View view, MotionEvent motionEvent) {
+//                if (view.getScrollY() == 0 && ((WebView) view).getUrl().contains(Consts.WEB_STAR)){
+//                    if (motionEvent.getY() <= ScreenUtil.dip2px(mActivity, 133)) {
+//                        ((WebView) view).requestDisallowInterceptTouchEvent(true);
+//                    } else {
+//                        ((WebView) view).requestDisallowInterceptTouchEvent(false);
+//                    }
+//                }
+//
+//                return false;
+//            }
+//        });
 
         //设置js调用android方法
         if(mAgentWeb!=null){

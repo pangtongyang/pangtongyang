@@ -1,11 +1,16 @@
 package lbcy.com.cn.purplelibrary.app;
 
 import android.app.Application;
+import android.app.Service;
 import android.database.sqlite.SQLiteDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import lbcy.com.cn.purplelibrary.entity.DaoMaster;
 import lbcy.com.cn.purplelibrary.entity.DaoSession;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
+import lbcy.com.cn.purplelibrary.service.PurpleBLEService;
 
 /**
  * Created by chenjie on 2017/8/24.
@@ -46,5 +51,19 @@ public class MyApplication extends Application {
 
     public SQLiteDatabase getDb() {
         return db;
+    }
+
+    private Map<String, PurpleBLEService> threadLocal = new HashMap<>();
+
+    public void setThread(PurpleBLEService service){
+        threadLocal.put("thread", service);
+    }
+
+    public PurpleBLEService getThread(){
+        return threadLocal.get("thread");
+    }
+
+    public void removeThread(){
+        threadLocal.remove("thread");
     }
 }

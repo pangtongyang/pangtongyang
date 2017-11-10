@@ -3,7 +3,7 @@
     <string name="app_name">Wristband</string>
     <string name="settings">设置</string>
     <string name="help">帮助</string>
-    <string name="string_help_text">当前应用缺少必要权限。\n\n请打开所需权限。</string>
+    <string name="string_help_text">当前应用缺少必要权限，\n\n请打开所需权限。</string>
     <string name="quit">关闭</string>
     <string name="connection_state">State: %s</string>
     <string name="disconnect">Disconnect</string>
@@ -12,6 +12,7 @@
     <string name="ble_not_supported">当前版本不支持蓝牙功能</string>
     <string name="error_bluetooth_not_supported">设备不支持蓝牙功能</string>
     <string name="network_timeout">网络连接失败，请检查网络连接！</string>
+    <string name="network_error">接口调用失败</string>
     <string name="file_download">文件下载</string>
 
     <string name="confirm">确定</string>
@@ -70,6 +71,7 @@
     <string name="fragment_me_body">身高体重 </string>
     <string name="fragment_me_phone">绑定手机号 </string>
     <string name="fragment_me_news">我的消息 </string>
+    <string name="fragment_me_news_detail">消息详情 </string>
     <string name="fragment_me_help">帮助说明 </string>
 
     <!--activity Device Setting-->

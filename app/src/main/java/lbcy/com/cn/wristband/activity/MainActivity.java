@@ -11,14 +11,17 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
@@ -29,9 +32,16 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.huichenghe.bleControl.Ble.BluetoothLeService;
+import com.huichenghe.bleControl.Utils.FormatUtils;
 import com.just.library.AgentWeb;
 
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -39,9 +49,15 @@ import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.ble.DeviceConnect;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.blacklibrary.manager.DeviceConnectManager;
+import lbcy.com.cn.blacklibrary.utils.Util;
+import lbcy.com.cn.purplelibrary.app.MyApplication;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
+import lbcy.com.cn.purplelibrary.ctl.DataListener;
+import lbcy.com.cn.purplelibrary.entity.SportData;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
+import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManagerNew;
 import lbcy.com.cn.purplelibrary.service.ManagerDeviceService;
+import lbcy.com.cn.purplelibrary.service.PurpleBLEService;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
@@ -49,8 +65,24 @@ import lbcy.com.cn.wristband.app.BaseWebFragment;
 import lbcy.com.cn.wristband.app.BaseFragmentActivity;
 import lbcy.com.cn.wristband.ctl.BleScanCallback;
 import lbcy.com.cn.wristband.entity.BleDevice;
+import lbcy.com.cn.wristband.entity.HeartBeatsAllDayDataTo;
+import lbcy.com.cn.wristband.entity.HeartBeatsAllDayHistory;
+import lbcy.com.cn.wristband.entity.HeartBeatsAllDayHistoryDao;
+import lbcy.com.cn.wristband.entity.HeartBeatsAllDayMaxMin;
+import lbcy.com.cn.wristband.entity.HeartBeatsAllDayMaxMinDao;
+import lbcy.com.cn.wristband.entity.HeartBeatsHistory;
+import lbcy.com.cn.wristband.entity.HeartBeatsHistoryDao;
 import lbcy.com.cn.wristband.entity.LoginData;
 import lbcy.com.cn.wristband.entity.LoginDataDao;
+import lbcy.com.cn.wristband.entity.MessageBean;
+import lbcy.com.cn.wristband.entity.SleepAllData;
+import lbcy.com.cn.wristband.entity.SleepAllDataDao;
+import lbcy.com.cn.wristband.entity.SleepTo;
+import lbcy.com.cn.wristband.entity.SportAllDayData;
+import lbcy.com.cn.wristband.entity.SportAllDayDataDao;
+import lbcy.com.cn.wristband.entity.SportSplitData;
+import lbcy.com.cn.wristband.entity.SportSplitDataDao;
+import lbcy.com.cn.wristband.entity.SportTo;
 import lbcy.com.cn.wristband.entity.UserInfoBean;
 import lbcy.com.cn.wristband.entity.UserInfoData;
 import lbcy.com.cn.wristband.entity.UserInfoDataDao;
@@ -59,8 +91,8 @@ import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.service.MyNotificationService;
 import lbcy.com.cn.wristband.utils.BleScanHelper;
+import lbcy.com.cn.wristband.utils.DateUtil;
 import lbcy.com.cn.wristband.utils.HandlerTip;
-import lbcy.com.cn.wristband.utils.ToastUtil;
 import lbcy.com.cn.wristband.widget.NoScrollViewPager;
 import lbcy.com.cn.wristband.widget.webview.WebLayout;
 import retrofit2.Call;
@@ -82,6 +114,10 @@ public class MainActivity extends BaseFragmentActivity {
     BaseWebFragment healthFragment, kaoqinFragment, expertFragment, starFragment;
     BaseWebFragment[] webFragments = new WebFragment[4];
     FragmentAdapter adapter;
+
+    // 运动数据
+    SportAllDayData sportAllDayData;
+    SportSplitData sportSplitData;
 
     int prePage = 0;
     @BindView(R.id.web)
@@ -184,24 +220,8 @@ public class MainActivity extends BaseFragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        switch(prePage){
-//            case 0:
-//                jumpHealthFragment();
-//                break;
-//            case 1:
-//                jumpKaoqinFragment();
-//                break;
-//            case 2:
-//                jumpExpertFragment();
-//                break;
-//            case 3:
-//                jumpStarFragment();
-//                break;
-//        }
-//        vpContent.invalidate();
-//        llHomeBottomBar.invalidate();
-        llHomeBottomBar.setVisibility(View.VISIBLE);
 
+        llHomeBottomBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -220,6 +240,7 @@ public class MainActivity extends BaseFragmentActivity {
 
         spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
         token = spUtil.getString("token", "");
+
     }
 
     @Override
@@ -234,6 +255,13 @@ public class MainActivity extends BaseFragmentActivity {
             //判断是否已登录
             String isLogin = spUtil.getString("is_login", "0");
             if (isLogin.equals("0")) {
+                finish();
+                return;
+            }
+
+            //判断是否设置身高体重
+            String hasSetBodyData = spUtil.getString("body_data", "0");
+            if (hasSetBodyData.equals("0")){
                 finish();
                 return;
             }
@@ -254,7 +282,7 @@ public class MainActivity extends BaseFragmentActivity {
                     .setSecutityType(AgentWeb.SecurityType.strict)
                     .setWebLayout(new WebLayout(this))
                     .createAgentWeb()//
-                    .ready().go(Consts.WEB_BASE + "/test.html");
+                    .ready().go(Consts.WEB_TEST);
         } else {
             //初始化web页面
             initWeb();
@@ -307,6 +335,16 @@ public class MainActivity extends BaseFragmentActivity {
 
                         //获取用户基本信息
                         getUserInfoAction();
+                        break;
+                    case Consts.REQUEST_ENABLE_BT:
+                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                        startActivityForResult(enableBtIntent, Consts.REQUEST_ENABLE_BT);
+                        break;
+                    case Consts.RELOAD_DATA:
+                        if (!runningState){
+                            Thread thread = new Thread(runnableSaveData);
+                            thread.start();
+                        }
                         break;
                 }
             }
@@ -392,7 +430,13 @@ public class MainActivity extends BaseFragmentActivity {
                     purpleConnectAction();
                 }
             } else if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(mActivity, "蓝牙设备未开启，无法连接手环", Toast.LENGTH_SHORT).show();
+                Toast.makeText(BaseApplication.getBaseApplication(), "蓝牙设备未开启，无法连接手环", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == Consts.REQUEST_ENABLE_BT) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(BaseApplication.getBaseApplication(), "蓝牙开启成功！", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(BaseApplication.getBaseApplication(), "蓝牙开启失败！", Toast.LENGTH_SHORT).show();
             }
         } else {
             //一定要保证 mAgentWebFragment 回调
@@ -624,7 +668,12 @@ public class MainActivity extends BaseFragmentActivity {
                 }
                 break;
             case R.id.iv_history:
-                startActivity(new Intent(mActivity, WebActivity.class).putExtra("url", Consts.WEB_HISTORY));
+                if (view1.getVisibility() == View.VISIBLE)
+                    startActivity(new Intent(mActivity, WebActivity.class).putExtra("url", Consts.WEB_HISTORY));
+                else if (view2.getVisibility() == View.VISIBLE)
+                    startActivity(new Intent(mActivity, WebActivity.class).putExtra("url", Consts.WEB_HEART_RATE_HISTORY));
+                else if (view3.getVisibility() == View.VISIBLE)
+                    startActivity(new Intent(mActivity, WebActivity.class).putExtra("url", Consts.WEB_SLEEP_HISTORY));
                 break;
         }
     }
@@ -638,12 +687,14 @@ public class MainActivity extends BaseFragmentActivity {
 
             } else {
                 finish();
-//                HandlerTip.getInstance().postDelayed(500, new HandlerTip.HandlerCallback() {
-//                    @Override
-//                    public void postDelayed() {
-//                        System.exit(0);
-//                    }
-//                });
+//                if (which_device.equals("1")){
+//                    HandlerTip.getInstance().postDelayed(500, new HandlerTip.HandlerCallback() {
+//                        @Override
+//                        public void postDelayed() {
+//                            System.exit(0);
+//                        }
+//                    });
+//                }
             }
             return true;
         }
@@ -654,15 +705,22 @@ public class MainActivity extends BaseFragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         //紫色手环销毁
-        stopService();
-        try {
-            if (internalReceiver != null) {
-                unregisterReceiver(internalReceiver);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (purpleConnectionListener != null){
+            purpleConnectionListener.interrupt();
+            purpleConnectionListener = null;
         }
-
+        Intent intent = new Intent(mActivity, PurpleBLEService.class);
+        intent.setAction("lbcy.com.cn.purplelibrary.service.PurpleBLEService");
+        stopService(intent);
+        //紫色手环销毁
+//        stopService();
+//        try {
+//            if (internalReceiver != null) {
+//                unregisterReceiver(internalReceiver);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         //黑色手环销毁
         if (BluetoothLeService.getInstance() != null) {
             BluetoothLeService.getInstance().disconnect();
@@ -670,17 +728,19 @@ public class MainActivity extends BaseFragmentActivity {
         }
         if (scanHelper != null && !scanHelper.isScanSubscriptionNull())
             scanHelper.stopRxAndroidBleScan();
-        if (manager != null)
+        if (manager != null){
+            manager.stopCircleScan();
             manager.stopService();
+        }
     }
 
     // 获取用户基本信息
-    private void getUserInfoAction(){
+    private void getUserInfoAction() {
         NetManager.getUserInfoAction(token, new NetManager.NetCallBack<UserInfoBean>() {
             @Override
             public void onResponse(Call<UserInfoBean> call, Response<UserInfoBean> response) {
                 UserInfoBean userInfoBean = response.body();
-                if ((userInfoBean != null ? userInfoBean.getCode() : 0) == 200){
+                if ((userInfoBean != null ? userInfoBean.getCode() : 0) == 200) {
                     saveData(userInfoBean.getData());
                 } else {
                     Toast.makeText(mActivity, userInfoBean != null ? userInfoBean.getMessage().toString() : "用户基本信息获取失败！", Toast.LENGTH_SHORT).show();
@@ -694,9 +754,9 @@ public class MainActivity extends BaseFragmentActivity {
         });
     }
 
-    private void saveData(UserInfoData data){
+    private void saveData(UserInfoData data) {
         UserInfoDataDao dataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getUserInfoDataDao();
-        if (dataDao.count() == 0){
+        if (dataDao.count() == 0) {
             dataDao.insert(data);
         } else {
             data.setMId(dataDao.loadAll().get(0).getMId());
@@ -704,155 +764,412 @@ public class MainActivity extends BaseFragmentActivity {
         }
     }
 
+    // 上传运动数据
+    private void uploadSportData() {
+        // 获取整天数据列表
+        SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSportAllDayDataDao();
+        // 无数据，返回
+        if (dayDataDao.count() != 0) {
+            List<SportAllDayData> dayDataList = dayDataDao.queryBuilder().where(SportAllDayDataDao.Properties.IsUpload.eq(false)).build().list();
+            // 根据整天数据列表获取每天分时数据
+            SportSplitDataDao dataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSportSplitDataDao();
+            for (SportAllDayData dayData : dayDataList) {
+                // 获取到当天数据，不上传
+                if (dayData.getDate().equals(DateUtil.getCurrentTime_Y_M_d()))
+                    continue;
+
+                List<SportSplitData> list = dataDao.queryBuilder().where(SportSplitDataDao.Properties.Date.like(dayData.getDate() + "%")).build().list();
+                // 无分时数据，<!--跳出继续执行-->，可以继续上传，受限于紫色手环没有分时数据
+//            if (list.size() == 0)
+//                continue;
+
+                // 上传数据
+                SportTo sportTo = new SportTo();
+                sportTo.setDate(dayData.getDate());
+                sportTo.setDone_steps(dayData.getDone_steps());
+                List<SportTo.HistoryBean> historyList = new ArrayList<>();
+                for (SportSplitData data : list) {
+                    SportTo.HistoryBean historyBean = new SportTo.HistoryBean();
+                    historyBean.setTime(data.getDate());
+                    historyBean.setSteps(data.getSteps());
+                    historyBean.setDuration(data.getDuration());
+                    historyList.add(historyBean);
+                }
+                if (historyList.size() != 0)
+                    sportTo.setHistory(historyList);
+                else
+                    continue;
+                NetManager.uploadSportDataAction(token, sportTo, new NetManager.NetCallBack<MessageBean>() {
+                    @Override
+                    public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
+                        MessageBean messageBean = response.body();
+                        if (messageBean != null) {
+                            if (messageBean.getCode() == 200) {
+                                // 更新上传状态 已上传
+                                dayData.setIsUpload(true);
+                                dayDataDao.update(dayData);
+                            } else {
+                                Toast.makeText(BaseApplication.getBaseApplication(), "运动数据上传失败！", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<MessageBean> call, Throwable t) {
+                        Log.e("testtest", t.toString());
+                    }
+                });
+            }
+        }
+    }
+
+    // 上传睡眠数据
+    private void uploadSleepData() {
+
+        // 获取睡眠数据
+        SleepAllDataDao allDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSleepAllDataDao();
+        if (allDataDao.count() != 0) {
+            List<SleepAllData> sleepAllDataList = allDataDao.queryBuilder().where(SleepAllDataDao.Properties.Is_upload.eq(false)).build().list();
+            for (SleepAllData allData : sleepAllDataList) {
+                SleepTo sleepTo = new SleepTo();
+                sleepTo.setDate(allData.getTod_date());
+                sleepTo.setStart_time(allData.getStart_time());
+                sleepTo.setEnd_time(allData.getEnd_time());
+                sleepTo.setDeep_duration(allData.getDeep_duration());
+                sleepTo.setLight_duration(allData.getLight_duration());
+                sleepTo.setWake_duration(allData.getWake_duration());
+                sleepTo.setScore(allData.getScore());
+                List<SleepTo.HistoryBean> historyBeanList = new ArrayList<>();
+
+                int sleepHour = Integer.valueOf(sleepTo.getStart_time().substring(11, 13));
+                int wakeHour;
+                if (Integer.valueOf(sleepTo.getEnd_time().substring(14, 16)) > 0)
+                    wakeHour = Integer.valueOf(sleepTo.getEnd_time().substring(11, 13)) + 1;
+                else
+                    wakeHour = Integer.valueOf(sleepTo.getEnd_time().substring(11, 13));
+                int length = ((24 - sleepHour) + wakeHour) >= 24 ? ((24 - sleepHour) + wakeHour) - 24 : ((24 - sleepHour) + wakeHour);
+
+                // 获取分时睡眠数据
+                for (int i = 0; i < length; i++) {
+                    SleepTo.HistoryBean historyBean = new SleepTo.HistoryBean();
+                    int hour = (sleepHour + i) >= 24 ? (sleepHour + i) - 24 : (sleepHour + i);
+                    String strHour = hour < 10 ? "0" + hour : hour + "";
+                    if (hour > 12)
+                        historyBean.setTime(allData.getYes_date() + " " + strHour + ":00:00");
+                    else
+                        historyBean.setTime(allData.getTod_date() + " " + strHour + ":00:00");
+                    historyBean.setIndex(Integer.valueOf(allData.getSleep_data().substring(6 * i, 6 + 6 * i)));
+                    historyBeanList.add(historyBean);
+                }
+                sleepTo.setHistory(historyBeanList);
+
+                NetManager.uploadSleepDataAction(token, sleepTo, new NetManager.NetCallBack<MessageBean>() {
+                    @Override
+                    public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
+                        MessageBean message = response.body();
+                        if (message != null && message.getCode() == 200) {
+                            allData.setIs_upload(true);
+                            allDataDao.update(allData);
+                        } else {
+                            Toast.makeText(BaseApplication.getBaseApplication(), "睡眠数据上传失败", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<MessageBean> call, Throwable t) {
+
+                    }
+                });
+            }
+        }
+    }
+
+    // 上传全天心率数据
+    private void uploadHeartData() {
+
+        // 获取心率数据
+        HeartBeatsAllDayDataTo dayDataTo = new HeartBeatsAllDayDataTo();
+        HeartBeatsAllDayMaxMinDao maxMinDao = BaseApplication.getBaseApplication().getBaseDaoSession().getHeartBeatsAllDayMaxMinDao();
+        List<HeartBeatsAllDayMaxMin> maxMinList = maxMinDao.queryBuilder().where(HeartBeatsAllDayMaxMinDao.Properties.IsUpload.eq(false)).build().list();
+        for (HeartBeatsAllDayMaxMin maxMin : maxMinList){
+            // 获取到当天数据，不上传
+            if (maxMin.getDate().equals(DateUtil.getCurrentTime_Y_M_d()))
+                continue;
+            HeartBeatsAllDayHistoryDao historyDao = BaseApplication.getBaseApplication().getBaseDaoSession().getHeartBeatsAllDayHistoryDao();
+            List<HeartBeatsAllDayHistory> histories = historyDao.queryBuilder().
+                    where(HeartBeatsAllDayHistoryDao.Properties.Time.like(maxMin.getDate() + "%")).
+                    build().list();
+            // 数据不存在
+            if (histories.size() == 0)
+                continue;
+            // 插入总数据
+            dayDataTo.setDate(maxMin.getDate());
+            dayDataTo.setMin_heartbeats(maxMin.getMin_heartbeats());
+            dayDataTo.setMax_heartbeats(maxMin.getMax_heartbeats());
+            List<HeartBeatsAllDayDataTo.HistoryBean> historyBeanList = new ArrayList<>();
+            // 获取分时数据
+            for (HeartBeatsAllDayHistory history : histories){
+                HeartBeatsAllDayDataTo.HistoryBean historyBean = new HeartBeatsAllDayDataTo.HistoryBean();
+                historyBean.setHeartbeats(history.getHeartbeats());
+                historyBean.setTime(history.getTime());
+                historyBeanList.add(historyBean);
+            }
+            // 插入分时数据
+            dayDataTo.setHistory(historyBeanList);
+
+            NetManager.uploadAllDayHeartBeats(token, dayDataTo, new NetManager.NetCallBack<MessageBean>() {
+                @Override
+                public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
+                    MessageBean message = response.body();
+                    if ((message != null ? message.getCode() : 0) == 200){
+                        maxMin.setIsUpload(true);
+                        maxMinDao.update(maxMin);
+                    } else {
+                        Toast.makeText(BaseApplication.getBaseApplication(), "心率数据上传失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<MessageBean> call, Throwable t) {
+
+                }
+            });
+        }
+    }
+
+    boolean runningState = false;
+    // 异步执行
+    Runnable runnableSaveData = new Runnable() {
+        @Override
+        public void run() {
+            runningState = true;
+            if (which_device.equals("2")) {
+                b_getDataFromDevice();
+            } else {
+                while(!MyApplication.getInstances().getThread().canCallBack){
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                p_getDataFromDevice();
+            }
+//            try {
+//                Thread.sleep(2000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            uploadData();
+            runningState = false;
+        }
+    };
+
 
     /**************************************************************************/
+    Thread purpleConnectionListener;
     //紫色手环连接相关
-    private ManagerDeviceService managerDeviceService;
-    private BluetoothAdapter mBluetoothAdapter;
-    private InternalReceiver internalReceiver;
-
     private void purpleConnectAction() {
+        Intent intent = new Intent(mActivity, PurpleBLEService.class);
+        intent.setAction("lbcy.com.cn.purplelibrary.service.PurpleBLEService");
+        String mac_address = spUtil.getString("deviceAddress");
+        intent.putExtra("mac_address", mac_address);
+        startService(intent);
 
-        managerDeviceService = new ManagerDeviceService(mActivity);
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(mActivity, "本机没有找到蓝牙硬件或驱动！", Toast.LENGTH_SHORT).show();
-        } else {
-            if (!mBluetoothAdapter.isEnabled()) {
-                Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                enableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-                startActivityForResult(enableIntent, 10001);
+        purpleConnectionListener = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long time = System.currentTimeMillis();
+                while(spUtil.getString("is_connected","0").equals("0")){
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Thread thread = new Thread(runnableSaveData);
+                thread.start();
             }
-        }
+        });
+        purpleConnectionListener.start();
+    }
 
-        // 检查当前手机是否支持ble 蓝牙,如果不支持退出程序
-        if (!MainActivity.this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(MainActivity.this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-        }
-
-        // 初始化 Bluetooth adapter, 通过蓝牙管理器得到一个参考蓝牙适配器(API必须在以上android4.3或以上和版本)
-        final BluetoothManager bluetoothManager = (BluetoothManager) MainActivity.this.getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-
-        // 检查设备上是否支持蓝牙
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(MainActivity.this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
-        }
+    private void p_getDataFromDevice() {
+        // 同步时间
+        PurpleDeviceManagerNew.getInstance().syncTime();
 
         try {
-            registerReceiver(new String[]{
-                    CommonConfiguration.RESULT_CONNECT_DEVICE_NOTIFICATION,
-                    CommonConfiguration.RESULT_FAIL_CONNECT_DEVICE_NOTIFICATION
-            });
-        } catch (Exception e) {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        startService();
-    }
+        // 读取设备信息（包括闹钟信息）
+        PurpleDeviceManagerNew.getInstance().readDeviceConfig();
 
-    class ConnectDeviceTask extends AsyncTask<Integer, Integer, Integer> {
-        @Override
-        protected void onPreExecute() {
-            try {
-//                deviceName = sharedPreferencesDao.getString("deviceName");
-//                deviceAddress = sharedPreferencesDao.getString("deviceAddress");
-//                if (deviceName != null && !"".equals(deviceName) && !"null".equals(deviceName)) {
-//                    dialog = new LoadingDialog(MainActivity.this, "正在连接" + deviceName, 1);
-//                    dialog.setCanceledOnTouchOutside(false);
-//                    dialog.show();
-//                }
-            } catch (Exception e) {
-
-            }
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            try {
-                Thread.sleep(1000l);
-                managerDeviceService.startService();
-                ToastUtil.toast("正在连接设备，请稍后...");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return 0;
-        }
-
-        /**
-         * 运行在ui线程中，在doInBackground()执行完毕后执行
-         */
-        @Override
-        protected void onPostExecute(Integer integer) {
-//            if(integer==1){
-//                if (dialog != null) {
-//                    dialog.dismiss();
-//                }
-//                Toast.makeText(mActivity, "没有要连接的设备", Toast.LENGTH_SHORT).show();
-//            }
-
-
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-
-        }
-    }
-
-    protected final void registerReceiver(String[] actionArray) {
-        if (actionArray == null) {
-            return;
-        }
-        IntentFilter intentfilter = new IntentFilter();
-        for (String action : actionArray) {
-            intentfilter.addAction(action);
-        }
-        if (internalReceiver == null) {
-            internalReceiver = new InternalReceiver();
-        }
         try {
-
-            registerReceiver(internalReceiver, intentfilter);
-        } catch (Exception e) {
-        }
-    }
-
-    private class InternalReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent == null || intent.getAction() == null) {
-                return;
-            }
-            handleReceiver(context, intent);
-        }
-    }
-
-    boolean isToastFlag = true;
-
-    protected void handleReceiver(Context context, Intent intent) {
-
-        if (intent.getAction().equals(CommonConfiguration.RESULT_CONNECT_DEVICE_NOTIFICATION)) {
-            if (isToastFlag) {
-                ToastUtil.toast("连接成功！");
-                isToastFlag = false;
-            }
-        } else if (intent.getAction().equals(CommonConfiguration.RESULT_FAIL_CONNECT_DEVICE_NOTIFICATION)) {
-            Toast.makeText(MainActivity.this, "连接设备失败", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void startService() {
-        new ConnectDeviceTask().execute();
-    }
-
-    public void stopService() {
-        try {
-            managerDeviceService.stopService();
-        } catch (Exception e) {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        // 获取当天运动数据（步数）
+        PurpleDeviceManagerNew.getInstance().getSportData(new DataListener<String>() {
+            @Override
+            public void getData(String data) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date datetime = new Date();
+                String date = format.format(datetime);
+
+                if (sportAllDayData == null)
+                    sportAllDayData = new SportAllDayData();
+                sportAllDayData.setDate(date);
+                sportAllDayData.setDone_steps(Integer.valueOf(data));
+                SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().
+                        getSportAllDayDataDao();
+                SportAllDayData buf = dayDataDao.queryBuilder().
+                        where(SportAllDayDataDao.Properties.Date.eq(date)).
+                        build().unique();
+                if (buf == null) {
+                    dayDataDao.insert(sportAllDayData);
+                } else {
+                    sportAllDayData.setId(buf.getId());
+                    sportAllDayData.setIsUpload(buf.getIsUpload());
+                    dayDataDao.update(sportAllDayData);
+                }
+
+                // 紫色手环上传运动数据
+                uploadSportData();
+            }
+        });
+
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 获取历史运动数据
+        PurpleDeviceManagerNew.getInstance().getSportHistory(new DataListener<List<SportData>>() {
+            @Override
+            public void getData(List<SportData> data) {
+                for (SportData mData : data){
+                    String date = mData.getDate();
+
+                    if (sportAllDayData == null)
+                        sportAllDayData = new SportAllDayData();
+                    sportAllDayData.setDate(date);
+                    sportAllDayData.setDone_steps(mData.getStep());
+                    SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().
+                            getSportAllDayDataDao();
+                    SportAllDayData buf = dayDataDao.queryBuilder().
+                            where(SportAllDayDataDao.Properties.Date.eq(date)).
+                            build().unique();
+                    if (buf == null) {
+                        dayDataDao.insert(sportAllDayData);
+                    } else {
+                        sportAllDayData.setId(buf.getId());
+                        sportAllDayData.setIsUpload(buf.getIsUpload());
+                        dayDataDao.update(sportAllDayData);
+                    }
+                }
+
+                // 紫色手环上传运动数据
+                uploadSportData();
+            }
+        });
+
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 获取睡眠数据
+        PurpleDeviceManagerNew.getInstance().getSleepData(new DataListener<Bundle>() {
+            @Override
+            public void getData(Bundle data) {
+                boolean isSleepValid = data.getBoolean("isSleepValid");
+                byte sleepHour = data.getByte("sleepHour");
+                byte sleepMin = data.getByte("sleepMin");
+                byte wakeHour = data.getByte("wakeHour");
+                byte wakeMin = data.getByte("wakeMin");
+                byte wakeCount = data.getByte("wakeCount");
+                int deepTime = data.getInt("deepTime");
+                int lightTime = data.getInt("lightTime");
+                int sleepScore = data.getInt("sleepScore");
+                byte[] sleepShowRaw = data.getByteArray("sleepShowRaw");
+                int sleepShowRawi = data.getInt("sleepShowRawi");
+
+                // 睡眠是否有效
+                if (!isSleepValid)
+                    return;
+
+                String yes_date = DateUtil.getYesterdayTime_Y_M_d();
+                String tod_date = DateUtil.getCurrentTime_Y_M_d();
+                String sleepTime = (sleepHour < 10 ? "0"+sleepHour : sleepHour) + ":" + (sleepMin < 10 ? "0" + sleepMin : sleepMin) + ":00";
+                String wakeTime = (wakeHour < 10 ? "0"+wakeHour : wakeHour) + ":" + (wakeMin < 10 ? "0" + wakeMin : wakeMin) + ":00";
+                String startTime = yes_date + " " + sleepTime;
+                String endTime = tod_date + " " + wakeTime;
+
+                if (sleepShowRaw == null)
+                    return;
+
+                int deep = deepTime;
+                int light = lightTime;
+                int wake = sleepShowRaw.length - deep - light;
+                int buf_state = 0;
+                // 处理后的睡眠数据
+                StringBuilder buffer = new StringBuilder("");
+                // 睡眠原数据字符串
+                StringBuilder sleepAllData = Util.bytesToString(sleepShowRaw);
+                // 处理前的睡眠数据前缀
+                StringBuilder before = new StringBuilder("");
+                // 处理前的睡眠数据后缀
+                StringBuilder later = new StringBuilder("");
+                for (int i=0; i<sleepMin; i++){
+                    before.append(2);
+                }
+                if (wakeMin > 0)
+                    for (int i=0; i<60-wakeMin; i++){
+                        later.append(2);
+                    }
+                sleepAllData = before.append(sleepAllData).append(later);
+                // // 睡眠原数据char数组
+                char[] sleepData = sleepAllData.toString().toCharArray();
+
+                for (int i = 0; i< sleepData.length; i+=10){
+                    for (int j = i; j < i+10; j++){
+                        if (j >= sleepData.length)
+                            break;
+                        if (sleepData[j] == '3'){
+                            buf_state = 3;
+                            break;
+                        }else if (sleepData[j] == '0' && buf_state < 2){
+                            buf_state = 2;
+                        }else if (sleepData[j] == '2' && buf_state < 1){
+                            buf_state = 1;
+                        }
+                    }
+                    buffer.append(buf_state);
+                    buf_state = 0;
+                }
+
+                SleepAllDataDao allDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSleepAllDataDao();
+                // 校验今日睡眠是否已缓存，已缓存则无需再次缓存
+                if (allDataDao.queryBuilder().where(SleepAllDataDao.Properties.Yes_date.eq(yes_date)).count() != 0)
+                    return;
+
+                // 缓存总睡眠数据
+                SleepAllData allData = new SleepAllData(null, yes_date, tod_date, startTime, endTime, deep, light, wake, sleepScore, buffer.toString(), false);
+                allDataDao.insert(allData);
+
+                // 紫色手环上传睡眠数据
+                uploadSleepData();
+            }
+        });
+
     }
 
     /**************************************************************************/
@@ -860,51 +1177,375 @@ public class MainActivity extends BaseFragmentActivity {
     BleScanHelper scanHelper;
     DeviceConnectManager manager;
 
+    private boolean isFirstConnect = true;
     private void blackConnectAction() {
-        Toast.makeText(getApplicationContext(), "设备连接中", Toast.LENGTH_SHORT).show();
+        if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()){
+            if (isFirstConnect){
+                Toast.makeText(getApplicationContext(), "设备连接中", Toast.LENGTH_SHORT).show();
+                isFirstConnect = false;
+            }
+        }
         String mac_address = spUtil.getString("deviceAddress");
         scanHelper = new BleScanHelper(this);
-        manager = new DeviceConnectManager(getApplicationContext());
 
         scanHelper.startRxAndroidBleScan(new BleScanCallback() {
             @Override
             public void updateUI(BleDevice device) {
                 if (device.getMacAddress().equals(mac_address)) {
-                    scanHelper.stopRxAndroidBleScan();
-                    manager.selectRxAndroidBleDevice(Consts.BLACK_WRISTBAND_NAME, mac_address);
+                    if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+                        return;
+                    }
+                    if (manager != null)
+                        manager.selectRxAndroidBleDevice(Consts.BLACK_WRISTBAND_NAME, mac_address);
                 }
             }
         });
+        if (manager == null){
+            manager = new DeviceConnectManager(getApplicationContext());
+            manager.registerReceiverForAllEvent(new DeviceConnect() {
+                @Override
+                public void connect() {
+                    Toast.makeText(getApplicationContext(), "连接成功！", Toast.LENGTH_SHORT).show();
+                    // 时间同步
+                    BlackDeviceManager.getInstance().synTime(new DataCallback<byte[]>() {
+                        @Override
+                        public void OnSuccess(byte[] data) {
 
-        manager.registerReceiverForAllEvent(new DeviceConnect() {
+                        }
+
+                        @Override
+                        public void OnFailed() {
+
+                        }
+
+                        @Override
+                        public void OnFinished() {
+
+                        }
+                    });
+
+                    //心率实时获取方法，包含其他方法回调，需要提前调用
+                    BlackDeviceManager.getInstance().startHeartRateListener(new DataCallback<byte[]>() {
+                        @Override
+                        public void OnSuccess(byte[] data) {
+
+                        }
+
+                        @Override
+                        public void OnFailed() {
+
+                        }
+
+                        @Override
+                        public void OnFinished() {
+
+                        }
+                    });
+
+                    BlackDeviceManager.getInstance().getHardwareVersion(new DataCallback<String>() {
+                        @Override
+                        public void OnSuccess(String data) {
+                            spUtil.putString("black_version", data);
+                        }
+
+                        @Override
+                        public void OnFailed() {
+
+                        }
+
+                        @Override
+                        public void OnFinished() {
+
+                        }
+                    });
+
+                    // 获取运动数据，并上传非当天数据，紫色手环连接成功务必也要调用！！！
+                    Thread thread = new Thread(runnableSaveData);
+                    thread.start();
+                }
+
+                @Override
+                public void scan(ArrayList data) {
+                    blackConnectAction();
+                }
+            });
+            manager.startService();
+        }
+
+        // 设备连接超时，重新扫描连接
+        manager.rescan();
+        manager.alert();
+    }
+
+    // 黑色手环待上传数据统一获取
+    private void b_getDataFromDevice() {
+        // 获取全天数据
+        BlackDeviceManager.getInstance().getDayData(new DataCallback<byte[]>() {
             @Override
-            public void connect() {
-                Toast.makeText(getApplicationContext(), "连接成功！", Toast.LENGTH_SHORT).show();
-                // 时间同步
-                BlackDeviceManager.getInstance().synTime(new DataCallback<byte[]>() {
-                    @Override
-                    public void OnSuccess(byte[] data) {
+            public void OnSuccess(byte[] data) {
 
-                    }
+                int day = data[0];                // 日
+                int month = data[1];              // 月
+                int year = data[2] + 2000;        // 年
+                int stepAll = FormatUtils.byte2Int(data, 4);
 
-                    @Override
-                    public void OnFailed() {
+                Calendar calendarData = Calendar.getInstance();
+                calendarData.set(year, (month - 1), day);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String date = format.format(calendarData.getTime());
 
-                    }
-
-                    @Override
-                    public void OnFinished() {
-
-                    }
-                });
+                if (sportAllDayData == null)
+                    sportAllDayData = new SportAllDayData();
+                sportAllDayData.setDate(date);
+                sportAllDayData.setDone_steps(stepAll);
+                SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().
+                        getSportAllDayDataDao();
+                SportAllDayData buf = dayDataDao.queryBuilder().
+                        where(SportAllDayDataDao.Properties.Date.eq(date)).
+                        build().unique();
+                if (buf == null) {
+                    dayDataDao.insert(sportAllDayData);
+                } else {
+                    sportAllDayData.setId(buf.getId());
+                    sportAllDayData.setIsUpload(buf.getIsUpload());
+                    dayDataDao.update(sportAllDayData);
+                }
             }
 
             @Override
-            public void scan(ArrayList data) {
+            public void OnFailed() {
+
+            }
+
+            @Override
+            public void OnFinished() {
 
             }
         });
-        manager.startService();
+
+        if(Looper.myLooper() != Looper.getMainLooper()){
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // 获取每小时数据
+        BlackDeviceManager.getInstance().getEachHourStep(new DataCallback<byte[]>() {
+            @Override
+            public void OnSuccess(byte[] data) {
+                int day = data[0];                // 日
+                int month = data[1];              // 月
+                int year = data[2] + 2000;        // 年
+
+                Calendar calendarData = Calendar.getInstance();
+                calendarData.set(year, (month - 1), day);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String date = format.format(calendarData.getTime());
+
+                int step;
+                for (int i = 0; i < 24; i++) {
+                    step = FormatUtils.byte2Int(data, 4 * (i + 1));
+                    if (step == -1)
+                        step = 0;
+                    sportSplitData = new SportSplitData();
+                    sportSplitData.setDate(date + " " + (String.valueOf(i).length() == 1 ? ("0" + i) : (i)) + ":00:00");
+                    sportSplitData.setSteps(step);
+                    sportSplitData.setDuration("01:00:00");
+                    SportSplitDataDao dataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSportSplitDataDao();
+                    SportSplitData buf = dataDao.queryBuilder().where(SportSplitDataDao.Properties.Date.eq(sportSplitData.getDate())).build().unique();
+                    if (buf == null) {
+                        dataDao.insert(sportSplitData);
+                    } else {
+                        sportSplitData.setId(buf.getId());
+                        dataDao.update(sportSplitData);
+                    }
+                }
+
+                // 黑色手环，上传运动数据
+                uploadSportData();
+            }
+
+            @Override
+            public void OnFailed() {
+
+            }
+
+            @Override
+            public void OnFinished() {
+
+            }
+        });
+
+
+
+        if(Looper.myLooper() != Looper.getMainLooper()){
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // 10点之后能获取一天的完整数据，因此10点后再取值
+        if (DateUtil.getCurrentTime_H_m().compareTo("10:00") >= 0){
+            // 获取昨晚睡眠数据
+            BlackDeviceManager.getInstance().getSleepData(new DataCallback<String>() {
+                @Override
+                public void OnSuccess(String data) {
+                    // 获取时间
+                    String yes_date = data.split("###")[1];
+                    String tod_date = data.split("###")[2];
+                    // 获取数据
+                    data = data.split("###")[0];
+
+                    // 3未设置，代表0清醒
+                    data = data.replaceAll("3", "0");
+                    // 2深睡，改为3深睡
+                    data = data.replaceAll("2", "3");
+                    // 1浅睡，改为2浅睡
+                    data = data.replaceAll("1", "2");
+                    // 0清醒，改为1清醒
+                    data = data.replaceAll("0", "1");
+
+                    char[] sleepData = data.toCharArray();
+                    int deep = 0;
+                    int light = 0;
+                    int wake = 0;
+                    // 获取不同类别睡眠状态时间
+                    for (char s : sleepData) {
+                        switch (s) {
+                            case '1':
+                                wake += 10;
+                                break;
+                            case '2':
+                                light += 10;
+                                break;
+                            case '3':
+                                deep += 10;
+                                break;
+                        }
+                    }
+
+                    SleepAllDataDao allDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSleepAllDataDao();
+                    // 校验今日睡眠是否已缓存，已缓存则无需再次缓存
+                    if (allDataDao.queryBuilder().where(SleepAllDataDao.Properties.Yes_date.eq(yes_date)).count() == 0){
+                        String startTime = yes_date + " 22:00:00";
+                        String endTime = tod_date + " 10:00:00";
+                        int score = (int) ((deep + light) / 60.0 / 8.0 * 100);
+                        // 缓存总睡眠数据
+                        SleepAllData allData = new SleepAllData(null, yes_date, tod_date, startTime, endTime, deep, light, wake, score, data, false);
+                        allDataDao.insert(allData);
+                    }
+
+                    // 黑色手环，上传睡眠数据
+                    uploadSleepData();
+                }
+
+                @Override
+                public void OnFailed() {
+
+                }
+
+                @Override
+                public void OnFinished() {
+
+                }
+            });
+        }
+
+
+        if(Looper.myLooper() != Looper.getMainLooper()){
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // 获取全天心率数据
+        BlackDeviceManager.getInstance().getDayHeartRateData(new DataCallback<byte[]>() {
+            @Override
+            public void OnSuccess(byte[] data) {
+                int maxValue = 0, minValue = Integer.MAX_VALUE;
+
+                int day = (data[0] & 0xff);
+                int month = (data[1] & 0xff);
+                int year = (data[2] & 0xff) + 2000;
+
+                byte[] dataThree = new byte[180];
+
+                // 复制以获取所有心率数据
+                System.arraycopy(data, 6, dataThree, 0, dataThree.length);
+
+                Calendar calendarData = Calendar.getInstance();
+                calendarData.set(year, (month - 1), day);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String date = format.format(calendarData.getTime());
+
+                // 心率历史数据库
+                HeartBeatsAllDayHistoryDao historyDao = BaseApplication.getBaseApplication().getBaseDaoSession().getHeartBeatsAllDayHistoryDao();
+
+                int base = data[5];
+                //(0+(base-1)*3)点到(2+(base-1)*3)点数据
+                for (int j = 0; j < dataThree.length / 60; j++) {
+                    for (int i = j * 60; i < j * 60 + 60; i++) {
+                        int heartRate = (dataThree[i] == 0 || dataThree[i] == -1) ? 0 : dataThree[i];
+                        if (dataThree[i] != 0 && heartRate > 0){
+                            if (heartRate > maxValue)
+                                maxValue = heartRate;
+                            if (heartRate < minValue)
+                                minValue = heartRate;
+                        }
+
+                        int hour = j + (base - 1) * 3;
+                        int minute = i - j * 60;
+                        int second = 0;
+                        calendarData.set(year, (month - 1), day, hour, minute, second);
+                        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                        String time = format1.format(calendarData.getTime());
+                        HeartBeatsAllDayHistory history = new HeartBeatsAllDayHistory(null, time, heartRate);
+                        // 已存在该时间数据
+                        if (historyDao.queryBuilder().where(HeartBeatsAllDayHistoryDao.Properties.Time.eq(time)).count() != 0){
+                            continue;
+                        }
+                        // 未到的时间，数据不插入数据库
+                        if (time.compareTo(DateUtil.getCurrentTime())> 0)
+                            continue;
+                        // 插入数据库
+                        historyDao.insert(history);
+
+                    }
+                }
+
+                if (minValue == Integer.MAX_VALUE)
+                    minValue = 0;
+
+                HeartBeatsAllDayMaxMinDao maxMinDao = BaseApplication.getBaseApplication().getBaseDaoSession().getHeartBeatsAllDayMaxMinDao();
+                HeartBeatsAllDayMaxMin buf = maxMinDao.queryBuilder().where(HeartBeatsAllDayMaxMinDao.Properties.Date.eq(date)).build().unique();
+                HeartBeatsAllDayMaxMin maxMin = new HeartBeatsAllDayMaxMin(null, date, minValue, maxValue, false);
+                if (buf == null)
+                    maxMinDao.insert(maxMin);
+                else if (buf.getMin_heartbeats() != minValue || buf.getMax_heartbeats() != maxValue){
+                    maxMin.setId(buf.getId());
+                    maxMinDao.update(maxMin);
+                }
+
+                // 黑色手环，上传心率数据
+                uploadHeartData();
+            }
+
+            @Override
+            public void OnFailed() {
+
+            }
+
+            @Override
+            public void OnFinished() {
+
+            }
+        });
     }
 
     /**************************************************************************/

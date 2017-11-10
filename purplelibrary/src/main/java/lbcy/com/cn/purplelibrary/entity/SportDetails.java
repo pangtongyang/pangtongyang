@@ -176,4 +176,5 @@ public class SportDetails {
         this.weekDate = weekDate;
     }
 
+
 }

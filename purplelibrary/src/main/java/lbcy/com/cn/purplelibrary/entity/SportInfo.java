@@ -121,4 +121,6 @@ public class SportInfo {
         this.isUpload = isUpload;
     }
 
+
+
 }

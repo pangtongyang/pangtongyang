@@ -1,27 +1,41 @@
 package lbcy.com.cn.wristband.activity;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
+import java.util.List;
+
 import butterknife.BindView;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.settingitemlibrary.SetItemView;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
+import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.utils.DialogUtil;
 import lbcy.com.cn.wristband.utils.ToastUtil;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.AppSettingsDialog;
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * Created by chenjie on 2017/9/8.
  */
 
-public class SetMessagePushActivity extends BaseActivity {
+public class SetMessagePushActivity extends BaseActivity implements EasyPermissions.PermissionCallbacks{
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 1001;
+    private static final int RC_READ_SMS_PERM = 1002;
+    private static final String[] READ_SMS = {Manifest.permission.READ_SMS};
+    public static final String TAG = SetMessagePushActivity.class.getSimpleName();
     @BindView(R.id.rl_sms_push)
     SetItemView rlSmsPush;
     @BindView(R.id.rl_qq_push)
@@ -42,7 +56,7 @@ public class SetMessagePushActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        spUtil = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
     }
 
     @Override
@@ -89,6 +103,7 @@ public class SetMessagePushActivity extends BaseActivity {
         rlSmsPush.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
+//                read_sms(state);
                 spUtil.putString("sms_switch", state?"1":"0");
             }
         });
@@ -118,8 +133,8 @@ public class SetMessagePushActivity extends BaseActivity {
                 ENABLED_NOTIFICATION_LISTENERS);
         if (!TextUtils.isEmpty(flat)) {
             final String[] names = flat.split(":");
-            for (int i = 0; i < names.length; i++) {
-                final ComponentName cn = ComponentName.unflattenFromString(names[i]);
+            for (String name : names) {
+                final ComponentName cn = ComponentName.unflattenFromString(name);
                 if (cn != null) {
                     if (TextUtils.equals(pkgName, cn.getPackageName())) {
                         return true;
@@ -128,6 +143,34 @@ public class SetMessagePushActivity extends BaseActivity {
             }
         }
         return false;
+    }
+
+    private boolean hasSMSPermissions(){
+        return EasyPermissions.hasPermissions(mActivity, READ_SMS);
+    }
+
+    @AfterPermissionGranted(RC_READ_SMS_PERM)
+    public void read_sms(boolean state){
+        if (state){
+            if (hasSMSPermissions()){
+                // Have permissions, do the thing!
+                spUtil.putString("sms_switch", "1");
+            } else {
+                EasyPermissions.requestPermissions(mActivity,
+                        "当前应用缺少短信权限，请打开所需权限",
+                        RC_READ_SMS_PERM,
+                        READ_SMS);
+            }
+        } else {
+            spUtil.putString("sms_switch", "0");
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // EasyPermissions handles the request result.
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
     @Override
@@ -142,6 +185,14 @@ public class SetMessagePushActivity extends BaseActivity {
                     rlSmsPush.setEnable(false);
                     rlTelephonePush.setEnable(false);
                     rlWechatPush.setEnable(false);
+                }
+                break;
+            case AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE:
+                PackageManager pm = getPackageManager();
+                Toast.makeText(BaseApplication.getBaseApplication(), getString(R.string.string_help_text), Toast.LENGTH_SHORT).show();
+                if (!(PackageManager.PERMISSION_GRANTED ==
+                    pm.checkPermission("android.permission.READ_SMS", mActivity.getPackageName()))){
+                    rlSmsPush.setChecked(false);
                 }
                 break;
         }
@@ -163,4 +214,20 @@ public class SetMessagePushActivity extends BaseActivity {
         spUtil.putString("wechat_switch", rlWechatPush.isChecked()?"1":"0");
     }
 
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> perms) {
+        Log.d(TAG, "onPermissionsGranted:" + requestCode + ":" + perms.size());
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> perms) {
+        Log.d(TAG, "onPermissionsDenied:" + requestCode + ":" + perms.size());
+        if (requestCode == RC_READ_SMS_PERM){
+            rlSmsPush.setChecked(false);
+
+            if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+                new AppSettingsDialog.Builder(this).setTitle(R.string.settings).setRationale("当前应用缺少短信权限，请打开所需权限").build().show();
+            }
+        }
+    }
 }

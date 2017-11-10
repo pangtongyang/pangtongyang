@@ -1,6 +1,7 @@
 package lbcy.com.cn.wristband.popup;
 
 import android.app.Activity;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -22,11 +23,14 @@ import java.lang.ref.WeakReference;
 import java.util.Locale;
 
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.entity.HardwareUpdateBean;
 import lbcy.com.cn.wristband.global.Consts;
+import lbcy.com.cn.wristband.rx.RxBus;
+import lbcy.com.cn.wristband.utils.HandlerTip;
 import razerdp.basepopup.BasePopupWindow;
 
 /**
@@ -48,13 +52,13 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
     private String title;
     private String filepath;
     private String url;
-    HardwareUpdateBean updateBean; //更新相关信息
-    int updateNum = 0; //待更新固件数量
+    private HardwareUpdateBean updateBean; //更新相关信息
+    private int updateNum = 0; //待更新固件数量
 
     int type = 1;
-    int downloadStatus = 0; // 0 ~ updateNum -> 下载过程 updateNum -> 升级过程
-    int updateStatus = -1; // 当前升级进行中的固件
-    int downloadId;
+    private int downloadStatus = 0; // 0 ~ updateNum -> 下载过程 updateNum -> 升级过程
+    private int updateStatus = -1; // 当前升级进行中的固件
+    private int downloadId;
 
     /**
      * 批量更新
@@ -64,9 +68,17 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
     public UpdatePopup(Activity context, HardwareUpdateBean updateBean){
         super(context);
         bindEvent();
-        this.updateBean = updateBean;
-        updateNum = updateBean.getParam().size();
-        doing();
+        SPUtil spUtil = new SPUtil(context, CommonConfiguration.SHAREDPREFERENCES_NAME);
+        if (spUtil.getString("which_device", "2").equals("2")){
+            this.updateBean = updateBean;
+            updateNum = updateBean.getParam().size();
+            doing();
+        } else {
+            downloadStatus = updateNum;
+            tvSpeed.setText("");
+            pbDoing.setIndeterminate(true);
+        }
+
     }
 
     private void doing(){
@@ -186,7 +198,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
     private String setFilePath(String type){
         String path;
         // 根据实际情况做更改
-        switch (updateBean.getParam().get(downloadStatus).getType()) {
+        switch (type) {
             case "mcu":
                 path = FileDownloadUtils.getDefaultSaveRootPath() + File.separator +
                         Consts.FILE_DOWNLOAD_CACHE_DIR + File.separator + Consts.FILE_MCU_NAME;
@@ -272,7 +284,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
 
     // 固件升级
     private void updating(){
-        SPUtil spUtil = new SPUtil(getContext(), Consts.SETTING_DB_NAME);
+        SPUtil spUtil = new SPUtil(getContext(), CommonConfiguration.SHAREDPREFERENCES_NAME);
         String which_device = spUtil.getString("which_device", "2");
 
         updateStatus++;
@@ -282,12 +294,22 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
             pbDoing.setProgress(1);
             tvSpeed.setText("固件升级成功！");
             Toast.makeText(BaseApplication.getBaseApplication(), "固件升级成功！", Toast.LENGTH_SHORT).show();
+            HandlerTip.getInstance().postDelayed(2000, new HandlerTip.HandlerCallback() {
+                @Override
+                public void postDelayed() {
+                    Message message = new Message();
+                    message.what = Consts.CONNECT_DEVICE;
+                    RxBus.getInstance().post(Consts.ACTIVITY_MANAGE_LISTENER, message);
+                    dismiss();
+                }
+            });
             return;
         }
         if (which_device.equals("2")){
-            tvSpeed.setText(String.format(Locale.getDefault(), "固件升级中.. %d/2", (updateStatus+1)));
+            tvSpeed.setText(String.format(Locale.getDefault(), "固件升级中.. %d/" + updateNum, (updateStatus+1)));
             String path = setFilePath(updateBean.getParam().get(updateStatus).getType());
-            BlackDeviceManager.getInstance().updateHardwareVersion(path, new UpdateVersionTask.UpdateListener() {
+
+            BlackDeviceManager.getInstance().updateHardwareVersion(getContext(), path, new UpdateVersionTask.UpdateListener() {
                 @Override
                 public void onProgress(int i) {
 
@@ -295,13 +317,19 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
 
                 @Override
                 public void onUpdateSuccess() {
-                    updating();
+                    HandlerTip.getInstance().postDelayed(1000, new HandlerTip.HandlerCallback() {
+                        @Override
+                        public void postDelayed() {
+                            updating();
+                        }
+                    });
                 }
 
                 @Override
                 public void onUpdateFailed() {
                     pbDoing.setIndeterminate(false);
                     Toast.makeText(BaseApplication.getBaseApplication(), "固件升级失败！", Toast.LENGTH_SHORT).show();
+                    dismiss();
                 }
             });
         } else {

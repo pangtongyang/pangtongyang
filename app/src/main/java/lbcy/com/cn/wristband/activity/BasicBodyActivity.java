@@ -1,6 +1,8 @@
 package lbcy.com.cn.wristband.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,6 +15,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
@@ -25,6 +28,7 @@ import lbcy.com.cn.wristband.entity.UserInfoData;
 import lbcy.com.cn.wristband.entity.UserInfoDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
+import lbcy.com.cn.wristband.rx.RxBus;
 import lbcy.com.cn.wristband.utils.DialogUtil;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -55,7 +59,7 @@ public class BasicBodyActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        spUtil = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
         token = spUtil.getString("token", "");
         which_device = spUtil.getString("which_device", "2");
     }
@@ -64,8 +68,13 @@ public class BasicBodyActivity extends BaseActivity {
     protected void initView() {
         setTitle(getResources().getString(R.string.simplebody));
 
-        getDataFromDisk();
-        getDataFromNetwork();
+        if (getIntent().getBooleanExtra("login", false)){
+            Toast.makeText(mActivity, "身高体重尚未设置，请设置身高体重！", Toast.LENGTH_SHORT).show();
+        } else {
+            getDataFromDisk();
+            getDataFromNetwork();
+        }
+
     }
 
     @Override
@@ -88,16 +97,25 @@ public class BasicBodyActivity extends BaseActivity {
     // 向服务器上传身高体重
     private void setBodyData(){
         BasicBodyData data = new BasicBodyData();
-        data.setHeight(Integer.valueOf(etHeight.getText().toString().trim()));
-        data.setWeight(Integer.valueOf(etWeight.getText().toString().trim()));
+        data.setHeight(Double.valueOf(etHeight.getText().toString().trim()));
+        data.setWeight(Double.valueOf(etWeight.getText().toString().trim()));
         NetManager.setBodyDataAction(token, data, new NetManager.NetCallBack<MessageBean>() {
             @Override
             public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
                 MessageBean messageBean = response.body();
                 if ((messageBean != null ? messageBean.getCode() : 0) == 200){
-                    if (which_device.equals("2")){
-                        b_setBodyDataToDevice();
+//                    if (which_device.equals("2")){
+//                        b_setBodyDataToDevice();
+//                    }
+                    Toast.makeText(BaseApplication.getBaseApplication(), "身高体重设置成功！", Toast.LENGTH_SHORT).show();
+                    if (getIntent().getBooleanExtra("login", false)){
+                        spUtil.putString("body_data", "1");
+                        Intent intent = new Intent(mActivity, MainActivity.class);
+                        intent.putExtra("isSplashed", true);
+                        startActivity(intent);
+                        finish();
                     }
+
                 } else {
                     Toast.makeText(mActivity, messageBean != null ? messageBean.getMessage() : null, Toast.LENGTH_SHORT).show();
                 }
@@ -128,7 +146,7 @@ public class BasicBodyActivity extends BaseActivity {
         String gender = data.getSex() == 0 ? "1" : "0";
         String birth = data.getBirth();
         if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
-            BlackDeviceManager.getInstance().setBodyItem(height, weight, gender, birth);
+            BlackDeviceManager.getInstance().setBodyItem(String.valueOf(Double.valueOf(height).intValue()), String.valueOf(Double.valueOf(weight).intValue()), gender, birth);
             Toast.makeText(mActivity, "身高体重设置成功！", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(mActivity, "手环未连接！", Toast.LENGTH_SHORT).show();
@@ -144,6 +162,14 @@ public class BasicBodyActivity extends BaseActivity {
         }
         if (etWeight.getText().toString().trim().equals("")){
             DialogUtil.showDialog(mActivity, "体重为空！", false);
+            return false;
+        }
+        if (Double.valueOf(etHeight.getText().toString().trim()) < 50 || Double.valueOf(etHeight.getText().toString().trim()) > 300){
+            DialogUtil.showDialog(mActivity, "身高超出范围！", false);
+            return false;
+        }
+        if (Double.valueOf(etWeight.getText().toString().trim()) <= 0 || Double.valueOf(etWeight.getText().toString().trim()) > 300){
+            DialogUtil.showDialog(mActivity, "体重超出范围！", false);
             return false;
         }
 
@@ -193,4 +219,15 @@ public class BasicBodyActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (getIntent().getBooleanExtra("login", false) && spUtil.getString("body_data", "0").equals("1")){
+            // 连接设备
+            Message message = new Message();
+            message.what = Consts.CONNECT_DEVICE;
+            RxBus.getInstance().post(Consts.ACTIVITY_MANAGE_LISTENER, message);
+            finish();
+        }
+    }
 }

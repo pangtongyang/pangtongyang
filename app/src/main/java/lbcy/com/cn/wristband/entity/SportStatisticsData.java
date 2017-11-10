@@ -23,14 +23,14 @@ public class SportStatisticsData {
     @Id
     private Long id;
     private int average_steps;
-    private int average_calorie;
+    private double average_calorie;
     private String optimal_week;
     private String optimal_date;
     private int total_days;
     private int qualified_days;
     private int goal_steps;
-    @Generated(hash = 452721203)
-    public SportStatisticsData(Long id, int average_steps, int average_calorie,
+    @Generated(hash = 37955180)
+    public SportStatisticsData(Long id, int average_steps, double average_calorie,
             String optimal_week, String optimal_date, int total_days,
             int qualified_days, int goal_steps) {
         this.id = id;
@@ -57,10 +57,10 @@ public class SportStatisticsData {
     public void setAverage_steps(int average_steps) {
         this.average_steps = average_steps;
     }
-    public int getAverage_calorie() {
+    public double getAverage_calorie() {
         return this.average_calorie;
     }
-    public void setAverage_calorie(int average_calorie) {
+    public void setAverage_calorie(double average_calorie) {
         this.average_calorie = average_calorie;
     }
     public String getOptimal_week() {

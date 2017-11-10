@@ -5,6 +5,9 @@ package lbcy.com.cn.purplelibrary.config;
  * 配置文件
  */
 public class CommonConfiguration {
+    public static final String PURPLE_OPERATION="purple_operation";
+    public static final int PURPLE_CAN_CALLBACK=10001;
+    public static final int PURPLE_UPDATE_DEVICE_NOTIFICATION=10002;
     //服务地址
     public static String HTTP_SERVICE_ADDRESS="http://hc.bj35.com/";
     //登录地址

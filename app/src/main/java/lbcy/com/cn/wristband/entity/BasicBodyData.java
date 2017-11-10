@@ -18,10 +18,10 @@ public class BasicBodyData {
 
     @Id
     private Long id;
-    private int height;
-    private int weight;
-    @Generated(hash = 1783880232)
-    public BasicBodyData(Long id, int height, int weight) {
+    private double height;
+    private double weight;
+    @Generated(hash = 2037781647)
+    public BasicBodyData(Long id, double height, double weight) {
         this.id = id;
         this.height = height;
         this.weight = weight;
@@ -35,16 +35,16 @@ public class BasicBodyData {
     public void setId(Long id) {
         this.id = id;
     }
-    public int getHeight() {
+    public double getHeight() {
         return this.height;
     }
-    public void setHeight(int height) {
+    public void setHeight(double height) {
         this.height = height;
     }
-    public int getWeight() {
+    public double getWeight() {
         return this.weight;
     }
-    public void setWeight(int weight) {
+    public void setWeight(double weight) {
         this.weight = weight;
     }
 

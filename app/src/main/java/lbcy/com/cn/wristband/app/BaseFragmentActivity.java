@@ -22,7 +22,7 @@ public abstract class BaseFragmentActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.SplashTheme);
+        setTheme(R.style.NoActionBarTheme);
         mActivity = this;
         mRxManager = new RxManager();
         if (savedInstanceState!=null)

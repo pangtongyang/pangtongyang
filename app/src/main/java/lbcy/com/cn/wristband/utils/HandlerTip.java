@@ -7,16 +7,20 @@ public class HandlerTip {
     private static HandlerTip mDelayded = new HandlerTip();
     private Handler handler;
 
-    public HandlerTip() {
+    private HandlerTip() {
         handler = new Handler();
     }
 
 
     public static HandlerTip getInstance() {
+        if (mDelayded == null)
+            mDelayded = new HandlerTip();
         return mDelayded;
     }
 
     public Handler getHandler() {
+        if (handler == null)
+            handler = new Handler();
         return handler;
     }
 

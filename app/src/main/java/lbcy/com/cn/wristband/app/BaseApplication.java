@@ -23,6 +23,7 @@ import java.util.List;
 
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.purplelibrary.app.MyApplication;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.entity.DaoMaster;
@@ -70,7 +71,7 @@ public class BaseApplication extends MyApplication {
     public void onCreate() {
         super.onCreate();
         baseApplication = this;
-        spUtil = new SPUtil(this, Consts.SETTING_DB_NAME);
+        spUtil = new SPUtil(this, CommonConfiguration.SHAREDPREFERENCES_NAME);
         setDatabase();
 
         FileDownloader.setupOnApplicationOnCreate(this)
@@ -117,6 +118,22 @@ public class BaseApplication extends MyApplication {
                     case Consts.QQ:
                         isEnable = spUtil.getString("qq_switch", "0");
                         break;
+                    case Consts.INCALL:
+                        String remove = bundle.getString("remove", "");
+                        if (remove.equals("")){
+                            isEnable = spUtil.getString("telephone_switch", "0");
+                            if (isEnable.equals("1")){
+                                BlackDeviceManager.getInstance().phoneRemind(true);
+                                BlackDeviceManager.getInstance().isPhoneRemind(true, content, title);
+                            }
+                        } else {
+                            BlackDeviceManager.getInstance().isPhoneRemind(false, content, title);
+                        }
+
+                        return;
+                    case  Consts.NOTRECEIVECALL:
+                        BlackDeviceManager.getInstance().isPhoneRemind(false, content, title);
+                        return;
                 }
 
                 if (isEnable.equals("1"))
@@ -145,6 +162,13 @@ public class BaseApplication extends MyApplication {
 
     public DaoSession getBaseDaoSession() {
         return mDaoSession;
+    }
+
+    public void cleanDB() {
+        if (mDaoMaster != null){
+            DaoMaster.dropAllTables(mDaoMaster.getDatabase(), true);
+            DaoMaster.createAllTables(mDaoMaster.getDatabase(), true);
+        }
     }
 
     public SQLiteDatabase getDb() {

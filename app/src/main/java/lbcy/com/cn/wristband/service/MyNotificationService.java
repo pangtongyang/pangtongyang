@@ -15,6 +15,7 @@ import lbcy.com.cn.purplelibrary.app.MyApplication;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.entity.AppPushInfo;
 import lbcy.com.cn.purplelibrary.entity.AppPushInfoDao;
+import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManagerNew;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxBus;
@@ -28,12 +29,20 @@ public class MyNotificationService extends NotificationListenerService {
 
     SPUtil spUtil;
     String device_type;
+    String lastPkg = "";
+    String lastTitle = "";
+    String lastContent = "";
+    String lastRemovedPkg = "";
+    String lastRemovedTitle = "";
+    String lastRemovedContent = "";
+
+    long time = 0; // 超时记录
 
     @Override
     public void onCreate() {
         super.onCreate();
         appPushInfoDao = MyApplication.getInstances().getDaoSession().getAppPushInfoDao();
-        spUtil = new SPUtil(getBaseContext(), Consts.SETTING_DB_NAME);
+        spUtil = new SPUtil(getBaseContext(), CommonConfiguration.SHAREDPREFERENCES_NAME);
         device_type = spUtil.getString("which_device", "2");
     }
 
@@ -54,43 +63,60 @@ public class MyNotificationService extends NotificationListenerService {
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
+        if (device_type.equals("1")){
+            return;
+        }
+        Notification notification = sbn.getNotification();
+        String pkg = sbn.getPackageName();
+        String title = notification.extras.getString(Notification.EXTRA_TITLE);
+        String content = notification.extras.getString(Notification.EXTRA_TEXT);
+        if (!pkg.equals(Consts.INCALL)){
+            return;
+        }
+        if (lastRemovedPkg.equals(pkg) && lastRemovedTitle.equals(title) && lastRemovedContent.equals(content))
+            return;
+
+        lastRemovedPkg = pkg;
+        lastRemovedTitle = title;
+        lastRemovedContent = content;
+
+        Message message = new Message();
+        Bundle bundle = new Bundle();
+        bundle.putString("type", pkg);
+        bundle.putString("title", title);
+        bundle.putString("content", content);
+        bundle.putString("remove", "1");
+        message.what = Consts.SHOW_MESSAGE_FROM_APPS;
+        message.setData(bundle);
+
+        RxBus.getInstance().post(Consts.NOTIFICATION_LISTENER, message);
     }
 
     private void purplePostHandler(StatusBarNotification sbn){
-        pm = this.getPackageManager();
-
-
-        List<AppPushInfo> list = appPushInfoDao.queryBuilder()
-                .where(AppPushInfoDao.Properties.IsEnabled.eq(1))
-                .orderAsc(AppPushInfoDao.Properties.PackageName)
-                .build().list();
-        if (!list.isEmpty()) {
-            for (int i=0;i<list.size();i++){
-                AppPushInfo appPushInfo=list.get(i);
-                if(sbn.getPackageName().equals(appPushInfo.getPackageName())){
-                    try {
-                        ApplicationInfo applicationInfo=pm.getApplicationInfo(appPushInfo.getPackageName(), PackageManager.GET_UNINSTALLED_PACKAGES);
-                        if(applicationInfo==null){
-                            continue;
-                        }
-                        Intent intent = new Intent();
-//                        if(AirBLEService.parser!=null){
-                        //设置Intent的action属性
-                        intent.setAction(CommonConfiguration.PUSH_MESSAGE_NOTIFICATION);
-                        intent.putExtra("appName", applicationInfo.loadLabel(getPackageManager()).toString());
-                        intent.putExtra("title", sbn.getNotification().tickerText);
-                        //发出广播
-                        sendBroadcast(intent);
-//                        }
-                    } catch (PackageManager.NameNotFoundException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-
+        Notification notification = sbn.getNotification();
+        String pkg = sbn.getPackageName();
+        String title = notification.extras.getString(Notification.EXTRA_TITLE);
+        String content = notification.extras.getString(Notification.EXTRA_TEXT);
+        if (!pkg.equals(Consts.QQ) && !pkg.equals(Consts.WEIXIN) && !pkg.equals(Consts.MMS) && !pkg.equals(Consts.FACEBOOK) && !pkg.equals(Consts.INCALL) && !pkg.equals(Consts.NOTRECEIVECALL)){
+            return;
+        }
+        if (lastPkg.equals(pkg) && lastTitle.equals(title) && lastContent.equals(content)){
+            if (System.currentTimeMillis() - time < 5000){
+                return;
             }
         }
+
+        time = System.currentTimeMillis();
+
+        lastPkg = pkg;
+        lastTitle = title;
+        lastContent = content;
+        if (pkg.equals(Consts.MMS)){
+            title = "短信";
+            content = "收到一条短信";
+        }
+
+        PurpleDeviceManagerNew.getInstance().sendNotification(title, content);
     }
 
     private void blackPostHandler(StatusBarNotification sbn){
@@ -101,9 +127,18 @@ public class MyNotificationService extends NotificationListenerService {
         if (content == null || content.equals("")){
             content = notification.extras.getString(Notification.EXTRA_SUB_TEXT);
         }
-        if (!pkg.equals(Consts.QQ) && !pkg.equals(Consts.WEIXIN) && pkg.equals(Consts.MMS) && pkg.equals(Consts.FACEBOOK)){
+        if (!pkg.equals(Consts.QQ) && !pkg.equals(Consts.WEIXIN) && !pkg.equals(Consts.MMS) && !pkg.equals(Consts.FACEBOOK) && !pkg.equals(Consts.INCALL) && !pkg.equals(Consts.NOTRECEIVECALL)){
             return;
         }
+
+        title = (title == null ? "" : title);
+        content = (content == null ? "" : content);
+        if (lastPkg.equals(pkg) && lastTitle.equals(title) && lastContent.equals(content))
+            return;
+
+        lastPkg = pkg;
+        lastTitle = title;
+        lastContent = content;
 
         Message message = new Message();
         Bundle bundle = new Bundle();

@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
     tools:context="lbcy.com.cn.wristband.activity.MeActivity">
 
@@ -95,8 +96,8 @@
                         android:id="@+id/ll_version"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_below="@+id/tv_id">
+                        android:layout_below="@+id/tv_id"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:id="@+id/tv_version"

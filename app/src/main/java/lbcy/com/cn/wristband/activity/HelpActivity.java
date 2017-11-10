@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
+import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.adapter.HelpAdapter;
@@ -49,50 +50,8 @@ public class HelpActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        spUtil = new SPUtil(mActivity, Consts.SETTING_DB_NAME);
+        spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
         token = spUtil.getString("token", "");
-        try {
-            byte[] bt0 = "迟到".getBytes("Unicode");
-            byte[] bt1 = "迟到提醒".getBytes("Unicode");
-            byte[] bt2 = "运动".getBytes("Unicode");
-            byte[] bt3 = "约会".getBytes("Unicode");
-            byte[] bt4 = "喝水".getBytes("Unicode");
-            byte[] bt5 = "吃药".getBytes("Unicode");
-            byte[] bt6 = "睡眠".getBytes("Unicode");
-            byte[] bt7 = "自定义".getBytes("Unicode");
-            List<String> listWeek = new ArrayList<>();
-            listWeek.add("星期一");
-            listWeek.add("星期二");
-            listWeek.add("星期三");
-            listWeek.add("星期四");
-            listWeek.add("无");
-            listWeek.add("星期六");
-            listWeek.add("星期日");
-            // 星期的一个字节
-            byte b = 0;
-            int a = 0;
-            for (int i = 0; i < 7; i ++)
-            {
-                String s = listWeek.get(i);
-                if(!s.equals("无"))
-                {
-                    if(i >= 0)
-                    {
-                        if(i == 7)
-                        {
-                            b |= (byte)0x01;
-                        }
-                        else
-                        {
-                            b |= ((byte)0x01 << i);
-                        }
-                    }
-                }
-            }
-            Log.e("aaaa", String.valueOf(b));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

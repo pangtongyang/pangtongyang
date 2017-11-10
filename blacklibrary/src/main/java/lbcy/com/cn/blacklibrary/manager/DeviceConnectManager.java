@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import lbcy.com.cn.blacklibrary.ble.DeviceConnect;
+import lbcy.com.cn.blacklibrary.rx.RxBus;
 
 /**
  * Created by chenjie on 2017/8/6.
@@ -31,6 +32,7 @@ public class DeviceConnectManager {
     private DeviceConnect mDevice1; //设备扫描
     private ArrayList<LocalDeviceEntity> mData = new ArrayList<>();
     private final int CLOSE_NOTE_NOT_CONNECT = 1;
+    private final int RECONNECT_DEVICE = 2;
     private Intent bleConnect;
 
 
@@ -102,7 +104,7 @@ public class DeviceConnectManager {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            BleScanUtils.getBleScanUtilsInstance(mContext).setmOnDeviceScanFoundListener(myDeviceListnenr);
+            BleScanUtils.getBleScanUtilsInstance(mContext).setmOnDeviceScanFoundListener(myDeviceListener);
             BleScanUtils.getBleScanUtilsInstance(mContext).scanDevice(null);
         } else {
             //蓝牙未开启
@@ -113,7 +115,7 @@ public class DeviceConnectManager {
     /**
      * 实例化设备监听器，并对扫描到的设备进行监听
      */
-    private BleScanUtils.OnDeviceScanFoundListener myDeviceListnenr = new BleScanUtils.OnDeviceScanFoundListener() {
+    private BleScanUtils.OnDeviceScanFoundListener myDeviceListener = new BleScanUtils.OnDeviceScanFoundListener() {
         @Override
         public void OnDeviceFound(LocalDeviceEntity mLocalDeviceEntity) {
             String deviceName = mLocalDeviceEntity.getName();
@@ -163,7 +165,7 @@ public class DeviceConnectManager {
             Message msg = mHandler.obtainMessage();
             msg.what = CLOSE_NOTE_NOT_CONNECT;
             msg.obj = deviceEntity;
-            mHandler.sendMessageDelayed(msg, 12000);
+            mHandler.sendMessageDelayed(msg, 30000);
         } else {
             Toast.makeText(mContext, "lanya", Toast.LENGTH_LONG).show();
         }
@@ -175,12 +177,24 @@ public class DeviceConnectManager {
 
             BluetoothLeService.getInstance().connect(deviceEntity);
 
-            Message msg = mHandler.obtainMessage();
-            msg.what = CLOSE_NOTE_NOT_CONNECT;
-            msg.obj = deviceEntity;
-            mHandler.sendMessageDelayed(msg, 12000);
         } else {
             Toast.makeText(mContext, "黑色手环服务未初始化！", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void rescan(){
+        Message msg1 = mHandler.obtainMessage();
+        msg1.what = RECONNECT_DEVICE;
+        mHandler.sendMessageDelayed(msg1, 12000);
+    }
+
+    private boolean isFirstAlert = true;
+    public void alert(){
+        if (isFirstAlert){
+            Message msg = mHandler.obtainMessage();
+            msg.what = CLOSE_NOTE_NOT_CONNECT;
+            mHandler.sendMessageDelayed(msg, 30000);
+            isFirstAlert = false;
         }
     }
 
@@ -189,12 +203,25 @@ public class DeviceConnectManager {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case CLOSE_NOTE_NOT_CONNECT:
-                    if (BluetoothLeService.getInstance() != null && !BluetoothLeService.getInstance().isDeviceConnected((LocalDeviceEntity) msg.obj)) {
+                    if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
 //                    closeProgressDialog();  关闭弹窗
-                        Toast.makeText(mContext, "连接超时", Toast.LENGTH_SHORT).show();
+                        if (!stopScan)
+                            Toast.makeText(mContext, "仍未连接手环，请重启App后重试", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case RECONNECT_DEVICE:
+                    if (!stopScan){
+                        // 设备重新扫描
+                        mDevice.scan(null);
                     }
                     break;
             }
         }
     };
+
+    private boolean stopScan = false;
+    // 停止循环扫描，终止app时调用
+    public void stopCircleScan(){
+        stopScan = true;
+    }
 }
