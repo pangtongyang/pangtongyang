@@ -1005,15 +1005,6 @@ public class MainActivity extends BaseFragmentActivity {
             e.printStackTrace();
         }
 
-        // 读取设备信息（包括闹钟信息）
-        PurpleDeviceManagerNew.getInstance().readDeviceConfig();
-
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         // 获取当天运动数据（步数）
         PurpleDeviceManagerNew.getInstance().getSportData(new DataListener<String>() {
             @Override
@@ -1043,6 +1034,15 @@ public class MainActivity extends BaseFragmentActivity {
                 uploadSportData();
             }
         });
+
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 读取设备信息（包括闹钟信息）
+        PurpleDeviceManagerNew.getInstance().readDeviceConfig();
 
         try {
             Thread.sleep(200);
@@ -1294,8 +1294,7 @@ public class MainActivity extends BaseFragmentActivity {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 String date = format.format(calendarData.getTime());
 
-                if (sportAllDayData == null)
-                    sportAllDayData = new SportAllDayData();
+                sportAllDayData = new SportAllDayData();
                 sportAllDayData.setDate(date);
                 sportAllDayData.setDone_steps(stepAll);
                 SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().

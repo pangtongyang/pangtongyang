@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -171,12 +172,34 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (which_device.equals("2")){
-            b_getSettings();
-        } else {
-            p_getSettings();
-        }
+//        if (which_device.equals("2")){
+//            b_getSettings();
+//        } else {
+//            p_getSettings();
+//        }
+        isConnectHandler.post(runnable);
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isConnectHandler.removeCallbacks(runnable);
+    }
+
+    // 是否连接设备，每隔1秒执行一次
+    private Handler isConnectHandler = new Handler();
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            if (which_device.equals("2")){
+                b_getSettings();
+            } else {
+                p_getSettings();
+            }
+            isConnectHandler.postDelayed(runnable, 1000);
+        }
+    };
 
     private void initView(){
         getState();

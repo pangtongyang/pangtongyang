@@ -98,14 +98,14 @@ public class PurpleBLEService extends Service {
     }
 
     // 初始化
-    private void init(){
+    private void init() {
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
-        if (mBluetoothAdapter == null){
+        if (mBluetoothAdapter == null) {
             Toast.makeText(MyApplication.getInstances(), "本机没有找到蓝牙硬件或驱动！", Toast.LENGTH_SHORT).show();
         }
 
-        if (!mBluetoothAdapter.isEnabled()){
+        if (!mBluetoothAdapter.isEnabled()) {
             Message message = new Message();
             message.what = REQUEST_ENABLE_BT;
             RxBus.getInstance().post(ACTIVITY_MANAGE_LISTENER, message);
@@ -120,20 +120,20 @@ public class PurpleBLEService extends Service {
     }
 
     // 蓝牙扫描
-    private void scan(){
+    private void scan() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            if (scanCallBack == null){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (scanCallBack == null) {
                 scanCallBack = new ScanCallback() {
                     @Override
                     public void onScanResult(int callbackType, ScanResult result) {
                         super.onScanResult(callbackType, result);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            if (mac_address.equals(result.getDevice().getAddress()) && !isConnecting){
+                            if (mac_address.equals(result.getDevice().getAddress()) && !isConnecting) {
                                 device = result.getDevice();
 //                                scanner.stopScan(scanCallBack);
                                 scanCallBack = null;
-                                if (userSpUtil.getString("is_connected", "0").equals("0")){
+                                if (userSpUtil.getString("is_connected", "0").equals("0")) {
                                     connect();
                                     isConnecting = true;
                                 }
@@ -149,15 +149,15 @@ public class PurpleBLEService extends Service {
                 };
             }
         } else {
-            if (leScanCallback == null){
+            if (leScanCallback == null) {
                 leScanCallback = new BluetoothAdapter.LeScanCallback() {
                     @Override
                     public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] bytes) {
-                        if (mac_address.equals(bluetoothDevice.getAddress()) && !isConnecting){
+                        if (mac_address.equals(bluetoothDevice.getAddress()) && !isConnecting) {
                             device = bluetoothDevice;
 //                            mBluetoothAdapter.stopLeScan(leScanCallback);
                             leScanCallback = null;
-                            if (userSpUtil.getString("is_connected", "0").equals("0")){
+                            if (userSpUtil.getString("is_connected", "0").equals("0")) {
                                 connect();
                                 isConnecting = true;
                             }
@@ -194,7 +194,8 @@ public class PurpleBLEService extends Service {
 //                        mBluetoothAdapter.stopLeScan(leScanCallback);
 //                    }
 //                }
-            Toast.makeText(MyApplication.getInstances(), "仍未连接手环，请重启App后重试", Toast.LENGTH_SHORT).show();
+            if (userSpUtil.getString("is_connected", "0").equals("0"))
+                Toast.makeText(MyApplication.getInstances(), "仍未连接手环，请重启App后重试", Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -214,7 +215,7 @@ public class PurpleBLEService extends Service {
     }
 
     // 蓝牙连接
-    private void connect(){
+    private void connect() {
         // 连接回调
         final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
             @Override
@@ -224,7 +225,6 @@ public class PurpleBLEService extends Service {
                     isConnecting = false;
                     if (bluetoothGatt.discoverServices()) {
                     }
-                    HandlerTip.getInstance().getHandler().removeCallbacks(handlerCallback);
                     HandlerTip.getInstance().getHandler().post(new Runnable() {
                         @Override
                         public void run() {
@@ -314,7 +314,7 @@ public class PurpleBLEService extends Service {
             }
         };
 
-        if (device != null){
+        if (device != null) {
             // 蓝牙连接
             bluetoothGatt = device.connectGatt(getBaseContext(), false, mGattCallback);
         }
@@ -322,43 +322,48 @@ public class PurpleBLEService extends Service {
 
     /**
      * 启动升级
+     *
      * @param path
      */
     public void startUpdate(String path, final UpdateListener listener) {
-        Log.i("TAG",path+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        airDfu = new AirDfuAndroid(getApplicationContext(),new DfuProgress() {
+        Log.i("TAG", path + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        airDfu = new AirDfuAndroid(getApplicationContext(), new DfuProgress() {
             @Override
 //            int code, String message, int progress
             public void onGetMessage(int i, String s, int progress) {
-                Log.i("TAG","错误码："+i+"+++++++++++++++++++++++++++++++++++++++");
-                Log.i("TAG","描述事件信息："+s+"+++++++++++++++++++++++++++++++++++++++++++");
-                Log.i("TAG",progress+"进度为：++++++++++++++++++++++++++++++++++++++++");
-                if(i==AirDfuAndroid.DFD_CHECK_SUCCESS){
+                Log.i("TAG", "错误码：" + i + "+++++++++++++++++++++++++++++++++++++++");
+                Log.i("TAG", "描述事件信息：" + s + "+++++++++++++++++++++++++++++++++++++++++++");
+                Log.i("TAG", progress + "进度为：++++++++++++++++++++++++++++++++++++++++");
+                if (i == AirDfuAndroid.DFD_CHECK_SUCCESS) {
                     listener.success();
                     airDfu = null;
-                }else if(i==AirDfuAndroid.DFD_ERROR){
+                } else if (i == AirDfuAndroid.DFD_ERROR) {
                     listener.error();
-                }else if(i==AirDfuAndroid.DFD_HEX_NOT_FOUND){
+                } else if (i == AirDfuAndroid.DFD_HEX_NOT_FOUND) {
                     listener.file_not_found();
-                }else if(i==AirDfuAndroid.DFD_HEX_CHECK_ERROR){
+                } else if (i == AirDfuAndroid.DFD_HEX_CHECK_ERROR) {
                     listener.file_check_error();
-                }else if(i==AirDfuAndroid.DFD_IN_PROGRESS){
+                } else if (i == AirDfuAndroid.DFD_IN_PROGRESS) {
                     listener.in_progress(progress);
                 }
             }
-        }, AIR_FW_1530, AIR_FW_32, AIR_FW_31,parser);
+        }, AIR_FW_1530, AIR_FW_32, AIR_FW_31, parser);
         try {
-            airDfu.initDfu(path, bluetoothGatt,false);
+            airDfu.initDfu(path, bluetoothGatt, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public interface UpdateListener{
+    public interface UpdateListener {
         void success();
+
         void error();
+
         void file_not_found();
+
         void file_check_error();
+
         void in_progress(int progress);
     }
 
@@ -517,8 +522,8 @@ public class PurpleBLEService extends Service {
         }
     }
 
-    private void disconnect(){
-        if (bluetoothGatt != null){
+    private void disconnect() {
+        if (bluetoothGatt != null) {
             bluetoothGatt.disconnect();
             mBluetoothGattService = null;
         }
@@ -530,14 +535,14 @@ public class PurpleBLEService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            if (scanner != null){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (scanner != null) {
                 scanner.stopScan(scanCallBack);
                 scanCallBack = null;
                 scanner = null;
             }
         } else {
-            if (mBluetoothAdapter != null){
+            if (mBluetoothAdapter != null) {
                 mBluetoothAdapter.stopLeScan(leScanCallback);
                 leScanCallback = null;
             }
