@@ -28,6 +28,7 @@ import lbcy.com.cn.wristband.entity.MessageBean;
 import lbcy.com.cn.wristband.entity.SportStepsTo;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
+import lbcy.com.cn.wristband.utils.HandlerTip;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -124,6 +125,12 @@ public class SportStatisticsActivity extends BaseActivity {
             @Override
             public void onRefresh() {
                 getDataFromNetwork();
+                HandlerTip.getInstance().postDelayed(2000, new HandlerTip.HandlerCallback() {
+                    @Override
+                    public void postDelayed() {
+                        refreshLayout.setRefreshing(false);
+                    }
+                });
             }
         });
     }

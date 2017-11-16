@@ -14,27 +14,23 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.google.gson.Gson;
 import com.huichenghe.bleControl.Ble.BluetoothLeService;
-import com.huichenghe.bleControl.Utils.FormatUtils;
 import com.just.library.AgentWeb;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
-import lbcy.com.cn.purplelibrary.app.MyApplication;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.PurpleBleScan;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
@@ -54,12 +50,8 @@ import lbcy.com.cn.wristband.entity.SportInfoCurrentBean;
 import lbcy.com.cn.wristband.entity.SportLocationTo;
 import lbcy.com.cn.wristband.entity.SportSplitData;
 import lbcy.com.cn.wristband.entity.SportSplitDataDao;
-import lbcy.com.cn.wristband.entity.SportStatisticsBean;
-import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.utils.DateUtil;
-import lbcy.com.cn.wristband.utils.DialogUtil;
-import lbcy.com.cn.wristband.utils.HandlerTip;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -97,10 +89,10 @@ public class AndroidInterface {
     private int num_heartbeats = 0;
 
     // 位置上传相关
-    private LocationManager locationManager;
-    private LocationListener locationListener;
+    private AMapLocationClient locationClient = null;
     private SportLocationTo locations;
     private List<SportLocationTo.HistoryBean> locationHistoryList;
+
     // 心率数据
     private SportHeartRateTo  heartRateTo;
     private List<SportHeartRateTo.HistoryBean> heartRateHistoryList;
@@ -149,10 +141,11 @@ public class AndroidInterface {
 //        agent.getWebCreator().get().clearHistory();
         // 首先判断手环是否连接
         if (which_device.equals("2")){
-            if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice())
-                b_getData();
-            else
+            if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice())
                 return 0;
+            else
+                // 异步获取心率运动数据，可能存在延迟
+                b_openHeartSportScanning(true);
         }
         else {
             String is_connected = spUtil.getString("is_connected", "0");
@@ -165,8 +158,11 @@ public class AndroidInterface {
         // 获取运动code，同时初始化相关数据对象
         getSportCode();
 
-        // 获取经纬度信息
-        getLocation();
+        // 初始化定位服务
+        initLocation();
+        // 开始定位
+        if (locationClient != null)
+            locationClient.startLocation();
 
         return 1;
     }
@@ -194,15 +190,20 @@ public class AndroidInterface {
            ]
          }
          */
-
-        // 关闭实时心率监测
-        BlackDeviceManager.getInstance().heartScan(false);
+        if (which_device.equals("2")){
+            if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice())
+                return null;
+            // 关闭异步获取心率运动数据
+            b_openHeartSportScanning(false);
+        }
 
         start_distance = before_steps = current_steps = 0;
 
         // 停止获取位置信息
-        if (locationManager != null)
-            locationManager.removeUpdates(locationListener);
+        if (locationClient != null)
+            locationClient.stopLocation();
+//        if (locationManager != null)
+//            locationManager.removeUpdates(locationListener1);
 
         // 上传位置信息
         if (locations == null || locationHistoryList == null)
@@ -249,8 +250,12 @@ public class AndroidInterface {
      */
     @JavascriptInterface
     public String getSportInfo(){
-        // 异步获取运动数据，可能存在延迟
-        b_getDayData();
+        if (which_device.equals("2")){
+            if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice())
+                return null;
+            else
+                BlackDeviceManager.getInstance().sendHeartSportRequestForData();
+        }
 
         JSONObject jsonObject = new JSONObject();
 
@@ -394,7 +399,7 @@ public class AndroidInterface {
         if (which_device.equals("2")){
             if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice())
                 return null;
-            BlackDeviceManager.getInstance().heartScan(true);
+//            BlackDeviceManager.getInstance().heartScan(true);
         }
         else {
             String is_connected = spUtil.getString("is_connected", "0");
@@ -454,7 +459,7 @@ public class AndroidInterface {
             if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice())
                 return null;
             else if (!isCallBackStart){
-                b_getData();
+                b_getHeartData();
                 isCallBackStart = true;
             }
         }
@@ -488,52 +493,55 @@ public class AndroidInterface {
         return object.toString();
     }
 
-    // 获取位置信息
-    private void getLocation(){
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                SportLocationTo.HistoryBean historyBean = new SportLocationTo.HistoryBean();
-                historyBean.setTime(DateUtil.getCurrentTime());
-                historyBean.setLatitude(location.getLatitude());
-                historyBean.setLongitude(location.getLongitude());
-                locationHistoryList.add(historyBean);
-            }
-
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-
-            }
-        };
-
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+    /**
+     * 停止心率首页实时心率测量
+     */
+    @JavascriptInterface
+    public void stopHeartScanning(){
+        isCallBackStart = false;
+        if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice())
             return;
-        }
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, (float) 5, locationListener);
-        } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, (float) 5, locationListener);
-        }
-
+        BlackDeviceManager.getInstance().heartScan(false);
     }
+
+    // 初始化高德
+    private void initLocation(){
+        //初始化client
+        locationClient = new AMapLocationClient(BaseApplication.getBaseApplication());
+        AMapLocationClientOption locationOption = getDefaultOption();
+        //设置定位参数
+        locationClient.setLocationOption(locationOption);
+        // 设置定位监听
+        locationClient.setLocationListener(locationListener);
+    }
+
+    // 定位服务默认配置项
+    private AMapLocationClientOption getDefaultOption(){
+        AMapLocationClientOption mOption = new AMapLocationClientOption();
+        mOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);//可选，设置定位模式，可选的模式有高精度、仅设备、仅网络。默认为高精度模式
+        mOption.setGpsFirst(true);//可选，设置是否gps优先，只在高精度模式下有效。默认关闭
+        mOption.setNeedAddress(false);//可选，设置是否返回逆地理地址信息。默认是true
+        return mOption;
+    }
+
+    /**
+     * 定位监听
+     */
+    private AMapLocationListener locationListener = new AMapLocationListener() {
+        @Override
+        public void onLocationChanged(AMapLocation location) {
+            if (null != location) {
+                //errCode等于0代表定位成功，其他的为定位失败，具体的可以参照官网定位错误码说明
+                if(location.getErrorCode() == 0){
+                    SportLocationTo.HistoryBean historyBean = new SportLocationTo.HistoryBean();
+                    historyBean.setTime(DateUtil.getCurrentTime());
+                    historyBean.setLatitude(location.getLatitude());
+                    historyBean.setLongitude(location.getLongitude());
+                    locationHistoryList.add(historyBean);
+                }
+            }
+        }
+    };
 
     private void getSportCode(){
         NetManager.getSportCodeAction(token, new NetManager.NetCallBack<SportCodeBean>() {
@@ -572,7 +580,7 @@ public class AndroidInterface {
             public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
                 MessageBean messageBean = response.body();
                 if ((messageBean != null ? messageBean.getCode() : 0) == 200){
-                    Toast.makeText(BaseApplication.getBaseApplication(), "数据上传成功！", Toast.LENGTH_SHORT ).show();
+//                    Toast.makeText(BaseApplication.getBaseApplication(), "数据上传成功！", Toast.LENGTH_SHORT ).show();
                 } else {
                     Toast.makeText(BaseApplication.getBaseApplication(), "运动数据上传失败！", Toast.LENGTH_SHORT ).show();
                 }
@@ -670,42 +678,98 @@ public class AndroidInterface {
         }
     };
 
-    private void b_getData(){
+    private void b_getHeartData(){
         //获取实时心率
         BlackDeviceManager.getInstance().startHeartRateListener(callback);
         //开启心率实时监测
         BlackDeviceManager.getInstance().heartScan(true);
     }
 
-    private void b_getDayData(){
-        //获取运动数据
-        BlackDeviceManager.getInstance().getDayData(new DataCallback<byte[]>() {
-            @Override
-            public void OnSuccess(byte[] data) {
-                // 总里程
-                int stepAll = FormatUtils.byte2Int(data, 4);
-                int mileage = FormatUtils.byte2Int(data, 12);
-                if (start_distance == 0) {
-                    start_distance = mileage;
-                    return;
+    private void b_openHeartSportScanning(boolean isOpen){
+        if (isOpen)
+            BlackDeviceManager.getInstance().startHeartSport(true, new DataCallback<Bundle>() {
+                @Override
+                public void OnSuccess(Bundle data) {
+                    // 总步数
+                    int stepAll = data.getInt("step", 0);
+                    int mileage = data.getInt("distance", 0);
+                    // 开始测量时的里程
+                    if (start_distance == 0) {
+                        start_distance = mileage;
+                    }
+                    // 总里程
+                    distance = mileage;
+
+                    speed = (distance - start_distance) / 1000.0 / ((System.currentTimeMillis() - start_time) / 3600000.0);
+
+                    current_steps = stepAll;
+
+                    int heartRate = data.getInt("heart_rate", 0);
+                    if (heartRate == 0) {
+                        return;
+                    }
+                    current_heart_rate = heartRate;
+                    sum_heartbeats += current_heart_rate;
+                    num_heartbeats ++;
+                    if (current_heart_rate > max_heart_rate)
+                        max_heart_rate = current_heart_rate;
+                    if (current_heart_rate < min_heart_rate)
+                        min_heart_rate = current_heart_rate;
+
+                    // 本地存储心率数据
+                    if (currentMilli == 0){
+                        currentMilli = System.currentTimeMillis();
+                        HeartBeatsHistory history = new HeartBeatsHistory(null, DateUtil.getCurrentTime(), current_heart_rate);
+                        HeartBeatsHistoryDao historyDao = BaseApplication.getBaseApplication().getBaseDaoSession().getHeartBeatsHistoryDao();
+                        historyDao.insert(history);
+                    } else if (System.currentTimeMillis() - currentMilli > 5*60*1000){
+                        currentMilli = System.currentTimeMillis();
+                        HeartBeatsHistory history = new HeartBeatsHistory(null, DateUtil.getCurrentTime(), current_heart_rate);
+                        HeartBeatsHistoryDao historyDao = BaseApplication.getBaseApplication().getBaseDaoSession().getHeartBeatsHistoryDao();
+                        historyDao.insert(history);
+                    }
                 }
-                distance = mileage;
 
-                speed = (distance - start_distance) / 1000.0 / ((System.currentTimeMillis() - start_time) / 3600000.0);
+                @Override
+                public void OnFailed() {
 
-                current_steps = stepAll;
-            }
+                }
 
-            @Override
-            public void OnFailed() {
+                @Override
+                public void OnFinished() {
 
-            }
-
-            @Override
-            public void OnFinished() {
-
-            }
-        });
+                }
+            });
+        else
+            BlackDeviceManager.getInstance().startHeartSport(false, null);
+//        //获取运动数据
+//        BlackDeviceManager.getInstance().getDayData(new DataCallback<byte[]>() {
+//            @Override
+//            public void OnSuccess(byte[] data) {
+//                // 总里程
+//                int stepAll = FormatUtils.byte2Int(data, 4);
+//                int mileage = FormatUtils.byte2Int(data, 12);
+//                if (start_distance == 0) {
+//                    start_distance = mileage;
+//                    return;
+//                }
+//                distance = mileage;
+//
+//                speed = (distance - start_distance) / 1000.0 / ((System.currentTimeMillis() - start_time) / 3600000.0);
+//
+//                current_steps = stepAll;
+//            }
+//
+//            @Override
+//            public void OnFailed() {
+//
+//            }
+//
+//            @Override
+//            public void OnFinished() {
+//
+//            }
+//        });
     }
 
 

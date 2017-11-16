@@ -86,7 +86,4 @@ public class AlarmClockInfo {
         this.did = did;
     }
 
-
-
-
 }

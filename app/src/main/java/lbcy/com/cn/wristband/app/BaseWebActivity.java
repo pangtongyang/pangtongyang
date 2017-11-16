@@ -39,6 +39,7 @@ import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxManager;
 import lbcy.com.cn.wristband.utils.DialogUtil;
+import lbcy.com.cn.wristband.widget.SmartRefreshWebLayout;
 import lbcy.com.cn.wristband.widget.webview.WebLayout;
 import rx.functions.Action1;
 
@@ -64,6 +65,8 @@ public abstract class BaseWebActivity extends AppCompatActivity {
     @BindView(R.id.ll_web_content)
     LinearLayout llWebContent;
 
+    private SmartRefreshWebLayout mSmartRefreshWebLayout=null;
+
     protected AgentWeb mAgentWeb;
     AgentWeb.PreAgentWeb preAgentWeb;
     String targetUrl = "";
@@ -79,7 +82,7 @@ public abstract class BaseWebActivity extends AppCompatActivity {
         setTheme(R.style.NoActionBarTheme);
         setContentView(R.layout.activity_base);
         ButterKnife.bind(this);
-        baseContentview.setVisibility(View.GONE);
+        baseContentview.setVisibility(View.VISIBLE);
         mActivity = this;
         mRxManager = new RxManager();
         SPUtil mSpUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
@@ -89,15 +92,18 @@ public abstract class BaseWebActivity extends AppCompatActivity {
         initView();
         loadData();
 
+        mSmartRefreshWebLayout = new SmartRefreshWebLayout(mActivity);
+        mSmartRefreshWebLayout.getLayout().setEnabled(false);
+
         preAgentWeb = AgentWeb.with(this)//
-                .setAgentWebParent(llWebContent,new LinearLayout.LayoutParams(-1,-1) )//
+                .setAgentWebParent(baseContentview,new FrameLayout.LayoutParams(-1,-1) )//
                 .useDefaultIndicator()//
                 .defaultProgressBarColor()
                 .setReceivedTitleCallback(mCallback)
                 .setWebChromeClient(mWebChromeClient)
                 .setWebViewClient(mWebViewClient)
                 .setSecutityType(AgentWeb.SecurityType.strict)
-                .setWebLayout(new WebLayout(this))
+                .setWebLayout(mSmartRefreshWebLayout)
                 .createAgentWeb()//
                 .ready();
 

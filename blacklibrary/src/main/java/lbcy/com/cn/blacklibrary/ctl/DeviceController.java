@@ -1,6 +1,7 @@
 package lbcy.com.cn.blacklibrary.ctl;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import com.huichenghe.bleControl.upgrande.UpdateVersionTask;
 
@@ -218,4 +219,16 @@ public interface DeviceController {
      * @param isOpen 是否开启该功能
      */
     void lostRemind(boolean isOpen);
+
+    /**
+     * 发送获取心率运动模式数据请求，由回调处理返回数据
+     */
+    void sendHeartSportRequestForData();
+
+    /**
+     * 开启心率运动模式
+     * @param isOpen 是否开启
+     * @param callback 回调
+     */
+    void startHeartSport(boolean isOpen, DataCallback<Bundle> callback);
 }

@@ -58,5 +58,4 @@ public class HeartBeatsAllDayMaxMin {
     public void setIsUpload(boolean isUpload) {
         this.isUpload = isUpload;
     }
-
 }

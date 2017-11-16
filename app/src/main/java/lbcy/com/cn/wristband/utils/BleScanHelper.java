@@ -101,37 +101,38 @@ public class BleScanHelper {
 
         switch (bleScanException.getReason()) {
             case BleScanException.BLUETOOTH_NOT_AVAILABLE:
-                Toast.makeText(mContext, "Bluetooth is not available", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Bluetooth is not available", Toast.LENGTH_SHORT).show();
                 break;
             case BleScanException.BLUETOOTH_DISABLED:
-                Toast.makeText(mContext, "Enable bluetooth and try again", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Enable bluetooth and try again", Toast.LENGTH_SHORT).show();
                 break;
             case BleScanException.LOCATION_PERMISSION_MISSING:
-                Toast.makeText(mContext,
-                        "On Android 6.0 location permission is required. Implement Runtime Permissions", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext,
+//                        "On Android 6.0 location permission is required. Implement Runtime Permissions", Toast.LENGTH_SHORT).show();
                 break;
             case BleScanException.LOCATION_SERVICES_DISABLED:
-                Toast.makeText(mContext, "Location services needs to be enabled on Android 6.0", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Location services needs to be enabled on Android 6.0", Toast.LENGTH_SHORT).show();
                 break;
             case BleScanException.SCAN_FAILED_ALREADY_STARTED:
-                Toast.makeText(mContext, "Scan with the same filters is already started", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Scan with the same filters is already started", Toast.LENGTH_SHORT).show();
                 break;
             case BleScanException.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED:
-                Toast.makeText(mContext, "Failed to register application for bluetooth scan", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Failed to register application for bluetooth scan", Toast.LENGTH_SHORT).show();
                 break;
             case BleScanException.SCAN_FAILED_FEATURE_UNSUPPORTED:
-                Toast.makeText(mContext, "Scan with specified parameters is not supported", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Scan with specified parameters is not supported", Toast.LENGTH_SHORT).show();
                 break;
             case BleScanException.SCAN_FAILED_INTERNAL_ERROR:
-                Toast.makeText(mContext, "Scan failed due to internal error", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Scan failed due to internal error", Toast.LENGTH_SHORT).show();
                 break;
             case BleScanException.SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES:
-                Toast.makeText(mContext, "Scan cannot start due to limited hardware resources", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Scan cannot start due to limited hardware resources", Toast.LENGTH_SHORT).show();
                 break;
             case BleScanException.UNKNOWN_ERROR_CODE:
+                break;
             case BleScanException.BLUETOOTH_CANNOT_START:
             default:
-                Toast.makeText(mContext, "Unable to start scanning", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Unable to start scanning", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

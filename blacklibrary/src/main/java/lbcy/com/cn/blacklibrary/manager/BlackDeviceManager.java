@@ -3,6 +3,7 @@ package lbcy.com.cn.blacklibrary.manager;
 import android.bluetooth.BluetoothGatt;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.huichenghe.bleControl.Ble.BleDataForBattery;
@@ -766,6 +767,57 @@ public class BlackDeviceManager implements DeviceController {
                 }
             });
             BleForLostRemind.getInstance().requestAndHandler();
+        }
+    }
+
+    @Override
+    public void sendHeartSportRequestForData() {
+        if (BleDataForOnLineMovement.getBleDataForOutlineInstance() != null) {
+            BleDataForOnLineMovement.getBleDataForOutlineInstance().sendHRDataToDevice((byte) 0x00);
+        }
+    }
+
+    @Override
+    public void startHeartSport(boolean isOpen, final DataCallback<Bundle> callback) {
+        if (BleDataForOnLineMovement.getBleDataForOutlineInstance() != null) {
+            if (isOpen){
+                BleDataForOnLineMovement.getBleDataForOutlineInstance().setOnSendRecever(new DataSendCallback() {
+                    @Override
+                    public void sendSuccess(byte[] bytes) {
+                        if (bytes[0] == 0) {
+                            // 实时心率
+                            int hrValue = bytes[1] & 0xff;
+                            // 实时步数
+                            int stepValue = FormatUtils.byte2Int(bytes, 2);
+                            // 实时里程
+                            int mileValue = FormatUtils.byte2Int(bytes, 6);
+//                        int kcalValue = FormatUtils.byte2Int(bytes, 10);
+//                        int paceValue = bytes[14] & 0xff;
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("heart_rate", hrValue);
+                            bundle.putInt("distance", mileValue);
+                            bundle.putInt("step", stepValue);
+                            callback.OnSuccess(bundle);
+                        }
+
+                    }
+
+                    @Override
+                    public void sendFailed() {
+
+                    }
+
+                    @Override
+                    public void sendFinished() {
+
+                    }
+                });
+                BleDataForOnLineMovement.getBleDataForOutlineInstance().sendHRDataToDevice((byte) 0x01);
+            } else {
+                BleDataForOnLineMovement.getBleDataForOutlineInstance().sendHRDataToDevice((byte) 0x02);
+            }
+
+
         }
     }
 }

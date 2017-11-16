@@ -19,6 +19,5 @@ public class WebActivity extends BaseWebActivity {
 
     @Override
     protected void loadData() {
-
     }
 }

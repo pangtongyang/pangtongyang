@@ -174,6 +174,9 @@ public abstract class BaseWebFragment extends Fragment {
 
         mAgentWeb = preAgentWeb.go(getUrl());
 
+        if (getUrl().equals(Consts.WEB_STAR))
+            mSmartRefreshLayout.setEnabled(false);
+
 //        mAgentWeb.getWebCreator().get().setOnTouchListener(new View.OnTouchListener() {
 //            @Override
 //            public boolean onTouch(View view, MotionEvent motionEvent) {

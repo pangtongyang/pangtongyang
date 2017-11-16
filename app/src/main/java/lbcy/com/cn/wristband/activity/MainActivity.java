@@ -298,7 +298,7 @@ public class MainActivity extends BaseFragmentActivity {
         textViews[2] = tvBottom3;
         textViews[3] = tvBottom4;
 
-        vpContent.setNoScroll(false);
+        vpContent.setNoScroll(true);
 
         mRxManager.on(Consts.ACTIVITY_MANAGE_LISTENER, new Action1<Message>() {
             @Override
