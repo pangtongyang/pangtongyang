@@ -1,8 +1,5 @@
 package lbcy.com.cn.wristband.entity;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Id;
-
 import java.util.List;
 
 /**

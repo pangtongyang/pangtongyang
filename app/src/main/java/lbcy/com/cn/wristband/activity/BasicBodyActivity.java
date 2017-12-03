@@ -1,8 +1,9 @@
 package lbcy.com.cn.wristband.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,7 +13,6 @@ import android.widget.Toast;
 import com.huichenghe.bleControl.Ble.BluetoothLeService;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
@@ -29,7 +29,6 @@ import lbcy.com.cn.wristband.entity.UserInfoDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.rx.RxBus;
-import lbcy.com.cn.wristband.utils.DialogUtil;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -75,6 +74,52 @@ public class BasicBodyActivity extends BaseActivity {
             getDataFromNetwork();
         }
 
+        // 只能输入小数点后两位
+        etHeight.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String temp = editable.toString();
+                int posDot = temp.indexOf(".");
+                if (posDot <= 0) return;
+                if (temp.length() - posDot - 1 > 2)
+                {
+                    editable.delete(posDot + 3, posDot + 4);
+                }
+            }
+        });
+
+        etWeight.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String temp = editable.toString();
+                int posDot = temp.indexOf(".");
+                if (posDot <= 0) return;
+                if (temp.length() - posDot - 1 > 2)
+                {
+                    editable.delete(posDot + 3, posDot + 4);
+                }
+            }
+        });
     }
 
     @Override
@@ -157,19 +202,19 @@ public class BasicBodyActivity extends BaseActivity {
 
     private boolean validate(){
         if (etHeight.getText().toString().trim().equals("")){
-            DialogUtil.showDialog(mActivity, "身高为空！", false);
+            Toast.makeText(mActivity, "身高为空！", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (etWeight.getText().toString().trim().equals("")){
-            DialogUtil.showDialog(mActivity, "体重为空！", false);
+            Toast.makeText(mActivity, "体重为空！", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (Double.valueOf(etHeight.getText().toString().trim()) < 50 || Double.valueOf(etHeight.getText().toString().trim()) > 300){
-            DialogUtil.showDialog(mActivity, "身高超出范围！", false);
+            Toast.makeText(mActivity, "身高超出范围！", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (Double.valueOf(etWeight.getText().toString().trim()) <= 0 || Double.valueOf(etWeight.getText().toString().trim()) > 300){
-            DialogUtil.showDialog(mActivity, "体重超出范围！", false);
+            Toast.makeText(mActivity, "体重超出范围！", Toast.LENGTH_SHORT).show();
             return false;
         }
 

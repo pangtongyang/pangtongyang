@@ -231,4 +231,52 @@ public interface DeviceController {
      * @param callback 回调
      */
     void startHeartSport(boolean isOpen, DataCallback<Bundle> callback);
+
+    /**
+     * 是否开启短信提醒
+     * @param isOn true -> 开启， false -> 关闭
+     */
+    void smsRemind(boolean isOn);
+
+    /**
+     * 发送短信提醒
+     * @param content 提醒内容
+     */
+    void smsNotification(String content);
+
+    /**
+     * 抬腕显示开关
+     * @param isOpen true -> 开启， false -> 关闭
+     */
+    void isLiftUp(boolean isOpen);
+
+    /**
+     * 心率监测开关状态
+     * @param callback 心率监测开关回调，true -> 开启， false -> 关闭
+     */
+    void getHeartRateScanningState(DataCallback<Bundle> callback);
+
+    /**
+     * 心率预警开关状态
+     * @param callback 心率预警状态回调
+     */
+    void getHeartRateWarningState(DataCallback<Bundle> callback);
+
+    /**
+     * 防丢开关状态
+     * @param callback 防丢开关回调，true -> 开启， false -> 关闭
+     */
+    void getLostState(DataCallback<Boolean> callback);
+
+    /**
+     * 抬腕显示开关状态
+     * @param callback 抬腕显示开关回调，true -> 开启， false -> 关闭
+     */
+    void getAwakeState(DataCallback<Boolean> callback);
+
+    /**
+     * 久坐提醒状态
+     * @param callback 久坐提醒状态回调
+     */
+    void getSitRemindState(DataCallback<Bundle> callback);
 }

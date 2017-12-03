@@ -21,7 +21,6 @@ import lbcy.com.cn.purplelibrary.app.MyApplication;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.ctl.DataListener;
 import lbcy.com.cn.purplelibrary.ctl.DeviceControllerNew;
-import lbcy.com.cn.purplelibrary.entity.AlarmClockInfo;
 import lbcy.com.cn.purplelibrary.entity.SportData;
 import lbcy.com.cn.purplelibrary.entity.SportDataDao;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
@@ -43,7 +42,7 @@ public class PurpleDeviceManagerNew implements DeviceControllerNew {
 
     public static DeviceControllerNew getInstance() {
         if (manager == null) {
-            synchronized (PurpleDeviceManager.class) {
+            synchronized (PurpleDeviceManagerNew.class) {
                 if (manager == null) {
                     manager = new PurpleDeviceManagerNew();
                 }
@@ -75,7 +74,6 @@ public class PurpleDeviceManagerNew implements DeviceControllerNew {
             }
             // 回调运动数据
             if (sportListener != null){
-                Log.e("aaaaaaaaaa", step+"");
                 sportListener.getData(String.valueOf(step));
             }
         }
@@ -275,7 +273,7 @@ public class PurpleDeviceManagerNew implements DeviceControllerNew {
 
     @Override
     public void setVibrate(boolean isVibrate) {
-        MyApplication.getInstances().getThread().SendVibrateSet(isVibrate);
+        MyApplication.getInstances().getThread().SendViPressSet(isVibrate);
     }
 
     @Override

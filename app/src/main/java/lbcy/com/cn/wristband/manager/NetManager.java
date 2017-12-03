@@ -5,14 +5,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import lbcy.com.cn.wristband.R;
@@ -144,12 +137,15 @@ public class NetManager {
         if (response.code() == 401 && response.message().equals("Unauthorized")){
             Toast.makeText(BaseApplication.getBaseApplication(), "登录失效，请重新登录！", Toast.LENGTH_SHORT).show();
 
-            HandlerTip.getInstance().postDelayed(300, () -> {
-                Message message = new Message();
-                message.what = Consts.CLOSE_ALL_ACTIVITY;
-                RxBus.getInstance().post(Consts.CLOSE_ALL_ACTIVITY_LISTENER, message);
-                Intent intent = new Intent(BaseApplication.getBaseApplication(), LoginActivity.class);
-                BaseApplication.getBaseApplication().startActivity(intent);
+            HandlerTip.getInstance().postDelayed(300, new HandlerTip.HandlerCallback() {
+                @Override
+                public void postDelayed() {
+                    Message message = new Message();
+                    message.what = Consts.CLOSE_ALL_ACTIVITY;
+                    RxBus.getInstance().post(Consts.CLOSE_ALL_ACTIVITY_LISTENER, message);
+                    Intent intent = new Intent(BaseApplication.getBaseApplication(), LoginActivity.class);
+                    BaseApplication.getBaseApplication().startActivity(intent);
+                }
             });
             return true;
         }
@@ -161,7 +157,7 @@ public class NetManager {
      * @param loginTo 用户名密码
      * @param callBack 回调
      */
-    public static void loginAction(LoginTo loginTo, NetCallBack<LoginBean> callBack){
+    public static void loginAction(LoginTo loginTo, final NetCallBack<LoginBean> callBack){
         getService().login(loginTo).enqueue(new Callback<LoginBean>() {
             @Override
             public void onResponse(@NonNull Call<LoginBean> call, @NonNull Response<LoginBean> response) {

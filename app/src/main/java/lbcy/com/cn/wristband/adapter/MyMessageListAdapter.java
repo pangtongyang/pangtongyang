@@ -1,11 +1,7 @@
 package lbcy.com.cn.wristband.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.SwitchCompat;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.jude.easyrecyclerview.adapter.BaseViewHolder;
@@ -14,9 +10,6 @@ import com.jude.easyrecyclerview.adapter.RecyclerArrayAdapter;
 import java.util.List;
 
 import lbcy.com.cn.wristband.R;
-import lbcy.com.cn.wristband.entity.ClockBean;
-import lbcy.com.cn.wristband.entity.MessageDetailData;
-import lbcy.com.cn.wristband.entity.MessageListBean;
 import lbcy.com.cn.wristband.entity.MessageListData;
 
 /**

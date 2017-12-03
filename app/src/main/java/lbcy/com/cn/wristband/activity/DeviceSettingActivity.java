@@ -11,7 +11,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,9 +18,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.request.RequestOptions;
 import com.huichenghe.bleControl.Ble.BluetoothLeService;
 import com.jph.takephoto.app.TakePhotoActivity;
 import com.jph.takephoto.model.TImage;
@@ -43,7 +39,6 @@ import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.purplelibrary.app.MyApplication;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.ctl.DataListener;
-import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManagerNew;
 import lbcy.com.cn.purplelibrary.service.PurpleBLEService;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
@@ -59,7 +54,6 @@ import lbcy.com.cn.wristband.popup.SlideFromBottomPopup;
 import lbcy.com.cn.wristband.popup.UpdatePopup;
 import lbcy.com.cn.wristband.rx.RxManager;
 import lbcy.com.cn.wristband.utils.DialogUtil;
-import lbcy.com.cn.wristband.utils.HandlerTip;
 import razerdp.basepopup.BasePopupWindow;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -137,7 +131,6 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         itemClick();
 
         if (which_device.equals("2")){
-            rlHandUp.setVisibility(View.GONE);
             rlLoss.setVisibility(View.VISIBLE);
             rlVibrate.setVisibility(View.GONE);
             rlLongSittingAlarm.setVisibility(View.VISIBLE);
@@ -145,7 +138,6 @@ public class DeviceSettingActivity extends TakePhotoActivity {
 
             b_getSettings();
         } else {
-            rlHandUp.setVisibility(View.VISIBLE);
             rlLoss.setVisibility(View.GONE);
             rlVibrate.setVisibility(View.VISIBLE);
             rlLongSittingAlarm.setVisibility(View.GONE);
@@ -197,7 +189,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
             } else {
                 p_getSettings();
             }
-            isConnectHandler.postDelayed(runnable, 1000);
+            isConnectHandler.postDelayed(runnable, 5000);
         }
     };
 
@@ -226,17 +218,29 @@ public class DeviceSettingActivity extends TakePhotoActivity {
     private void itemClick() {
         rlHandUp.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
-            public void change(boolean state) {
+            public void change(final boolean state) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        String is_connected = spUtil.getString("is_connected", "0");
-                        if (is_connected.equals("0")){
-                            rlHandUp.setChecked(!state);
-                            Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
-                            return;
+                        if (which_device.equals("2")){
+                            if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+                                BlackDeviceManager.getInstance().isLiftUp(state);
+                            } else {
+                                rlHandUp.setChecked(!state);
+                                Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                        } else {
+                            String is_connected = spUtil.getString("is_connected", "0");
+                            if (is_connected.equals("0")){
+                                rlHandUp.setChecked(!state);
+                                Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            PurpleDeviceManagerNew.getInstance().setHandUp(state);
                         }
-                        PurpleDeviceManagerNew.getInstance().setHandUp(state);
+                        // 实时保存状态
+                        saveState();
                     }
                 });
             }
@@ -244,7 +248,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
 
         rlVibrate.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
-            public void change(boolean state) {
+            public void change(final boolean state) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -254,6 +258,8 @@ public class DeviceSettingActivity extends TakePhotoActivity {
                             Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        // 实时保存状态
+                        saveState();
                         PurpleDeviceManagerNew.getInstance().setVibrate(state);
                     }
                 });
@@ -266,9 +272,10 @@ public class DeviceSettingActivity extends TakePhotoActivity {
             public void change(boolean state) {
                 if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
                     BlackDeviceManager.getInstance().lostRemind(state);
-                    spUtil.putString("black_loss_switch", "1");
+                    // 实时保存状态
+                    saveState();
                 } else {
-                    Toast.makeText(mActivity, "设备未连接", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
                     rlLoss.setChecked(!state);
                 }
 
@@ -429,7 +436,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
             return;
         PurpleDeviceManagerNew.getInstance().getBattery(new DataListener<Long>() {
             @Override
-            public void getData(Long data) {
+            public void getData(final Long data) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -570,7 +577,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         if (BlackDeviceManager.getInstance() != null){
             BlackDeviceManager.getInstance().getBattery(new DataCallback<byte[]>() {
                 @Override
-                public void OnSuccess(byte[] data) {
+                public void OnSuccess(final byte[] data) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -606,9 +613,9 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         BlackDeviceManager.getInstance().getHardwareVersion(new DataCallback<String>() {
             @Override
             public void OnSuccess(String data) {
-                String softVersion = data.split("/")[2];
-                String hardVersion = data.split("/")[0];
-                String blueVersion = data.split("/")[1];
+                final String softVersion = data.split("/")[2];
+                final String hardVersion = data.split("/")[0];
+                final String blueVersion = data.split("/")[1];
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -633,7 +640,7 @@ public class DeviceSettingActivity extends TakePhotoActivity {
         NetManager.getUpdateListAction("bjhc", soft, hard, blue, "zh-cn", new NetManager.NetCallBack<HardwareUpdateBean>() {
             @Override
             public void onResponse(Call<HardwareUpdateBean> call, Response<HardwareUpdateBean> response) {
-                HardwareUpdateBean updateBean = response.body();
+                final HardwareUpdateBean updateBean = response.body();
                 if ((updateBean != null ? updateBean.getResult() : 0) == 1){
                     StringBuilder content = new StringBuilder();
                     for (HardwareUpdateBean.ParamBean param : updateBean.getParam()){

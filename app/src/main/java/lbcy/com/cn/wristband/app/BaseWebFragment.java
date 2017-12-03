@@ -12,7 +12,6 @@ import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
@@ -48,10 +47,10 @@ import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxBus;
 import lbcy.com.cn.wristband.rx.RxManager;
-import lbcy.com.cn.wristband.utils.ScreenUtil;
 import lbcy.com.cn.wristband.widget.SmartRefreshWebLayout;
 
 import static lbcy.com.cn.wristband.global.Consts.URL_KEY;
+import static lbcy.com.cn.wristband.global.Consts.WEB_INDEXES;
 
 /**
  * Created by chenjie on 2017/9/5.
@@ -65,6 +64,7 @@ public abstract class BaseWebFragment extends Fragment {
     public RxManager mRxManager;
     List<String> webHistoryUrls = new ArrayList<>();
 
+    // 是否加载的是loadUrl，即顶部栏点击事件（用以区分首页和其他跳转页）
     public boolean loadIndexUrl = false;
 
     private SmartRefreshWebLayout mSmartRefreshWebLayout=null;
@@ -256,6 +256,9 @@ public abstract class BaseWebFragment extends Fragment {
                 }
 
                 if (webHistoryUrls.size() != 0) {
+                    for (int i = 0; i < WEB_INDEXES.length; i++) {
+                        if (WEB_INDEXES[i].equals(view.getUrl())) return;
+                    }
                     //if--else前三行未作用，暂时保留
                     if (webHistoryUrls.size() == 2)
                         webHistoryUrls.set(1, view.getUrl());
@@ -265,8 +268,8 @@ public abstract class BaseWebFragment extends Fragment {
                     view.loadUrl(webHistoryUrls.get(0));
                 } else {
                     boolean isIndex = false;
-                    for (int i = 0; i < Consts.WEB_INDEXES.length; i++) {
-                        if (Consts.WEB_INDEXES[i].equals(view.getUrl()))
+                    for (int i = 0; i < WEB_INDEXES.length; i++) {
+                        if (WEB_INDEXES[i].equals(view.getUrl()))
                             isIndex = true;
                     }
                     if (isIndex) {

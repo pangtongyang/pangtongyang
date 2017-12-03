@@ -95,4 +95,73 @@ public class DateUtil {
         return millis;
     }
 
+    /**
+     * 字符串时间转毫秒
+     * @param strTime 字符串时间
+     * @return 返回毫秒
+     */
+    public static long stringToLong(String strTime){
+        Date date; // String类型转成date类型
+        date = stringToDate(strTime);
+        if (date == null) {
+            return 0;
+        } else {
+            return dateToLong(date);
+        }
+    }
+
+    /**
+     * Date转毫秒
+     * @param date 时间
+     * @return 返回毫秒
+     */
+    private static long dateToLong(Date date) {
+        return date.getTime();
+    }
+
+    /**
+     * 字符串时间转Date
+     * @param strTime 字符串时间
+     * @return 返回Date
+     */
+    private static Date stringToDate(String strTime){
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        Date date = null;
+        try {
+            date = formatter.parse(strTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
+
+    /**
+     * 时间戳转字符串
+     * @param currentTime 当前时间戳毫秒
+     * @return 返回时间字符串
+     */
+    public static String longToString(long currentTime){
+        Date date = longToDate(currentTime); // long类型转成Date类型
+        return dateToString(date);
+    }
+
+    /**
+     * date转时间字符串
+     * @param data Date时间
+     * @return 返回时间字符串
+     */
+    private static String dateToString(Date data) {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(data);
+    }
+
+    /**
+     * 时间戳毫秒转Date时间
+     * @param currentTime 当前时间戳毫秒
+     * @return 返回Date时间
+     */
+    private static Date longToDate(long currentTime){
+        Date dateOld = new Date(currentTime); // 根据long类型的毫秒数生命一个date类型的时间
+        String sDateTime = dateToString(dateOld); // 把date类型的时间转换为string
+        return stringToDate(sDateTime);
+    }
 }

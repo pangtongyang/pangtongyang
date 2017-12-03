@@ -6,7 +6,6 @@ import java.util.ArrayList;
  * Created by chenjie on 2017/8/6.
  */
 
-public interface DeviceConnect {
+public interface DeviceConnectListener {
     void connect();//连接成功回调
-    void scan(ArrayList data);//sdk自带扫描方法回调
 }

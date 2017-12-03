@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.Button;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
+import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
@@ -17,7 +17,6 @@ import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.popup.SedentarySpaceTimeSettingPopup;
-import lbcy.com.cn.wristband.rx.RxManager;
 import lbcy.com.cn.wristband.utils.StringUtil;
 import razerdp.basepopup.BasePopupWindow;
 import rx.functions.Action1;
@@ -70,6 +69,7 @@ public class SetSedentaryActivity extends BaseActivity {
                 }
             }
         });
+
     }
 
     @Override

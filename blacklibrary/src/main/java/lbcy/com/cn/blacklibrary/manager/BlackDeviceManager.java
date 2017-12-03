@@ -4,7 +4,11 @@ import android.bluetooth.BluetoothGatt;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.huichenghe.bleControl.Ble.BleDataForBattery;
 import com.huichenghe.bleControl.Ble.BleDataForCustomRemind;
@@ -23,6 +27,7 @@ import com.huichenghe.bleControl.Ble.BleDataForSleepData;
 import com.huichenghe.bleControl.Ble.BleDataForTarget;
 import com.huichenghe.bleControl.Ble.BleDataforSyn;
 import com.huichenghe.bleControl.Ble.BleForFindDevice;
+import com.huichenghe.bleControl.Ble.BleForLIftUpRemind;
 import com.huichenghe.bleControl.Ble.BleForLostRemind;
 import com.huichenghe.bleControl.Ble.BleForPhoneAndSmsRemind;
 import com.huichenghe.bleControl.Ble.BleForQQWeiChartFacebook;
@@ -141,6 +146,7 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void getBattery(final DataCallback<byte[]> callback) {
+        Log.e("aaaaaa", Looper.myLooper() == Looper.getMainLooper() ? "1" : "0");
         if (BleDataForBattery.getInstance() == null)
             return;
         BleDataForBattery.getInstance().setBatteryListener(new DataSendCallback() {
@@ -264,7 +270,7 @@ public class BlackDeviceManager implements DeviceController {
         if (isOn) {
             BleForPhoneAndSmsRemind.getInstance().openPhoneRemine((byte) 0x03, (byte) 0x01);
         } else {
-            BleForPhoneAndSmsRemind.getInstance().closeTheRemind();
+            BleForPhoneAndSmsRemind.getInstance().openPhoneRemine((byte) 0x03, (byte) 0x00);
         }
     }
 
@@ -436,24 +442,26 @@ public class BlackDeviceManager implements DeviceController {
     public void setAppNotification(String type, String title, String content) {
         if (BleForQQWeiChartFacebook.getInstance() == null)
             return;
-        //使能开关，0x01代表开
-        BleForQQWeiChartFacebook.getInstance().openRemind((byte) 0x0a, (byte) 0x01);
+
         byte mType;
         switch (type) {
             case FACEBOOK:
-                mType = 0x03;
-                break;
-            case MMS:
-                mType = 0x04;
+                //使能开关，0x01代表开
+                BleForQQWeiChartFacebook.getInstance().openRemind((byte) 0x0b, (byte) 0x01);
+                mType = BleDataForQQAndOtherRemine.facebook;
                 break;
             case WEIXIN:
-                mType = 0x01;
+                //使能开关，0x01代表开
+                BleForQQWeiChartFacebook.getInstance().openRemind((byte) 0x09, (byte) 0x01);
+                mType = BleDataForQQAndOtherRemine.weichart;
                 break;
             case QQ:
-                mType = 0x02;
+                //使能开关，0x01代表开
+                BleForQQWeiChartFacebook.getInstance().openRemind((byte) 0x0a, (byte) 0x01);
+                mType = BleDataForQQAndOtherRemine.qq;
                 break;
             default:
-                mType = 0x00;
+                mType = (byte) 0xfe;
                 break;
         }
 
@@ -464,10 +472,6 @@ public class BlackDeviceManager implements DeviceController {
             texts = title;
         } else {
             texts = title + ":" + content;
-        }
-
-        if (mType == 0x04) {
-            texts = "来短信啦";
         }
 
         if (TextUtils.isEmpty(texts)) {
@@ -750,23 +754,23 @@ public class BlackDeviceManager implements DeviceController {
     public void lostRemind(boolean isOpen) {
         if (BleForLostRemind.getInstance() != null){
             BleForLostRemind.getInstance().openAndHandler(isOpen);
-            BleForLostRemind.getInstance().setLostListener(new DataSendCallback() {
-                @Override
-                public void sendSuccess(byte[] bytes) {
-
-                }
-
-                @Override
-                public void sendFailed() {
-
-                }
-
-                @Override
-                public void sendFinished() {
-
-                }
-            });
-            BleForLostRemind.getInstance().requestAndHandler();
+//            BleForLostRemind.getInstance().setLostListener(new DataSendCallback() {
+//                @Override
+//                public void sendSuccess(byte[] bytes) {
+//
+//                }
+//
+//                @Override
+//                public void sendFailed() {
+//
+//                }
+//
+//                @Override
+//                public void sendFinished() {
+//
+//                }
+//            });
+//            BleForLostRemind.getInstance().requestAndHandler();
         }
     }
 
@@ -819,5 +823,213 @@ public class BlackDeviceManager implements DeviceController {
 
 
         }
+    }
+
+    @Override
+    public void smsRemind(boolean isOn) {
+        if (BleForPhoneAndSmsRemind.getInstance() == null)
+            return;
+        if (isOn) {
+            BleForPhoneAndSmsRemind.getInstance().openPhoneRemine((byte) 0x02, (byte) 0x01);
+        } else {
+            BleForPhoneAndSmsRemind.getInstance().openPhoneRemine((byte) 0x02, (byte) 0x00);
+        }
+    }
+
+    @Override
+    public void smsNotification(String content) {
+        if (BleForPhoneAndSmsRemind.getInstance() == null)
+            return;
+        BleForPhoneAndSmsRemind.getInstance().startSMSRemine(content, (byte) 0x05);
+    }
+
+    @Override
+    public void isLiftUp(boolean isOpen) {
+        if (BleForLIftUpRemind.getInstance() == null){
+            return;
+        }
+        BleForLIftUpRemind.getInstance().openLiftUp(isOpen);
+    }
+
+    @Override
+    public void getHeartRateScanningState(final DataCallback<Bundle> callback) {
+        new Handler(mContext.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                if (BleDataForSettingArgs.getInstance(mContext) == null)
+                    return;
+                BleDataForSettingArgs.getInstance(mContext).setOnArgsBackListener(new DataSendCallback() {
+                    @Override
+                    public void sendSuccess(byte[] bytes) {
+                        if (bytes[1] == (byte) 0x02 && bytes[3] == (byte) 0x04) {
+                            int sw = bytes[4];  //0代表心率监测关闭  1代表开启
+                            int heartData = bytes[2];
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("state", sw);
+                            bundle.putInt("scanFreq", heartData);
+                            callback.OnSuccess(bundle);
+                        }
+                    }
+
+                    @Override
+                    public void sendFailed() {
+
+                    }
+
+                    @Override
+                    public void sendFinished() {
+                        callback.OnFinished();
+                    }
+                });
+                BleDataForSettingArgs.getInstance(mContext).readHeartAndFatigue();
+            }
+        });
+    }
+
+    @Override
+    public void getHeartRateWarningState(final DataCallback<Bundle> callback) {
+        new Handler(mContext.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                BleDataForHRWarning.getInstance().setDataSendCallback(new DataSendCallback() {
+                    @Override
+                    public void sendSuccess(byte[] bytes) {
+                        int maxString = bytes[2] & 0xff;
+                        int minString = bytes[3] & 0xff;
+                        int switchState = bytes[1] & 0xff; //0开 1关
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("max", maxString);
+                        bundle.putInt("min", minString);
+                        bundle.putInt("state", switchState);
+                        callback.OnSuccess(bundle);
+                    }
+
+                    @Override
+                    public void sendFailed() {
+
+                    }
+
+                    @Override
+                    public void sendFinished() {
+                        callback.OnFinished();
+                    }
+                });
+                BleDataForHRWarning.getInstance().requestWarningData();
+            }
+        });
+    }
+
+    @Override
+    public void getLostState(final DataCallback<Boolean> callback) {
+        new Handler(mContext.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                BleForLostRemind.getInstance().setLostListener(new DataSendCallback() {
+                    @Override
+                    public void sendSuccess(byte[] bytes) {
+                        if(bytes[0] == (byte)0x01) {
+                            callback.OnSuccess(bytes[2] == 1);
+                        }
+                    }
+
+                    @Override
+                    public void sendFailed() {
+
+                    }
+
+                    @Override
+                    public void sendFinished() {
+                        callback.OnFinished();
+                    }
+                });
+                BleForLostRemind.getInstance().requestAndHandler();
+            }
+        });
+    }
+
+    @Override
+    public void getAwakeState(final DataCallback<Boolean> callback) {
+        new Handler(mContext.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                BleForLIftUpRemind.getInstance().setLiftUpListener(new DataSendCallback() {
+                    @Override
+                    public void sendSuccess(byte[] bytes) {
+                        if(bytes[0] == 1) {
+                            if (bytes[1] == 6) {
+                                callback.OnSuccess(bytes[2] == 1);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void sendFailed() {
+
+                    }
+
+                    @Override
+                    public void sendFinished() {
+                        callback.OnFinished();
+                    }
+                });
+                BleForLIftUpRemind.getInstance().requestLiftUpData();
+            }
+        });
+
+    }
+
+    @Override
+    public void getSitRemindState(final DataCallback<Bundle> callback) {
+        new Handler(mContext.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                BleForSitRemind.getInstance().setOnSitDataRecever(new DataSendCallback() {
+                    @Override
+                    public void sendSuccess(byte[] bytes) {
+                        if(bytes[0] == (byte)0x00)
+                        {
+                            if(bytes.length >= 4)
+                            {
+                                int count = (bytes.length - 3)/7;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    int number = bytes[1 + i * 7] & 0xff;
+                                    if (number == 0){
+                                        int open = bytes[2 + i * 7] & 0xff;
+                                        int beginM = bytes[3 + i * 7] & 0xff;
+                                        int beginH = bytes[4 + i * 7] & 0xff;
+                                        int endM = bytes[5 + i * 7] & 0xff;
+                                        int endH = bytes[6 + i * 7] & 0xff;
+                                        int duration = bytes[7 + i * 7] & 0xff;
+                                        String beginTime = ((beginH < 10) ? ("0" + beginH) : beginH) + ":" + ((beginM < 10) ? ("0" + beginM) : beginM);
+                                        String endTime = ((endH < 10) ? ("0" + endH) :endH) + ":" + ((endM < 10) ? ("0" + endM) :endM);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putInt("number", number);
+                                        bundle.putInt("isOpen", open);
+                                        bundle.putString("beginTime", beginTime);
+                                        bundle.putString("endTime", endTime);
+                                        bundle.putInt("duration", duration);
+                                        callback.OnSuccess(bundle);
+                                        return;
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void sendFailed() {
+
+                    }
+
+                    @Override
+                    public void sendFinished() {
+                        callback.OnFinished();
+                    }
+                });
+                BleForSitRemind.getInstance().sendToGetSitData();
+            }
+        });
     }
 }

@@ -33,6 +33,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
+import lbcy.com.cn.blacklibrary.ble.DataCallback;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManagerNew;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
@@ -131,12 +133,12 @@ public class MeActivity extends TakePhotoActivity {
 
         if (which_device.equals("2")){
             rlDisturb.setVisibility(View.GONE);
+//            b_getSettings();
 
-            b_getSettings();
         } else {
             rlDisturb.setVisibility(View.VISIBLE);
 
-            p_getSettings();
+//            p_getSettings();
         }
 
         RxManager mRxManager = new RxManager();
@@ -157,11 +159,11 @@ public class MeActivity extends TakePhotoActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        if (which_device.equals("2")){
-//            b_getSettings();
-//        } else {
-//            p_getSettings();
-//        }
+        if (which_device.equals("2")){
+            b_getSettings();
+        } else {
+            p_getSettings();
+        }
         isConnectHandler.post(runnable);
     }
 
@@ -182,7 +184,7 @@ public class MeActivity extends TakePhotoActivity {
             } else {
                 p_getSettings();
             }
-            isConnectHandler.postDelayed(runnable, 1000);
+            isConnectHandler.postDelayed(runnable, 5000);
         }
     };
 
@@ -207,7 +209,7 @@ public class MeActivity extends TakePhotoActivity {
     private void itemClick(){
         rlDisturb.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
-            public void change(boolean state) {
+            public void change(final boolean state) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -217,6 +219,8 @@ public class MeActivity extends TakePhotoActivity {
                             Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        // 实时保存状态
+                        saveState();
                         PurpleDeviceManagerNew.getInstance().setDisturb(state);
                     }
                 });
@@ -399,11 +403,11 @@ public class MeActivity extends TakePhotoActivity {
     }
 
     // 上传头像
-    private void uploadAvatarAction(String path){
+    private void uploadAvatarAction(final String path){
         NetManager.uploadAvatarAction(token, path, new NetManager.NetCallBack<MessageBean>() {
             @Override
             public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
-                MessageBean message = response.body();
+                final MessageBean message = response.body();
                 if ((message != null ? message.getCode() : 0) == 200){
                     if (Looper.myLooper() == Looper.getMainLooper()){
                         new Thread(new Runnable() {

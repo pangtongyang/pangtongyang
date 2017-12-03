@@ -2,7 +2,6 @@ package lbcy.com.cn.wristband.app;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -11,7 +10,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -20,7 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.just.library.AgentWeb;
 import com.just.library.ChromeClientCallbackManager;
 
@@ -31,16 +28,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
-import lbcy.com.cn.purplelibrary.utils.PurpleBleScan;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
-import lbcy.com.cn.wristband.entity.LoginData;
-import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxManager;
 import lbcy.com.cn.wristband.utils.DialogUtil;
 import lbcy.com.cn.wristband.widget.SmartRefreshWebLayout;
-import lbcy.com.cn.wristband.widget.webview.WebLayout;
 import rx.functions.Action1;
 
 /**

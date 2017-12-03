@@ -36,14 +36,6 @@
         <service android:name="com.amap.api.location.APSService">
 
         </service>
-        <activity android:name=".test.Main3Activity" />
-        <activity android:name=".test.ToolActivity" />
-        <activity android:name=".test.ConnectionExampleActivity" />
-        <activity android:name=".test.OprateActivity" />
-        <activity android:name=".test.RxAndroidBleText">
-
-        </activity>
-        <activity android:name=".test.BlackScanTest" />
 
         <service android:name="com.huichenghe.bleControl.Ble.BluetoothLeService" />
 
@@ -124,12 +116,6 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-
-        <activity android:name=".test.PurpleLogin">
-
-        </activity>
-
-
 
     </application>
 

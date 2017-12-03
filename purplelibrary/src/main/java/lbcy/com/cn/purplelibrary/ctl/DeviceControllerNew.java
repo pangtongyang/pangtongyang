@@ -5,9 +5,7 @@ import android.os.Bundle;
 
 import java.util.List;
 
-import lbcy.com.cn.purplelibrary.entity.AlarmClockInfo;
 import lbcy.com.cn.purplelibrary.entity.SportData;
-import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 
 /**
  * Created by chenjie on 2017/8/31.

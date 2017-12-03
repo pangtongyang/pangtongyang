@@ -2,8 +2,9 @@ package lbcy.com.cn.wristband.activity;
 
 import android.content.Intent;
 import android.os.Message;
-import android.support.annotation.NonNull;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -27,12 +28,9 @@ import lbcy.com.cn.wristband.entity.LoginTo;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.rx.RxBus;
-import lbcy.com.cn.wristband.utils.DialogUtil;
-import lbcy.com.cn.wristband.utils.HandlerTip;
 import lbcy.com.cn.wristband.widget.ClearEditText;
 import lbcy.com.cn.wristband.utils.InputUtil;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -88,6 +86,48 @@ public class LoginActivity extends BaseActivity {
             tvOtherlogin.setText(R.string.activity_login_by_other);
             etName.setInputType(InputType.TYPE_CLASS_PHONE);
         }
+
+        etName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String temp = editable.toString();
+                if (temp.length() > 20)
+                {
+                    editable.delete(20, 21);
+                }
+            }
+        });
+
+        etPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String temp = editable.toString();
+                if (temp.length() > 20)
+                {
+                    editable.delete(20, 21);
+                }
+            }
+        });
     }
 
     @Override
@@ -138,17 +178,25 @@ public class LoginActivity extends BaseActivity {
 
     private boolean validate(){
         if (etName.getText().toString().trim().equals("")){
-            DialogUtil.showDialog(mActivity, etName.getHint().toString()+"为空！", false);
+            Toast.makeText(mActivity, etName.getHint().toString()+"为空！", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (etPassword.getText().toString().trim().equals("")){
-            DialogUtil.showDialog(mActivity, "密码为空！", false);
+            Toast.makeText(mActivity, "密码为空！", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (etName.getText().toString().trim().length() > 20){
+            Toast.makeText(mActivity, etName.getHint().toString()+"长度超限！", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (etPassword.getText().toString().trim().length() > 20){
+            Toast.makeText(mActivity, "密码长度长度超限！", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (type == 2){
             String text = etName.getText().toString().trim();
             if (!Pattern.matches(REGEX_MOBILE, text)){
-                DialogUtil.showDialog(mActivity, "手机号错误！", false);
+                Toast.makeText(mActivity, "手机号错误！", Toast.LENGTH_SHORT).show();
                 return false;
             }
         }
@@ -171,7 +219,7 @@ public class LoginActivity extends BaseActivity {
         //设置密码
         spUtilUser.putString("password", etPassword.getText().toString().trim());
         //设置设备类型
-//        spUtilUser.putString("which_device", "2"); //1 -> 紫色 2 -> 黑色
+//        spUtilUser.putString("which_device", "1"); //1 -> 紫色 2 -> 黑色
         spUtilUser.putString("which_device", loginBean.getData().getDevice_type()); //1 -> 紫色 2 -> 黑色
         //设置设备名称
         spUtilUser.putString("deviceName", "wristband");

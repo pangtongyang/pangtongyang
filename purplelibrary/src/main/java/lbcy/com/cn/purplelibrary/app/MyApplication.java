@@ -1,7 +1,6 @@
 package lbcy.com.cn.purplelibrary.app;
 
 import android.app.Application;
-import android.app.Service;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.HashMap;
@@ -9,7 +8,6 @@ import java.util.Map;
 
 import lbcy.com.cn.purplelibrary.entity.DaoMaster;
 import lbcy.com.cn.purplelibrary.entity.DaoSession;
-import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 import lbcy.com.cn.purplelibrary.service.PurpleBLEService;
 
 /**
@@ -26,7 +24,6 @@ public class MyApplication extends Application {
         super.onCreate();
         instance = this;
         setDatabase();
-        PurpleDeviceManager.getInstance().setContext(this);
     }
 
     public static MyApplication getInstances() {

@@ -1,6 +1,8 @@
 package lbcy.com.cn.wristband.activity;
 
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -75,18 +77,58 @@ public class ScanHeartRateActivity extends BaseActivity {
         rlPredictHeartRate.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
-
-                if (etMaxHeartRate.getText().toString().equals("") || etMinHeartRate.getText().toString().equals("")){
-                    Toast.makeText(mActivity, "心率预警值为空", Toast.LENGTH_SHORT).show();
+                if (validate()){
+                    BlackDeviceManager.getInstance().setHeartRateWarning(state
+                            ? Integer.valueOf(etMaxHeartRate.getText().toString()) : 200, state
+                            ? Integer.valueOf(etMinHeartRate.getText().toString()) : 0);
+                } else {
                     rlPredictHeartRate.setChecked(false);
-                    return;
                 }
-                BlackDeviceManager.getInstance().setHeartRateWarning(state
-                        ? Integer.valueOf(etMaxHeartRate.getText().toString()) : 200, state
-                        ? Integer.valueOf(etMinHeartRate.getText().toString()) : 0);
+
             }
         });
 
+        etMaxHeartRate.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String temp = editable.toString();
+                if (temp.length() > 3)
+                {
+                    editable.delete(3, 4);
+                }
+            }
+        });
+
+        etMinHeartRate.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String temp = editable.toString();
+                if (temp.length() > 3)
+                {
+                    editable.delete(3, 4);
+                }
+            }
+        });
     }
 
     @Override
@@ -101,6 +143,27 @@ public class ScanHeartRateActivity extends BaseActivity {
                 }
             }
         });
+    }
+
+    private boolean validate(){
+        if (etMaxHeartRate.getText().toString().equals("") || etMinHeartRate.getText().toString().equals("")){
+            Toast.makeText(mActivity, "心率预警值为空！", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (Integer.valueOf(etMaxHeartRate.getText().toString()) > 200){
+            Toast.makeText(mActivity, "最大心率超限！", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (Integer.valueOf(etMinHeartRate.getText().toString()) < 40){
+            Toast.makeText(mActivity, "最小心率超限！", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (Integer.valueOf(etMaxHeartRate.getText().toString()) < Integer.valueOf(etMinHeartRate.getText().toString())){
+            Toast.makeText(mActivity, "最大心率小于最小心率！", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
     }
 
     @OnClick({R.id.rl_scan_rate})

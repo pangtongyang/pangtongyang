@@ -1,7 +1,8 @@
 package lbcy.com.cn.wristband.activity;
 
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,7 +11,6 @@ import android.widget.Toast;
 import java.util.regex.Pattern;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
@@ -18,9 +18,7 @@ import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseActivity;
 import lbcy.com.cn.wristband.entity.MobileBean;
 import lbcy.com.cn.wristband.entity.MobileTo;
-import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
-import lbcy.com.cn.wristband.utils.DialogUtil;
 import lbcy.com.cn.wristband.utils.HandlerTip;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -57,6 +55,48 @@ public class BindPhoneActivity extends BaseActivity {
     @Override
     protected void initView() {
         setTitle(getResources().getString(R.string.activity_bind_phone));
+
+        etPhone.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String temp = editable.toString();
+                if (temp.length() > 20)
+                {
+                    editable.delete(20, 21);
+                }
+            }
+        });
+
+        etCode.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String temp = editable.toString();
+                if (temp.length() > 10)
+                {
+                    editable.delete(10, 11);
+                }
+            }
+        });
     }
 
     @Override
@@ -105,7 +145,16 @@ public class BindPhoneActivity extends BaseActivity {
 
     private boolean codeValidate(){
         if (etPhone.getText().toString().trim().equals("")){
-            DialogUtil.showDialog(mActivity, "手机号为空", false);
+            Toast.makeText(mActivity, "手机号为空！", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (etPhone.getText().toString().trim().length() > 20){
+            Toast.makeText(mActivity, "手机号长度超限！", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        String text = etPhone.getText().toString().trim();
+        if (!Pattern.matches(REGEX_MOBILE, text)){
+            Toast.makeText(mActivity, "手机号错误！", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
@@ -113,25 +162,25 @@ public class BindPhoneActivity extends BaseActivity {
 
     private boolean validate(){
         if (etPhone.getText().toString().trim().equals("")){
-            DialogUtil.showDialog(mActivity, "手机号为空", false);
+            Toast.makeText(mActivity, "手机号为空！", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (etPhone.getText().toString().trim().length() > 20){
+            Toast.makeText(mActivity, "手机号长度超限！", Toast.LENGTH_SHORT).show();
             return false;
         }
         String text = etPhone.getText().toString().trim();
         if (!Pattern.matches(REGEX_MOBILE, text)){
-            DialogUtil.showDialog(mActivity, "手机号错误！", false);
+            Toast.makeText(mActivity, "手机号错误！", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (etCode.getText().toString().trim().equals("")){
-            DialogUtil.showDialog(mActivity, "验证码为空", false);
+            Toast.makeText(mActivity, "验证码为空！", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (mobileBean == null){
-            DialogUtil.showDialog(mActivity, "请获取验证码", false);
-            return false;
-        }
-        if (!etCode.getText().toString().trim().equals(mobileBean.getData())){
-            Toast.makeText(mActivity, "验证码错误", Toast.LENGTH_SHORT).show();
+        if (etCode.getText().toString().trim().length() > 10){
+            Toast.makeText(mActivity, "验证码长度超限！", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -143,15 +192,13 @@ public class BindPhoneActivity extends BaseActivity {
             @Override
             public void onResponse(Call<MobileBean> call, Response<MobileBean> response) {
                 MobileBean data = response.body();
-                if (data == null) {
-                    Toast.makeText(mActivity, "数据获取失败！", Toast.LENGTH_SHORT).show();
-                    return;
+                if ((data != null ? data.getCode() : 0) == 200)
+                    mobileBean = data;
+                else if ((data != null ? data.getCode() : 0) == 300){
+                    Toast.makeText(mActivity, "已绑定手机号" + data.getData() + "，无需重新绑定！", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(mActivity, "验证码获取失败", Toast.LENGTH_SHORT).show();
                 }
-                if (data.getCode() != 200) {
-                    Toast.makeText(mActivity, "数据获取失败！", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                mobileBean = data;
             }
 
             @Override
@@ -172,7 +219,9 @@ public class BindPhoneActivity extends BaseActivity {
                 MobileBean data = response.body();
                 if (data != null && data.getCode() == 200) {
                     Toast.makeText(mActivity, "绑定成功！", Toast.LENGTH_SHORT).show();
-                } else {
+                } else if ((data != null ? data.getCode() : 0) == 500){
+                    Toast.makeText(mActivity, data.getMessage(), Toast.LENGTH_SHORT).show();
+                } else{
                     Toast.makeText(mActivity, "绑定失败！", Toast.LENGTH_SHORT).show();
                 }
             }

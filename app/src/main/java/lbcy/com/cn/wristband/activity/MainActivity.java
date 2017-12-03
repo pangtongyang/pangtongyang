@@ -1,26 +1,20 @@
 package lbcy.com.cn.wristband.activity;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -35,7 +29,6 @@ import com.huichenghe.bleControl.Ble.BluetoothLeService;
 import com.huichenghe.bleControl.Utils.FormatUtils;
 import com.just.library.AgentWeb;
 
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -46,32 +39,26 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.OnClick;
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
-import lbcy.com.cn.blacklibrary.ble.DeviceConnect;
+import lbcy.com.cn.blacklibrary.ble.DeviceConnectListener;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
-import lbcy.com.cn.blacklibrary.manager.DeviceConnectManager;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceConnectManager;
 import lbcy.com.cn.blacklibrary.utils.Util;
 import lbcy.com.cn.purplelibrary.app.MyApplication;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.ctl.DataListener;
 import lbcy.com.cn.purplelibrary.entity.SportData;
-import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManager;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManagerNew;
-import lbcy.com.cn.purplelibrary.service.ManagerDeviceService;
 import lbcy.com.cn.purplelibrary.service.PurpleBLEService;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.app.BaseWebFragment;
 import lbcy.com.cn.wristband.app.BaseFragmentActivity;
-import lbcy.com.cn.wristband.ctl.BleScanCallback;
-import lbcy.com.cn.wristband.entity.BleDevice;
 import lbcy.com.cn.wristband.entity.HeartBeatsAllDayDataTo;
 import lbcy.com.cn.wristband.entity.HeartBeatsAllDayHistory;
 import lbcy.com.cn.wristband.entity.HeartBeatsAllDayHistoryDao;
 import lbcy.com.cn.wristband.entity.HeartBeatsAllDayMaxMin;
 import lbcy.com.cn.wristband.entity.HeartBeatsAllDayMaxMinDao;
-import lbcy.com.cn.wristband.entity.HeartBeatsHistory;
-import lbcy.com.cn.wristband.entity.HeartBeatsHistoryDao;
 import lbcy.com.cn.wristband.entity.LoginData;
 import lbcy.com.cn.wristband.entity.LoginDataDao;
 import lbcy.com.cn.wristband.entity.MessageBean;
@@ -90,7 +77,6 @@ import lbcy.com.cn.wristband.fragment.WebFragment;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.service.MyNotificationService;
-import lbcy.com.cn.wristband.utils.BleScanHelper;
 import lbcy.com.cn.wristband.utils.DateUtil;
 import lbcy.com.cn.wristband.utils.HandlerTip;
 import lbcy.com.cn.wristband.widget.NoScrollViewPager;
@@ -221,6 +207,21 @@ public class MainActivity extends BaseFragmentActivity {
     protected void onResume() {
         super.onResume();
 
+//        if (which_device.equals("2") && isSplashed){
+//            if (scanHelper == null || !scanHelper.isScanning()) blackConnectAction();
+//        }
+
+        // 若进入首页时，蓝牙处于断开状态，则调用连接逻辑
+        if (which_device.equals("2")) {
+            if (BluetoothLeService.getInstance() == null || BluetoothLeService.getInstance().isConnectedDevice()) {
+                connectedThread.start();
+            }
+        } else {
+            if (spUtil.getString("is_connected", "0").equals("0")) {
+                connectedThread.start();
+            }
+        }
+
         llHomeBottomBar.setVisibility(View.VISIBLE);
     }
 
@@ -246,7 +247,6 @@ public class MainActivity extends BaseFragmentActivity {
     @Override
     protected void initView() {
 
-
         if (!isSplashed)
             isSplashed = getIntent().getBooleanExtra("isSplashed", false); //判断是否从登录页跳转
 
@@ -261,7 +261,7 @@ public class MainActivity extends BaseFragmentActivity {
 
             //判断是否设置身高体重
             String hasSetBodyData = spUtil.getString("body_data", "0");
-            if (hasSetBodyData.equals("0")){
+            if (hasSetBodyData.equals("0")) {
                 finish();
                 return;
             }
@@ -327,11 +327,7 @@ public class MainActivity extends BaseFragmentActivity {
                             break;
                         }
 
-                        if (which_device.equals("2")) {
-                            blackConnectAction();
-                        } else {
-                            purpleConnectAction();
-                        }
+                        connectedThread.start();
 
                         //获取用户基本信息
                         getUserInfoAction();
@@ -341,7 +337,7 @@ public class MainActivity extends BaseFragmentActivity {
                         startActivityForResult(enableBtIntent, Consts.REQUEST_ENABLE_BT);
                         break;
                     case Consts.RELOAD_DATA:
-                        if (!runningState){
+                        if (System.currentTimeMillis() - runningTimeOut > 12000) {
                             Thread thread = new Thread(runnableSaveData);
                             thread.start();
                         }
@@ -424,11 +420,7 @@ public class MainActivity extends BaseFragmentActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == BLUETOOTH_OPEN_REQUEST) {
             if (resultCode == RESULT_OK) {
-                if (which_device.equals("2")) {
-                    blackConnectAction();
-                } else {
-                    purpleConnectAction();
-                }
+                connectedThread.start();
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(BaseApplication.getBaseApplication(), "蓝牙设备未开启，无法连接手环", Toast.LENGTH_SHORT).show();
             }
@@ -595,15 +587,33 @@ public class MainActivity extends BaseFragmentActivity {
                 jumpStarFragment();
                 break;
             case R.id.iv_user:
+                System.gc();
                 intent = new Intent(mActivity, MeActivity.class);
                 startActivity(intent);
                 break;
         }
     }
 
+    // 上次点击时间戳
+    long lastTopClickTime = 0;
+    // 多次连续点击，时间间隔小于1s时，记录点击次数
+    int clickTimes = 0;
+
     @OnClick({R.id.rl_top1, R.id.rl_top2, R.id.rl_top3, R.id.iv_history})
     public void topClick(View v) {
-        Intent intent;
+        // 用户两次点击顶部栏的时间间隔应超过1s，确保上次页面已基本加载完成
+        if (System.currentTimeMillis() - lastTopClickTime < 1000) {
+            lastTopClickTime = System.currentTimeMillis();
+            // 防止用户间隔1s内持续点击顶部栏，而页面不进行跳转
+            if (clickTimes < 1) {
+                clickTimes++;
+                return;
+            }
+        }
+        lastTopClickTime = System.currentTimeMillis();
+        if (clickTimes != 0) clickTimes = 0;
+
+        // 点击事件处理
         switch (v.getId()) {
             case R.id.rl_top1:
                 if (view1.getVisibility() == View.GONE) {
@@ -705,10 +715,6 @@ public class MainActivity extends BaseFragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         //紫色手环销毁
-        if (purpleConnectionListener != null){
-            purpleConnectionListener.interrupt();
-            purpleConnectionListener = null;
-        }
         Intent intent = new Intent(mActivity, PurpleBLEService.class);
         intent.setAction("lbcy.com.cn.purplelibrary.service.PurpleBLEService");
         stopService(intent);
@@ -716,21 +722,25 @@ public class MainActivity extends BaseFragmentActivity {
 //        stopService();
 //        try {
 //            if (internalReceiver != null) {
-//                unregisterReceiver(internalReceiver);
+//                unregisterReceiverandStopReconnect(internalReceiver);
 //            }
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
         //黑色手环销毁
+        connectStateHandler.removeCallbacks(connectStateRunnable);
         if (BluetoothLeService.getInstance() != null) {
             BluetoothLeService.getInstance().disconnect();
             BluetoothLeService.getInstance().stopSelf();
         }
-        if (scanHelper != null && !scanHelper.isScanSubscriptionNull())
-            scanHelper.stopRxAndroidBleScan();
-        if (manager != null){
-            manager.stopCircleScan();
-            manager.stopService();
+        if (manager != null) {
+            manager.unregisterReceiverandStopReconnect();
+            manager = null;
+        }
+        // 销毁手环连接线程
+        if (connectedThread != null) {
+            connectedThread.interrupt();
+            connectedThread = null;
         }
     }
 
@@ -767,13 +777,13 @@ public class MainActivity extends BaseFragmentActivity {
     // 上传运动数据
     private void uploadSportData() {
         // 获取整天数据列表
-        SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSportAllDayDataDao();
+        final SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSportAllDayDataDao();
         // 无数据，返回
         if (dayDataDao.count() != 0) {
             List<SportAllDayData> dayDataList = dayDataDao.queryBuilder().where(SportAllDayDataDao.Properties.IsUpload.eq(false)).build().list();
             // 根据整天数据列表获取每天分时数据
             SportSplitDataDao dataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSportSplitDataDao();
-            for (SportAllDayData dayData : dayDataList) {
+            for (final SportAllDayData dayData : dayDataList) {
                 // 获取到当天数据，不上传
                 if (dayData.getDate().equals(DateUtil.getCurrentTime_Y_M_d()))
                     continue;
@@ -827,10 +837,10 @@ public class MainActivity extends BaseFragmentActivity {
     private void uploadSleepData() {
 
         // 获取睡眠数据
-        SleepAllDataDao allDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSleepAllDataDao();
+        final SleepAllDataDao allDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSleepAllDataDao();
         if (allDataDao.count() != 0) {
             List<SleepAllData> sleepAllDataList = allDataDao.queryBuilder().where(SleepAllDataDao.Properties.Is_upload.eq(false)).build().list();
-            for (SleepAllData allData : sleepAllDataList) {
+            for (final SleepAllData allData : sleepAllDataList) {
                 SleepTo sleepTo = new SleepTo();
                 sleepTo.setDate(allData.getTod_date());
                 sleepTo.setStart_time(allData.getStart_time());
@@ -889,9 +899,9 @@ public class MainActivity extends BaseFragmentActivity {
 
         // 获取心率数据
         HeartBeatsAllDayDataTo dayDataTo = new HeartBeatsAllDayDataTo();
-        HeartBeatsAllDayMaxMinDao maxMinDao = BaseApplication.getBaseApplication().getBaseDaoSession().getHeartBeatsAllDayMaxMinDao();
+        final HeartBeatsAllDayMaxMinDao maxMinDao = BaseApplication.getBaseApplication().getBaseDaoSession().getHeartBeatsAllDayMaxMinDao();
         List<HeartBeatsAllDayMaxMin> maxMinList = maxMinDao.queryBuilder().where(HeartBeatsAllDayMaxMinDao.Properties.IsUpload.eq(false)).build().list();
-        for (HeartBeatsAllDayMaxMin maxMin : maxMinList){
+        for (final HeartBeatsAllDayMaxMin maxMin : maxMinList) {
             // 获取到当天数据，不上传
             if (maxMin.getDate().equals(DateUtil.getCurrentTime_Y_M_d()))
                 continue;
@@ -908,7 +918,7 @@ public class MainActivity extends BaseFragmentActivity {
             dayDataTo.setMax_heartbeats(maxMin.getMax_heartbeats());
             List<HeartBeatsAllDayDataTo.HistoryBean> historyBeanList = new ArrayList<>();
             // 获取分时数据
-            for (HeartBeatsAllDayHistory history : histories){
+            for (HeartBeatsAllDayHistory history : histories) {
                 HeartBeatsAllDayDataTo.HistoryBean historyBean = new HeartBeatsAllDayDataTo.HistoryBean();
                 historyBean.setHeartbeats(history.getHeartbeats());
                 historyBean.setTime(history.getTime());
@@ -921,7 +931,7 @@ public class MainActivity extends BaseFragmentActivity {
                 @Override
                 public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
                     MessageBean message = response.body();
-                    if ((message != null ? message.getCode() : 0) == 200){
+                    if ((message != null ? message.getCode() : 0) == 200) {
                         maxMin.setIsUpload(true);
                         maxMinDao.update(maxMin);
                     } else {
@@ -937,16 +947,23 @@ public class MainActivity extends BaseFragmentActivity {
         }
     }
 
-    boolean runningState = false;
+    // 下拉刷新超过12s再刷新数据，未超过则不执行
+    long runningTimeOut = 0;
     // 异步执行
     Runnable runnableSaveData = new Runnable() {
         @Override
         public void run() {
-            runningState = true;
+            runningTimeOut = System.currentTimeMillis();
             if (which_device.equals("2")) {
                 b_getDataFromDevice();
             } else {
-                while(!MyApplication.getInstances().getThread().canCallBack){
+                if (MyApplication.getInstances().getThread() == null) {
+                    return;
+                }
+                while (!MyApplication.getInstances().getThread().canCallBack) {
+                    if (MyApplication.getInstances().getThread() == null) {
+                        return;
+                    }
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -955,257 +972,211 @@ public class MainActivity extends BaseFragmentActivity {
                 }
                 p_getDataFromDevice();
             }
-//            try {
-//                Thread.sleep(2000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            uploadData();
-            runningState = false;
         }
     };
 
+    // 黑色手环、紫色手环连接逻辑，单独建立线程，防止页面卡顿
+    MyThread connectedThread = new MyThread();
 
-    /**************************************************************************/
-    Thread purpleConnectionListener;
-    //紫色手环连接相关
-    private void purpleConnectAction() {
-        Intent intent = new Intent(mActivity, PurpleBLEService.class);
-        intent.setAction("lbcy.com.cn.purplelibrary.service.PurpleBLEService");
-        String mac_address = spUtil.getString("deviceAddress");
-        intent.putExtra("mac_address", mac_address);
-        startService(intent);
-
-        purpleConnectionListener = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                long time = System.currentTimeMillis();
-                while(spUtil.getString("is_connected","0").equals("0")){
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                Thread thread = new Thread(runnableSaveData);
-                thread.start();
+    // 黑色手环设备连接超时监听
+    Handler connectStateHandler = new Handler();
+    Runnable connectStateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                Toast.makeText(getApplicationContext(), "仍未连接手环，请重启App后重试", Toast.LENGTH_SHORT).show();
             }
-        });
-        purpleConnectionListener.start();
-    }
+        }
+    };
 
-    private void p_getDataFromDevice() {
-        // 同步时间
-        PurpleDeviceManagerNew.getInstance().syncTime();
+    // 手环连接线程
+    private class MyThread extends Thread {
 
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        // 是否为首次连接
+        private boolean isFirstConnect = true;
+
+        @Override
+        public void run() {
+            if (which_device.equals("2")) blackConnectAction();
+            else purpleConnectAction();
         }
 
-        // 获取当天运动数据（步数）
-        PurpleDeviceManagerNew.getInstance().getSportData(new DataListener<String>() {
-            @Override
-            public void getData(String data) {
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                Date datetime = new Date();
-                String date = format.format(datetime);
+        // 紫色手环连接逻辑
+        private void purpleConnectAction() {
+            Intent intent = new Intent(mActivity, PurpleBLEService.class);
+            intent.setAction("lbcy.com.cn.purplelibrary.service.PurpleBLEService");
+            String mac_address = spUtil.getString("deviceAddress");
+            intent.putExtra("mac_address", mac_address);
+            startService(intent);
 
-                if (sportAllDayData == null)
-                    sportAllDayData = new SportAllDayData();
-                sportAllDayData.setDate(date);
-                sportAllDayData.setDone_steps(Integer.valueOf(data));
-                SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().
-                        getSportAllDayDataDao();
-                SportAllDayData buf = dayDataDao.queryBuilder().
-                        where(SportAllDayDataDao.Properties.Date.eq(date)).
-                        build().unique();
-                if (buf == null) {
-                    dayDataDao.insert(sportAllDayData);
-                } else {
-                    sportAllDayData.setId(buf.getId());
-                    sportAllDayData.setIsUpload(buf.getIsUpload());
-                    dayDataDao.update(sportAllDayData);
+            while (spUtil.getString("is_connected", "0").equals("0")) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-                // 紫色手环上传运动数据
-                uploadSportData();
             }
-        });
 
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // 读取设备信息（包括闹钟信息）
-        PurpleDeviceManagerNew.getInstance().readDeviceConfig();
-
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // 获取历史运动数据
-        PurpleDeviceManagerNew.getInstance().getSportHistory(new DataListener<List<SportData>>() {
-            @Override
-            public void getData(List<SportData> data) {
-                for (SportData mData : data){
-                    String date = mData.getDate();
-
-                    if (sportAllDayData == null)
-                        sportAllDayData = new SportAllDayData();
-                    sportAllDayData.setDate(date);
-                    sportAllDayData.setDone_steps(mData.getStep());
-                    SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().
-                            getSportAllDayDataDao();
-                    SportAllDayData buf = dayDataDao.queryBuilder().
-                            where(SportAllDayDataDao.Properties.Date.eq(date)).
-                            build().unique();
-                    if (buf == null) {
-                        dayDataDao.insert(sportAllDayData);
-                    } else {
-                        sportAllDayData.setId(buf.getId());
-                        sportAllDayData.setIsUpload(buf.getIsUpload());
-                        dayDataDao.update(sportAllDayData);
-                    }
-                }
-
-                // 紫色手环上传运动数据
-                uploadSportData();
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        });
 
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            // 获取运动数据，并上传非当天数据
+            Thread thread = new Thread(runnableSaveData);
+            thread.start();
         }
 
-        // 获取睡眠数据
-        PurpleDeviceManagerNew.getInstance().getSleepData(new DataListener<Bundle>() {
-            @Override
-            public void getData(Bundle data) {
-                boolean isSleepValid = data.getBoolean("isSleepValid");
-                byte sleepHour = data.getByte("sleepHour");
-                byte sleepMin = data.getByte("sleepMin");
-                byte wakeHour = data.getByte("wakeHour");
-                byte wakeMin = data.getByte("wakeMin");
-                byte wakeCount = data.getByte("wakeCount");
-                int deepTime = data.getInt("deepTime");
-                int lightTime = data.getInt("lightTime");
-                int sleepScore = data.getInt("sleepScore");
-                byte[] sleepShowRaw = data.getByteArray("sleepShowRaw");
-                int sleepShowRawi = data.getInt("sleepShowRawi");
+        // 黑色手环连接逻辑
+        private void blackConnectAction() {
+            // 连接经过的时间
+            final long[] connectingDuration = {System.currentTimeMillis()};
+            if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                if (isFirstConnect) {
+//                    Log.e("1111110", Looper.myLooper() == Looper.getMainLooper()? "1" : "0");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "设备连接中", Toast.LENGTH_SHORT).show();
 
-                // 睡眠是否有效
-                if (!isSleepValid)
-                    return;
-
-                String yes_date = DateUtil.getYesterdayTime_Y_M_d();
-                String tod_date = DateUtil.getCurrentTime_Y_M_d();
-                String sleepTime = (sleepHour < 10 ? "0"+sleepHour : sleepHour) + ":" + (sleepMin < 10 ? "0" + sleepMin : sleepMin) + ":00";
-                String wakeTime = (wakeHour < 10 ? "0"+wakeHour : wakeHour) + ":" + (wakeMin < 10 ? "0" + wakeMin : wakeMin) + ":00";
-                String startTime = yes_date + " " + sleepTime;
-                String endTime = tod_date + " " + wakeTime;
-
-                if (sleepShowRaw == null)
-                    return;
-
-                int deep = deepTime;
-                int light = lightTime;
-                int wake = sleepShowRaw.length - deep - light;
-                int buf_state = 0;
-                // 处理后的睡眠数据
-                StringBuilder buffer = new StringBuilder("");
-                // 睡眠原数据字符串
-                StringBuilder sleepAllData = Util.bytesToString(sleepShowRaw);
-                // 处理前的睡眠数据前缀
-                StringBuilder before = new StringBuilder("");
-                // 处理前的睡眠数据后缀
-                StringBuilder later = new StringBuilder("");
-                for (int i=0; i<sleepMin; i++){
-                    before.append(2);
-                }
-                if (wakeMin > 0)
-                    for (int i=0; i<60-wakeMin; i++){
-                        later.append(2);
-                    }
-                sleepAllData = before.append(sleepAllData).append(later);
-                // // 睡眠原数据char数组
-                char[] sleepData = sleepAllData.toString().toCharArray();
-
-                for (int i = 0; i< sleepData.length; i+=10){
-                    for (int j = i; j < i+10; j++){
-                        if (j >= sleepData.length)
-                            break;
-                        if (sleepData[j] == '3'){
-                            buf_state = 3;
-                            break;
-                        }else if (sleepData[j] == '0' && buf_state < 2){
-                            buf_state = 2;
-                        }else if (sleepData[j] == '2' && buf_state < 1){
-                            buf_state = 1;
+                            connectStateHandler.postDelayed(connectStateRunnable, 30000);
                         }
-                    }
-                    buffer.append(buf_state);
-                    buf_state = 0;
-                }
 
-                SleepAllDataDao allDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSleepAllDataDao();
-                // 校验今日睡眠是否已缓存，已缓存则无需再次缓存
-                if (allDataDao.queryBuilder().where(SleepAllDataDao.Properties.Yes_date.eq(yes_date)).count() != 0)
-                    return;
+                    });
 
-                // 缓存总睡眠数据
-                SleepAllData allData = new SleepAllData(null, yes_date, tod_date, startTime, endTime, deep, light, wake, sleepScore, buffer.toString(), false);
-                allDataDao.insert(allData);
-
-                // 紫色手环上传睡眠数据
-                uploadSleepData();
-            }
-        });
-
-    }
-
-    /**************************************************************************/
-    //黑色手环相关
-    BleScanHelper scanHelper;
-    DeviceConnectManager manager;
-
-    private boolean isFirstConnect = true;
-    private void blackConnectAction() {
-        if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()){
-            if (isFirstConnect){
-                Toast.makeText(getApplicationContext(), "设备连接中", Toast.LENGTH_SHORT).show();
-                isFirstConnect = false;
-            }
-        }
-        String mac_address = spUtil.getString("deviceAddress");
-        scanHelper = new BleScanHelper(this);
-
-        scanHelper.startRxAndroidBleScan(new BleScanCallback() {
-            @Override
-            public void updateUI(BleDevice device) {
-                if (device.getMacAddress().equals(mac_address)) {
-                    if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
-                        return;
-                    }
-                    if (manager != null)
-                        manager.selectRxAndroidBleDevice(Consts.BLACK_WRISTBAND_NAME, mac_address);
+                    isFirstConnect = false;
                 }
             }
-        });
-        if (manager == null){
-            manager = new DeviceConnectManager(getApplicationContext());
-            manager.registerReceiverForAllEvent(new DeviceConnect() {
+            String mac_address = spUtil.getString("deviceAddress");
+
+            if (manager == null) {
+                manager = new BlackDeviceConnectManager(mActivity, mac_address);
+            }
+
+            manager.startConnectingCallBack(new DeviceConnectListener() {
                 @Override
                 public void connect() {
-                    Toast.makeText(getApplicationContext(), "连接成功！", Toast.LENGTH_SHORT).show();
+                    connectingDuration[0] = System.currentTimeMillis() - connectingDuration[0];
+                    // 防止连接过快导致显示过快
+                    HandlerTip.getInstance().postDelayed((5000 - connectingDuration[0] > 0 ? (int) (5000 - connectingDuration[0]) : 100), new HandlerTip.HandlerCallback() {
+                        @Override
+                        public void postDelayed() {
+                            Toast.makeText(getApplicationContext(), "连接成功！", Toast.LENGTH_SHORT).show();
+                            connectStateHandler.removeCallbacks(connectStateRunnable);
+                        }
+                    });
+
+                    // 心率监测状态获取
+                    BlackDeviceManager.getInstance().getHeartRateScanningState(new DataCallback<Bundle>() {
+                        @Override
+                        public void OnSuccess(Bundle data) {
+                            int state = data.getInt("state");
+                            int freq = data.getInt("scanFreq");
+                            String freqText = (freq == 1 ? freq + " 小时/次" : freq + "分钟/次");
+                            if (state == 1 && spUtil.getString("scan_heart_rate_scan_switch", "0").equals("0")) {
+                                spUtil.putString("scan_heart_rate_time", freqText);
+                                spUtil.putString("scan_heart_rate_scan_switch", "1");
+                            }
+                        }
+
+                        @Override
+                        public void OnFailed() {
+
+                        }
+
+                        @Override
+                        public void OnFinished() {
+                            //心率预警状态获取
+                            BlackDeviceManager.getInstance().getHeartRateWarningState(new DataCallback<Bundle>() {
+                                @Override
+                                public void OnSuccess(Bundle data) {
+                                    int max = data.getInt("max");
+                                    int min = data.getInt("min");
+                                    int state = data.getInt("state"); // 0 -> 开， 1 -> 关
+                                    if (state == 0 && spUtil.getString("scan_heart_rate_predict_switch", "0").equals("0")) {
+                                        spUtil.putString("scan_heart_rate_max_heart_rate", String.valueOf(max));
+                                        spUtil.putString("scan_heart_rate_min_heart_rate", String.valueOf(min));
+                                        spUtil.putString("scan_heart_rate_predict_switch", "1");
+                                    }
+                                }
+
+                                @Override
+                                public void OnFailed() {
+
+                                }
+
+                                @Override
+                                public void OnFinished() {
+
+                                }
+                            });
+                        }
+                    });
+
+                    // 防丢开关状态获取
+                    BlackDeviceManager.getInstance().getLostState(new DataCallback<Boolean>() {
+                        @Override
+                        public void OnSuccess(Boolean data) {
+                            if (data && spUtil.getString("rl_loss", "0").equals("0")) {
+                                spUtil.putString("rl_loss", "1");
+                            }
+                        }
+
+                        @Override
+                        public void OnFailed() {
+
+                        }
+
+                        @Override
+                        public void OnFinished() {
+
+                        }
+                    });
+
+                    // 抬腕显示状态获取
+                    BlackDeviceManager.getInstance().getAwakeState(new DataCallback<Boolean>() {
+                        @Override
+                        public void OnSuccess(Boolean data) {
+                            if (data && spUtil.getString("rl_hand_up", "0").equals("0")) {
+                                spUtil.putString("rl_hand_up", "1");
+                            }
+                        }
+
+                        @Override
+                        public void OnFailed() {
+
+                        }
+
+                        @Override
+                        public void OnFinished() {
+
+                        }
+                    });
+
+                    // 久坐提醒状态获取
+                    BlackDeviceManager.getInstance().getSitRemindState(new DataCallback<Bundle>() {
+                        @Override
+                        public void OnSuccess(Bundle data) {
+                            if (data.getInt("isOpen") == 1 && spUtil.getString("sedentary_checked", "0").equals("0")) {
+                                spUtil.putString("startSedentary", data.getString("beginTime"));
+                                spUtil.putString("endSedentary", data.getString("endTime"));
+                                spUtil.putString("spaceSedentary", data.getInt("duration") + "分钟");
+                                spUtil.putString("sedentary_checked", "1");
+                            }
+                        }
+
+                        @Override
+                        public void OnFailed() {
+
+                        }
+
+                        @Override
+                        public void OnFinished() {
+
+                        }
+                    });
+
                     // 时间同步
                     BlackDeviceManager.getInstance().synTime(new DataCallback<byte[]>() {
                         @Override
@@ -1259,23 +1230,205 @@ public class MainActivity extends BaseFragmentActivity {
                         }
                     });
 
+                    if (Looper.getMainLooper() != Looper.myLooper()) {
+                        try {
+                            Thread.sleep(300);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                     // 获取运动数据，并上传非当天数据，紫色手环连接成功务必也要调用！！！
                     Thread thread = new Thread(runnableSaveData);
                     thread.start();
                 }
-
-                @Override
-                public void scan(ArrayList data) {
-                    blackConnectAction();
-                }
             });
-            manager.startService();
+
+            manager.connectDevice();
+
+        }
+    }
+
+    /**************************************************************************/
+    //紫色手环连接相关
+    private void p_getDataFromDevice() {
+        // 同步时间
+        PurpleDeviceManagerNew.getInstance().syncTime();
+
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        // 设备连接超时，重新扫描连接
-        manager.rescan();
-        manager.alert();
+        // 获取当天运动数据（步数）
+        PurpleDeviceManagerNew.getInstance().getSportData(new DataListener<String>() {
+            @Override
+            public void getData(String data) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date datetime = new Date();
+                String date = format.format(datetime);
+
+                sportAllDayData = new SportAllDayData();
+                sportAllDayData.setDate(date);
+                sportAllDayData.setDone_steps(Integer.valueOf(data));
+                SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().
+                        getSportAllDayDataDao();
+                SportAllDayData buf = dayDataDao.queryBuilder().
+                        where(SportAllDayDataDao.Properties.Date.eq(date)).
+                        build().unique();
+                if (buf == null) {
+                    dayDataDao.insert(sportAllDayData);
+                } else {
+                    sportAllDayData.setId(buf.getId());
+                    sportAllDayData.setIsUpload(buf.getIsUpload());
+                    dayDataDao.update(sportAllDayData);
+                }
+
+                // 紫色手环上传运动数据
+                uploadSportData();
+            }
+        });
+
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 读取设备信息（包括闹钟信息）
+        PurpleDeviceManagerNew.getInstance().readDeviceConfig();
+
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 获取历史运动数据
+        PurpleDeviceManagerNew.getInstance().getSportHistory(new DataListener<List<SportData>>() {
+            @Override
+            public void getData(List<SportData> data) {
+                for (SportData mData : data) {
+                    String date = mData.getDate();
+
+                    sportAllDayData = new SportAllDayData();
+                    sportAllDayData.setDate(date);
+                    sportAllDayData.setDone_steps(mData.getStep());
+                    SportAllDayDataDao dayDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().
+                            getSportAllDayDataDao();
+                    SportAllDayData buf = dayDataDao.queryBuilder().
+                            where(SportAllDayDataDao.Properties.Date.eq(date)).
+                            build().unique();
+                    if (buf == null) {
+                        dayDataDao.insert(sportAllDayData);
+                    } else {
+                        sportAllDayData.setId(buf.getId());
+                        sportAllDayData.setIsUpload(buf.getIsUpload());
+                        dayDataDao.update(sportAllDayData);
+                    }
+                }
+
+                // 紫色手环上传运动数据
+                uploadSportData();
+            }
+        });
+
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 获取睡眠数据
+        PurpleDeviceManagerNew.getInstance().getSleepData(new DataListener<Bundle>() {
+            @Override
+            public void getData(Bundle data) {
+                boolean isSleepValid = data.getBoolean("isSleepValid");
+                byte sleepHour = data.getByte("sleepHour");
+                byte sleepMin = data.getByte("sleepMin");
+                byte wakeHour = data.getByte("wakeHour");
+                byte wakeMin = data.getByte("wakeMin");
+                byte wakeCount = data.getByte("wakeCount");
+                int deepTime = data.getInt("deepTime");
+                int lightTime = data.getInt("lightTime");
+                int sleepScore = data.getInt("sleepScore");
+                byte[] sleepShowRaw = data.getByteArray("sleepShowRaw");
+                int sleepShowRawi = data.getInt("sleepShowRawi");
+
+                // 睡眠是否有效
+                if (!isSleepValid)
+                    return;
+
+                String yes_date = DateUtil.getYesterdayTime_Y_M_d();
+                String tod_date = DateUtil.getCurrentTime_Y_M_d();
+                String sleepTime = (sleepHour < 10 ? "0" + sleepHour : sleepHour) + ":" + (sleepMin < 10 ? "0" + sleepMin : sleepMin) + ":00";
+                String wakeTime = (wakeHour < 10 ? "0" + wakeHour : wakeHour) + ":" + (wakeMin < 10 ? "0" + wakeMin : wakeMin) + ":00";
+                String startTime = yes_date + " " + sleepTime;
+                String endTime = tod_date + " " + wakeTime;
+
+                if (sleepShowRaw == null)
+                    return;
+
+                int deep = deepTime;
+                int light = lightTime;
+                int wake = sleepShowRaw.length - deep - light;
+                int buf_state = 0;
+                // 处理后的睡眠数据
+                StringBuilder buffer = new StringBuilder("");
+                // 睡眠原数据字符串
+                StringBuilder sleepAllData = Util.bytesToString(sleepShowRaw);
+                // 处理前的睡眠数据前缀
+                StringBuilder before = new StringBuilder("");
+                // 处理前的睡眠数据后缀
+                StringBuilder later = new StringBuilder("");
+                for (int i = 0; i < sleepMin; i++) {
+                    before.append(2);
+                }
+                if (wakeMin > 0)
+                    for (int i = 0; i < 60 - wakeMin; i++) {
+                        later.append(2);
+                    }
+                sleepAllData = before.append(sleepAllData).append(later);
+                // // 睡眠原数据char数组
+                char[] sleepData = sleepAllData.toString().toCharArray();
+
+                for (int i = 0; i < sleepData.length; i += 10) {
+                    for (int j = i; j < i + 10; j++) {
+                        if (j >= sleepData.length)
+                            break;
+                        if (sleepData[j] == '3') {
+                            buf_state = 3;
+                            break;
+                        } else if (sleepData[j] == '0' && buf_state < 2) {
+                            buf_state = 2;
+                        } else if (sleepData[j] == '2' && buf_state < 1) {
+                            buf_state = 1;
+                        }
+                    }
+                    buffer.append(buf_state);
+                    buf_state = 0;
+                }
+
+                SleepAllDataDao allDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSleepAllDataDao();
+                // 校验今日睡眠是否已缓存，已缓存则无需再次缓存
+                if (allDataDao.queryBuilder().where(SleepAllDataDao.Properties.Yes_date.eq(yes_date)).count() != 0)
+                    return;
+
+                // 缓存总睡眠数据
+                SleepAllData allData = new SleepAllData(null, yes_date, tod_date, startTime, endTime, deep, light, wake, sleepScore, buffer.toString(), false);
+                allDataDao.insert(allData);
+
+                // 紫色手环上传睡眠数据
+                uploadSleepData();
+            }
+        });
+
     }
+
+    /**************************************************************************/
+    //黑色手环相关
+    BlackDeviceConnectManager manager;
 
     // 黑色手环待上传数据统一获取
     private void b_getDataFromDevice() {
@@ -1322,9 +1475,9 @@ public class MainActivity extends BaseFragmentActivity {
             }
         });
 
-        if(Looper.myLooper() != Looper.getMainLooper()){
+        if (Looper.myLooper() != Looper.getMainLooper()) {
             try {
-                Thread.sleep(200);
+                Thread.sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -1378,17 +1531,16 @@ public class MainActivity extends BaseFragmentActivity {
         });
 
 
-
-        if(Looper.myLooper() != Looper.getMainLooper()){
+        if (Looper.myLooper() != Looper.getMainLooper()) {
             try {
-                Thread.sleep(200);
+                Thread.sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
         // 10点之后能获取一天的完整数据，因此10点后再取值
-        if (DateUtil.getCurrentTime_H_m().compareTo("10:00") >= 0){
+        if (DateUtil.getCurrentTime_H_m().compareTo("10:00") >= 0) {
             // 获取昨晚睡眠数据
             BlackDeviceManager.getInstance().getSleepData(new DataCallback<String>() {
                 @Override
@@ -1412,9 +1564,31 @@ public class MainActivity extends BaseFragmentActivity {
                     int deep = 0;
                     int light = 0;
                     int wake = 0;
+
+                    // 根据头尾连续0，确定真实睡眠时间
+                    // 开始位置、结束位置（真实睡眠时间）
+                    int startPos = 0, endPos = -1;
+
+                    for (int i = sleepData.length - 1; i >= 0; i--) {
+                        if (sleepData[i] != '1') {
+                            endPos = i;
+                            break;
+                        }
+                    }
+                    // 没有睡眠数据，直接返回
+                    if (endPos == -1)
+                        return;
+
+                    for (int i = 0; i < sleepData.length; i++) {
+                        if (sleepData[i] != '1') {
+                            startPos = i;
+                            break;
+                        }
+                    }
+
                     // 获取不同类别睡眠状态时间
-                    for (char s : sleepData) {
-                        switch (s) {
+                    for (int i = startPos; i <= endPos; i++) {
+                        switch (sleepData[i]) {
                             case '1':
                                 wake += 10;
                                 break;
@@ -1429,12 +1603,40 @@ public class MainActivity extends BaseFragmentActivity {
 
                     SleepAllDataDao allDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSleepAllDataDao();
                     // 校验今日睡眠是否已缓存，已缓存则无需再次缓存
-                    if (allDataDao.queryBuilder().where(SleepAllDataDao.Properties.Yes_date.eq(yes_date)).count() == 0){
-                        String startTime = yes_date + " 22:00:00";
-                        String endTime = tod_date + " 10:00:00";
+                    if (allDataDao.queryBuilder().where(SleepAllDataDao.Properties.Yes_date.eq(yes_date)).count() == 0) {
+                        // 开始记录时间
+                        String record_startTime = yes_date + " 22:00:00";
+                        long l_startTime = DateUtil.stringToLong(record_startTime) + startPos * 10 * 60 * 1000;
+                        // 真实睡眠开始时间
+                        String startTime = DateUtil.longToString(l_startTime);
+
+                        // 结束记录时间
+                        String record_endTime = tod_date + " 10:00:00";
+                        long l_endTime = DateUtil.stringToLong(record_endTime) - (sleepData.length - endPos - 1) * 10 * 60 * 1000;
+                        // 真实睡眠结束时间
+                        String endTime = DateUtil.longToString(l_endTime);
                         int score = (int) ((deep + light) / 60.0 / 8.0 * 100);
+
+                        // 真实数据（10分钟1个数）
+                        String realData = data.substring(startPos, endPos + 1);
+                        // 真实数据前缀(保证数据整点开始、整点结束，每小时都有6个数)
+                        StringBuilder before = new StringBuilder();
+                        // 真实数据后缀
+                        StringBuilder later = new StringBuilder();
+
+                        for (int i = 0; i < Integer.valueOf(startTime.substring(14, 15)); i++) {
+                            before.append("1");
+                        }
+                        if (Integer.valueOf(endTime.substring(14, 15)) != 0) {
+                            for (int i = 0; i < 6 - Integer.valueOf(endTime.substring(14, 15)); i++) {
+                                later.append("1");
+                            }
+                        }
+                        // 带前后缀的数据
+                        String totalData = before.append(realData).append(later).toString();
+
                         // 缓存总睡眠数据
-                        SleepAllData allData = new SleepAllData(null, yes_date, tod_date, startTime, endTime, deep, light, wake, score, data, false);
+                        SleepAllData allData = new SleepAllData(null, yes_date, tod_date, startTime, endTime, deep, light, wake, score, totalData, false);
                         allDataDao.insert(allData);
                     }
 
@@ -1455,9 +1657,9 @@ public class MainActivity extends BaseFragmentActivity {
         }
 
 
-        if(Looper.myLooper() != Looper.getMainLooper()){
+        if (Looper.myLooper() != Looper.getMainLooper()) {
             try {
-                Thread.sleep(200);
+                Thread.sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -1491,7 +1693,7 @@ public class MainActivity extends BaseFragmentActivity {
                 for (int j = 0; j < dataThree.length / 60; j++) {
                     for (int i = j * 60; i < j * 60 + 60; i++) {
                         int heartRate = (dataThree[i] == 0 || dataThree[i] == -1) ? 0 : dataThree[i];
-                        if (dataThree[i] != 0 && heartRate > 0){
+                        if (dataThree[i] != 0 && heartRate > 0) {
                             if (heartRate > maxValue)
                                 maxValue = heartRate;
                             if (heartRate < minValue)
@@ -1506,11 +1708,11 @@ public class MainActivity extends BaseFragmentActivity {
                         String time = format1.format(calendarData.getTime());
                         HeartBeatsAllDayHistory history = new HeartBeatsAllDayHistory(null, time, heartRate);
                         // 已存在该时间数据
-                        if (historyDao.queryBuilder().where(HeartBeatsAllDayHistoryDao.Properties.Time.eq(time)).count() != 0){
+                        if (historyDao.queryBuilder().where(HeartBeatsAllDayHistoryDao.Properties.Time.eq(time)).count() != 0) {
                             continue;
                         }
                         // 未到的时间，数据不插入数据库
-                        if (time.compareTo(DateUtil.getCurrentTime())> 0)
+                        if (time.compareTo(DateUtil.getCurrentTime()) > 0)
                             continue;
                         // 插入数据库
                         historyDao.insert(history);
@@ -1526,7 +1728,7 @@ public class MainActivity extends BaseFragmentActivity {
                 HeartBeatsAllDayMaxMin maxMin = new HeartBeatsAllDayMaxMin(null, date, minValue, maxValue, false);
                 if (buf == null)
                     maxMinDao.insert(maxMin);
-                else if (buf.getMin_heartbeats() != minValue || buf.getMax_heartbeats() != maxValue){
+                else if (buf.getMin_heartbeats() != minValue || buf.getMax_heartbeats() != maxValue) {
                     maxMin.setId(buf.getId());
                     maxMinDao.update(maxMin);
                 }
@@ -1545,6 +1747,15 @@ public class MainActivity extends BaseFragmentActivity {
 
             }
         });
+
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     /**************************************************************************/

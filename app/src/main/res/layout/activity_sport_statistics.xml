@@ -532,8 +532,8 @@
                         android:id="@+id/appCompatSeekBar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="99999"
-                        android:progress="50000"
+                        android:max="50"
+                        android:progress="0"
                         android:maxHeight="@dimen/width_30"
                         android:layout_marginStart="-5dp"
                         android:layout_marginEnd="-5dp"
@@ -565,7 +565,7 @@
                             android:layout_gravity="center"
                             android:layout_weight="1"
                             android:gravity="center_vertical|center"
-                            android:text="30000"
+                            android:text="15000"
                             android:textColor="@color/text_dark_gray"
                             android:textSize="@dimen/textsize_16" />
 
@@ -575,7 +575,7 @@
                             android:layout_gravity="center"
                             android:gravity="center_vertical|center"
                             android:layout_weight="1"
-                            android:text="60000"
+                            android:text="30000"
                             android:textColor="@color/text_dark_gray"
                             android:textSize="@dimen/textsize_16" />
 
@@ -586,7 +586,7 @@
                             android:gravity="center_vertical|center"
                             android:layout_marginEnd="-25dp"
                             android:layout_weight="1"
-                            android:text="99999"
+                            android:text="50000"
                             android:textColor="@color/text_dark_gray"
                             android:textSize="@dimen/textsize_16" />
 

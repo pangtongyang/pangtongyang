@@ -7,9 +7,6 @@ import android.os.Bundle;
 import android.os.Message;
 import android.telephony.SmsMessage;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManagerNew;

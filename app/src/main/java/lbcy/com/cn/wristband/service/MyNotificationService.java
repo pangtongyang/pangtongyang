@@ -1,20 +1,13 @@
 package lbcy.com.cn.wristband.service;
 
 import android.app.Notification;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Message;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
-import java.util.List;
-
-import lbcy.com.cn.purplelibrary.app.MyApplication;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
-import lbcy.com.cn.purplelibrary.entity.AppPushInfo;
-import lbcy.com.cn.purplelibrary.entity.AppPushInfoDao;
 import lbcy.com.cn.purplelibrary.manager.PurpleDeviceManagerNew;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.global.Consts;
@@ -24,7 +17,6 @@ import lbcy.com.cn.wristband.rx.RxBus;
  * 监听通知消息
  */
 public class MyNotificationService extends NotificationListenerService {
-    private AppPushInfoDao appPushInfoDao;
     private PackageManager pm;
 
     SPUtil spUtil;
@@ -41,7 +33,6 @@ public class MyNotificationService extends NotificationListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
-        appPushInfoDao = MyApplication.getInstances().getDaoSession().getAppPushInfoDao();
         spUtil = new SPUtil(getBaseContext(), CommonConfiguration.SHAREDPREFERENCES_NAME);
         device_type = spUtil.getString("which_device", "2");
     }

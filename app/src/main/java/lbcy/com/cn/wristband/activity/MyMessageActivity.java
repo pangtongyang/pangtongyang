@@ -18,13 +18,9 @@ import butterknife.BindView;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
-import lbcy.com.cn.wristband.adapter.MyMessageAdapter;
 import lbcy.com.cn.wristband.adapter.MyMessageListAdapter;
-import lbcy.com.cn.wristband.adapter.SecondaryListAdapter;
 import lbcy.com.cn.wristband.app.BaseActivity;
 import lbcy.com.cn.wristband.app.BaseApplication;
-import lbcy.com.cn.wristband.entity.MessageDetailData;
-import lbcy.com.cn.wristband.entity.MessageDetailDataDao;
 import lbcy.com.cn.wristband.entity.MessageListBean;
 import lbcy.com.cn.wristband.entity.MessageListData;
 import lbcy.com.cn.wristband.entity.MessageListDataDao;
@@ -59,6 +55,7 @@ public class MyMessageActivity extends BaseActivity {
 
     @Override
     protected void initView() {
+        setTitle(R.string.fragment_me_news);
         adapter = new MyMessageListAdapter(mActivity);
         //设置列表样式
         DividerDecoration itemDecoration = new DividerDecoration(ContextCompat.getColor(mActivity, R.color.mtpLightGray), ScreenUtil.dip2px(this, 1f), 0, 0);//color & height & paddingLeft & paddingRight
@@ -113,8 +110,8 @@ public class MyMessageActivity extends BaseActivity {
         });
     }
 
-    // 按照id排序
-    private void sortById(){
+    // 按照time排序
+    private void sortByTime(){
         Comparator<MessageListData> comparator = new Comparator<MessageListData>() {
             @Override
             public int compare(MessageListData t1, MessageListData t2) {
@@ -129,6 +126,8 @@ public class MyMessageActivity extends BaseActivity {
     private void setText(List<MessageListData> datas){
         list.clear();
         list.addAll(datas);
+        sortByTime();
+        adapter.clear();
         adapter.addAll(list);
     }
 

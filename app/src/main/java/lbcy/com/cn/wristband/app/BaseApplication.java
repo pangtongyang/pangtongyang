@@ -5,17 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.multidex.MultiDex;
-import android.view.ViewGroup;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
 
-import com.just.library.AgentWeb;
 import com.liulishuo.filedownloader.FileDownloader;
 import com.liulishuo.filedownloader.connection.FileDownloadUrlConnection;
-import com.liulishuo.filedownloader.util.FileDownloadLog;
-import com.polidea.rxandroidble.RxBleClient;
-import com.polidea.rxandroidble.internal.RxBleLog;
 
 import java.net.Proxy;
 import java.util.ArrayList;
@@ -39,7 +31,6 @@ import rx.functions.Action1;
 
 public class BaseApplication extends MyApplication {
     private static BaseApplication baseApplication;
-    private RxBleClient rxBleClient;
 
     private UpgradeHelper mHelper;
     private SQLiteDatabase db;
@@ -52,14 +43,6 @@ public class BaseApplication extends MyApplication {
 
     public final List<String> WEB_TITLE_LIST = new ArrayList<>();
     public final List<String> WEB_URL_LIST = new ArrayList<>();
-
-    /**
-     * In practise you will use some kind of dependency injection pattern.
-     */
-    public static RxBleClient getRxBleClient(Context context) {
-        BaseApplication application = (BaseApplication) context.getApplicationContext();
-        return application.rxBleClient;
-    }
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -85,15 +68,6 @@ public class BaseApplication extends MyApplication {
 
         BlackDeviceManager.getInstance().setContext(baseApplication);
 
-        rxBleClient = RxBleClient.create(this);
-        RxBleClient.setLogLevel(RxBleLog.DEBUG);
-
-//        BluetoothConfig config = new BluetoothConfig.Builder()
-//                .enableQueueInterval(true)
-//                .setQueueIntervalTime(BluetoothConfig.AUTO)//设置队列间隔时间为自动
-//                .build();
-//        BluetoothLe.getDefault().init(this, config);
-
         initWebTitle();
 
         rxManager = new RxManager();
@@ -111,7 +85,11 @@ public class BaseApplication extends MyApplication {
                         break;
                     case Consts.MMS:
                         isEnable = spUtil.getString("sms_switch", "0");
-                        break;
+                        if (isEnable.equals("1")){
+                            BlackDeviceManager.getInstance().smsRemind(true);
+                            BlackDeviceManager.getInstance().smsNotification(title);
+                        }
+                        return;
                     case Consts.WEIXIN:
                         isEnable = spUtil.getString("wechat_switch", "0");
                         break;

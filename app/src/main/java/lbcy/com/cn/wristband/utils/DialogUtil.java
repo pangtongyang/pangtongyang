@@ -37,7 +37,7 @@ public class DialogUtil {
 
     // 定义一个显示消息的对话框,添加listener
     public static void showDialog(final Context ctx
-            , String msg, DialogListener listener) {
+            , String msg, final DialogListener listener) {
         // 创建一个AlertDialog.Builder对象
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx)
                 .setMessage(msg).setCancelable(true);
@@ -57,7 +57,7 @@ public class DialogUtil {
 
     // 定义一个显示标题、消息的对话框,添加listener
     public static void showDialog(final Context ctx, String title
-            , String msg, DialogListener listener) {
+            , String msg, final DialogListener listener) {
         // 创建一个AlertDialog.Builder对象
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx)
                 .setTitle(title).setMessage(msg).setCancelable(true);

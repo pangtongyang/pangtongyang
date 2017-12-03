@@ -31,17 +31,6 @@ public class CommonConfiguration {
     public static String SQLITE_DB_NAME="wisgen_health.db";
     //sqlite数据库版本号
     public static int SQLITE_DBVERSION=4;
-    //数据库表
-//    public static Class<?>[] ENTITY_CLAZZ = { SportInfo.class,
-//            SportTarget.class,
-//            SportDetails.class,
-//            SleepInfo.class,
-//            AppPushInfo.class,
-//            AlarmClockInfo.class,
-//            TargetRemind.class,
-//            NotFazeTime.class,
-//            HeartRateInfo.class
-//    };
 
     //获取运动数据
     public static String GET_BLE_SPORTSDATA_NOTIFICATION="GET_BLE_SPORTSDATA_NOTIFICATION";

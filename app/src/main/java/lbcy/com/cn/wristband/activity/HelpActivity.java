@@ -3,13 +3,11 @@ package lbcy.com.cn.wristband.activity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.jude.easyrecyclerview.EasyRecyclerView;
 import com.jude.easyrecyclerview.decoration.DividerDecoration;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +22,6 @@ import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.entity.HelpBean;
 import lbcy.com.cn.wristband.entity.HelpData;
 import lbcy.com.cn.wristband.entity.HelpDataDao;
-import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.utils.ScreenUtil;
 import retrofit2.Call;
@@ -112,7 +109,7 @@ public class HelpActivity extends BaseActivity {
 
     private void setText(List<HelpData> datas){
         this.datas.clear();
-        for (HelpData data: datas){
+        for (final HelpData data: datas){
             this.datas.add(new SecondaryListAdapter.DataTree<String, String>(data.getQuestion(),
                     new ArrayList<String>(){{add(data.getAnswer());}}));
         }

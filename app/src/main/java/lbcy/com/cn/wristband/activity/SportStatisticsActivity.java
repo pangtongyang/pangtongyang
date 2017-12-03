@@ -12,8 +12,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import butterknife.BindView;
 import butterknife.OnClick;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
@@ -26,7 +24,6 @@ import lbcy.com.cn.wristband.entity.SportStatisticsData;
 import lbcy.com.cn.wristband.entity.SportStatisticsDataDao;
 import lbcy.com.cn.wristband.entity.MessageBean;
 import lbcy.com.cn.wristband.entity.SportStepsTo;
-import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
 import lbcy.com.cn.wristband.utils.HandlerTip;
 import retrofit2.Call;
@@ -106,7 +103,7 @@ public class SportStatisticsActivity extends BaseActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 //步数实时显示
-                setStepText(i);
+                setStepText(i * 1000);
             }
 
             @Override
@@ -146,7 +143,7 @@ public class SportStatisticsActivity extends BaseActivity {
         switch (v.getId()){
             case R.id.btn_submit:
                 //注意接口回调中保存数据，可以toast保存成功或保存失败
-                setStepsAction(appCompatSeekBar.getProgress());
+                setStepsAction(appCompatSeekBar.getProgress() * 1000);
                 break;
         }
     }
@@ -176,6 +173,8 @@ public class SportStatisticsActivity extends BaseActivity {
         SportStatisticsDataDao dataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getSportStatisticsDataDao();
         if (dataDao.count() != 0){
             setText(dataDao.loadAll().get(0));
+        } else {
+            setStepText(10000);
         }
     }
 
@@ -212,7 +211,7 @@ public class SportStatisticsActivity extends BaseActivity {
         textCountDays.setText(String.valueOf(data.getTotal_days()));
         textStandardsDays.setText(String.valueOf(data.getQualified_days()));
         setStepText(data.getGoal_steps());
-        appCompatSeekBar.setProgress(data.getGoal_steps());
+        appCompatSeekBar.setProgress(data.getGoal_steps() / 1000);
     }
 
     private void saveData(SportStatisticsData data){
@@ -253,9 +252,9 @@ public class SportStatisticsActivity extends BaseActivity {
         tvWalk.setText(walk);
         tvRun.setText(run);
 
-        if (step <= 30000){
+        if (step <= 15000){
             setSportColor(1);
-        } else if (step <= 60000){
+        } else if (step <= 30000){
             setSportColor(2);
         } else {
             setSportColor(3);

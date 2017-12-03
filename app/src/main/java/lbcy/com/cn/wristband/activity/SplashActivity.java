@@ -1,7 +1,6 @@
 package lbcy.com.cn.wristband.activity;
 
 import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -14,13 +13,10 @@ import java.util.List;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
-import lbcy.com.cn.wristband.app.BaseActivity;
 import lbcy.com.cn.wristband.app.BaseApplication;
 import lbcy.com.cn.wristband.app.BaseSplashActivity;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.rx.RxBus;
-import lbcy.com.cn.wristband.utils.HandlerTip;
-import lbcy.com.cn.wristband.utils.ToastUtil;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;

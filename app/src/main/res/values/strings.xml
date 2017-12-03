@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Wristband</string>
+    <string name="app_name">递康</string>
     <string name="settings">设置</string>
     <string name="help">帮助</string>
     <string name="string_help_text">当前应用缺少必要权限，\n\n请打开所需权限。</string>
@@ -36,7 +36,7 @@
     <string name="activity_home_tv_star"> 星座运势 </string>
 
     <!-- activity LoginActivity -->
-    <string name="activity_login_et_name_hint"> 学生/教师证件号 </string>
+    <string name="activity_login_et_name_hint"> 学号或教师号 </string>
     <string name="activity_login_et_password_hint">请输入密码 </string>
     <string name="activity_login_et_btn_login">登录</string>
     <string name="activity_login_et_btn_regist">注册</string>

@@ -1,15 +1,9 @@
 package lbcy.com.cn.wristband.app;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
@@ -214,8 +208,11 @@ public class AndroidInterface {
         // 将运动数据传递给web
         if (heartRateTo == null || heartRateHistoryList == null)
             return null;
+        if (heartRateHistoryList.size() == 0)
+            return null;
 
-        long duration_time = System.currentTimeMillis() - start_time; //已运动时长 单位ms
+        long duration_time = System.currentTimeMillis() -
+                DateUtil.stringToLong(heartRateHistoryList.get(0).getTime()); //已运动时长 单位ms
         int hour = (int) (duration_time / 1000 / 3600);
         int minute = (int) (duration_time / 1000 / 60) - hour * 60;
         int second = (int) (duration_time / 1000) - hour * 3600 - minute * 60;

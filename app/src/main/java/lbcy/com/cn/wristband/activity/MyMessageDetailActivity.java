@@ -1,11 +1,9 @@
 package lbcy.com.cn.wristband.activity;
 
-import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
@@ -66,7 +64,7 @@ public class MyMessageDetailActivity extends BaseActivity {
         NetManager.getMessageDataAction(token, id, new NetManager.NetCallBack<MessageDetailBean>() {
             @Override
             public void onResponse(Call<MessageDetailBean> call, Response<MessageDetailBean> response) {
-                MessageDetailBean detailBean = response.body();
+                final MessageDetailBean detailBean = response.body();
                 if ((detailBean != null ? detailBean.getCode() : 0) == 200){
                     runOnUiThread(new Runnable() {
                         @Override

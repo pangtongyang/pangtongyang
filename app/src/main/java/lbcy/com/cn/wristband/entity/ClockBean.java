@@ -89,6 +89,4 @@ public class ClockBean {
     public void setBookTime(long bookTime) {
         this.bookTime = bookTime;
     }
-
-
 }

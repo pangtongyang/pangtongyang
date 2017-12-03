@@ -29,7 +29,6 @@ import lbcy.com.cn.wristband.entity.ClockBeanDao;
 import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.utils.DialogUtil;
 import lbcy.com.cn.wristband.utils.ScreenUtil;
-import lbcy.com.cn.wristband.utils.ToastUtil;
 import rx.functions.Action1;
 
 public class AlarmClockListActivity extends BaseActivity {
@@ -117,9 +116,9 @@ public class AlarmClockListActivity extends BaseActivity {
                     intent.putExtra("is_late_clock", isLateClock);
                     startActivity(intent);
                 } else {
-                    ToastUtil.toast("闹钟数量超限，最多设置"+
+                    Toast.makeText(mActivity,"闹钟数量超限，最多设置"+
                             (which_device.equals("2")?Consts.CLOCK_MAX_NUM_BLACK:Consts.CLOCK_MAX_NUM_PURPLE)+
-                            "个闹钟（包括迟到闹钟）");
+                            "个闹钟（包括迟到闹钟）", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -141,7 +140,7 @@ public class AlarmClockListActivity extends BaseActivity {
         //闹钟长按删除
         adapter.setMyOnItemLongClickListener(new AlarmClockListAdapter.MyItemLongClickListener() {
             @Override
-            public void onItemLongClick(View view, int position) {
+            public void onItemLongClick(View view, final int position) {
                 DialogUtil.showDialog(mActivity, "是否删除当前闹钟？", new DialogUtil.DialogListener() {
                     @Override
                     public void submit() {
