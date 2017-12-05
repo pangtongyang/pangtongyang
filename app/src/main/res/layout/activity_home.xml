@@ -173,7 +173,7 @@
                 android:gravity="center"
                 android:text="@string/sport"
                 android:textColor="@drawable/color_txt_bottom_style"
-                android:textSize="@dimen/textsize_16" />
+                android:textSize="@dimen/textsize_14" />
 
             <TextView
                 android:id="@+id/tv_bottom2"
@@ -186,7 +186,7 @@
                 android:gravity="center"
                 android:text="@string/kaoqin"
                 android:textColor="@drawable/color_txt_bottom_style"
-                android:textSize="@dimen/textsize_16" />
+                android:textSize="@dimen/textsize_14" />
 
             <TextView
                 android:id="@+id/tv_bottom3"
@@ -199,7 +199,7 @@
                 android:gravity="center"
                 android:text="@string/expert"
                 android:textColor="@drawable/color_txt_bottom_style"
-                android:textSize="@dimen/textsize_16" />
+                android:textSize="@dimen/textsize_14" />
 
             <TextView
                 android:id="@+id/tv_bottom4"
@@ -212,7 +212,7 @@
                 android:gravity="center"
                 android:text="@string/star"
                 android:textColor="@drawable/color_txt_bottom_style"
-                android:textSize="@dimen/textsize_16" />
+                android:textSize="@dimen/textsize_14" />
 
         </LinearLayout>
     </FrameLayout>

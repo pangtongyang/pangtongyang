@@ -67,7 +67,7 @@ public class BasicBodyActivity extends BaseActivity {
     protected void initView() {
         setTitle(getResources().getString(R.string.simplebody));
 
-        if (getIntent().getBooleanExtra("login", false)){
+        if (getIntent().getBooleanExtra("login", false)) {
             Toast.makeText(mActivity, "身高体重尚未设置，请设置身高体重！", Toast.LENGTH_SHORT).show();
         } else {
             getDataFromDisk();
@@ -90,10 +90,16 @@ public class BasicBodyActivity extends BaseActivity {
             public void afterTextChanged(Editable editable) {
                 String temp = editable.toString();
                 int posDot = temp.indexOf(".");
-                if (posDot <= 0) return;
-                if (temp.length() - posDot - 1 > 2)
-                {
+                if (posDot < 0) {
+                    if (temp.length() > 3) {
+                        editable.delete(3, 4);
+                    }
+                } else if (posDot == 0) {
+                    editable.insert(0, "0");
+                } else if (temp.length() - posDot - 1 > 2) {
                     editable.delete(posDot + 3, posDot + 4);
+                } else if (posDot > 3) {
+                    editable.delete(posDot - 1, posDot);
                 }
             }
         });
@@ -113,10 +119,16 @@ public class BasicBodyActivity extends BaseActivity {
             public void afterTextChanged(Editable editable) {
                 String temp = editable.toString();
                 int posDot = temp.indexOf(".");
-                if (posDot <= 0) return;
-                if (temp.length() - posDot - 1 > 2)
-                {
+                if (posDot < 0) {
+                    if (temp.length() > 3) {
+                        editable.delete(3, 4);
+                    }
+                } else if (posDot == 0) {
+                    editable.insert(0, "0");
+                } else if (temp.length() - posDot - 1 > 2) {
                     editable.delete(posDot + 3, posDot + 4);
+                } else if (posDot > 3) {
+                    editable.delete(posDot - 1, posDot);
                 }
             }
         });
@@ -128,11 +140,11 @@ public class BasicBodyActivity extends BaseActivity {
     }
 
     @OnClick({R.id.btn_submit})
-    public void onClick(View v){
-        switch (v.getId()){
+    public void onClick(View v) {
+        switch (v.getId()) {
             case R.id.btn_submit:
                 //注意接口回调中保存数据，可以toast保存成功或保存失败
-                if (validate()){
+                if (validate()) {
                     setBodyData();
                 }
                 break;
@@ -140,7 +152,7 @@ public class BasicBodyActivity extends BaseActivity {
     }
 
     // 向服务器上传身高体重
-    private void setBodyData(){
+    private void setBodyData() {
         BasicBodyData data = new BasicBodyData();
         data.setHeight(Double.valueOf(etHeight.getText().toString().trim()));
         data.setWeight(Double.valueOf(etWeight.getText().toString().trim()));
@@ -148,12 +160,12 @@ public class BasicBodyActivity extends BaseActivity {
             @Override
             public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
                 MessageBean messageBean = response.body();
-                if ((messageBean != null ? messageBean.getCode() : 0) == 200){
+                if ((messageBean != null ? messageBean.getCode() : 0) == 200) {
 //                    if (which_device.equals("2")){
 //                        b_setBodyDataToDevice();
 //                    }
                     Toast.makeText(BaseApplication.getBaseApplication(), "身高体重设置成功！", Toast.LENGTH_SHORT).show();
-                    if (getIntent().getBooleanExtra("login", false)){
+                    if (getIntent().getBooleanExtra("login", false)) {
                         spUtil.putString("body_data", "1");
                         Intent intent = new Intent(mActivity, MainActivity.class);
                         intent.putExtra("isSplashed", true);
@@ -179,9 +191,9 @@ public class BasicBodyActivity extends BaseActivity {
     /**************************************************************************/
     //黑色手环相关
     // 设置手环参数
-    private void b_setBodyDataToDevice(){
+    private void b_setBodyDataToDevice() {
         UserInfoDataDao dataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getUserInfoDataDao();
-        if (dataDao.count() == 0){
+        if (dataDao.count() == 0) {
             Toast.makeText(mActivity, "用户基本信息获取失败！", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -190,30 +202,31 @@ public class BasicBodyActivity extends BaseActivity {
         String weight = etWeight.getText().toString().trim();
         String gender = data.getSex() == 0 ? "1" : "0";
         String birth = data.getBirth();
-        if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+        if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()) {
             BlackDeviceManager.getInstance().setBodyItem(String.valueOf(Double.valueOf(height).intValue()), String.valueOf(Double.valueOf(weight).intValue()), gender, birth);
             Toast.makeText(mActivity, "身高体重设置成功！", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(mActivity, "手环未连接！", Toast.LENGTH_SHORT).show();
         }
     }
+
     /**************************************************************************/
 
 
-    private boolean validate(){
-        if (etHeight.getText().toString().trim().equals("")){
+    private boolean validate() {
+        if (etHeight.getText().toString().trim().equals("")) {
             Toast.makeText(mActivity, "身高为空！", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (etWeight.getText().toString().trim().equals("")){
+        if (etWeight.getText().toString().trim().equals("")) {
             Toast.makeText(mActivity, "体重为空！", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (Double.valueOf(etHeight.getText().toString().trim()) < 50 || Double.valueOf(etHeight.getText().toString().trim()) > 300){
+        if (Double.valueOf(etHeight.getText().toString().trim()) < 50 || Double.valueOf(etHeight.getText().toString().trim()) > 300) {
             Toast.makeText(mActivity, "身高超出范围！", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (Double.valueOf(etWeight.getText().toString().trim()) <= 0 || Double.valueOf(etWeight.getText().toString().trim()) > 300){
+        if (Double.valueOf(etWeight.getText().toString().trim()) <= 0 || Double.valueOf(etWeight.getText().toString().trim()) > 300) {
             Toast.makeText(mActivity, "体重超出范围！", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -229,7 +242,7 @@ public class BasicBodyActivity extends BaseActivity {
 
     private void getDataFromDisk() {
         BasicBodyDataDao dataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getBasicBodyDataDao();
-        if (dataDao.count() != 0){
+        if (dataDao.count() != 0) {
             setText(dataDao.loadAll().get(0));
         }
     }
@@ -239,7 +252,7 @@ public class BasicBodyActivity extends BaseActivity {
             @Override
             public void onResponse(Call<BasicBodyBean> call, Response<BasicBodyBean> response) {
                 BasicBodyBean data = response.body();
-                if ((data != null ? data.getCode() : 0) == 200){
+                if ((data != null ? data.getCode() : 0) == 200) {
                     setText(data.getData());
                     saveData(data.getData());
                 } else {
@@ -267,7 +280,7 @@ public class BasicBodyActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (getIntent().getBooleanExtra("login", false) && spUtil.getString("body_data", "0").equals("1")){
+        if (getIntent().getBooleanExtra("login", false) && spUtil.getString("body_data", "0").equals("1")) {
             // 连接设备
             Message message = new Message();
             message.what = Consts.CONNECT_DEVICE;

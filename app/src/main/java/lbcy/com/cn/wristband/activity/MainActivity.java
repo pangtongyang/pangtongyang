@@ -40,8 +40,8 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import lbcy.com.cn.blacklibrary.ble.DataCallback;
 import lbcy.com.cn.blacklibrary.ble.DeviceConnectListener;
-import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceConnectManager;
+import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
 import lbcy.com.cn.blacklibrary.utils.Util;
 import lbcy.com.cn.purplelibrary.app.MyApplication;
 import lbcy.com.cn.purplelibrary.config.CommonConfiguration;
@@ -52,8 +52,8 @@ import lbcy.com.cn.purplelibrary.service.PurpleBLEService;
 import lbcy.com.cn.purplelibrary.utils.SPUtil;
 import lbcy.com.cn.wristband.R;
 import lbcy.com.cn.wristband.app.BaseApplication;
-import lbcy.com.cn.wristband.app.BaseWebFragment;
 import lbcy.com.cn.wristband.app.BaseFragmentActivity;
+import lbcy.com.cn.wristband.app.BaseWebFragment;
 import lbcy.com.cn.wristband.entity.HeartBeatsAllDayDataTo;
 import lbcy.com.cn.wristband.entity.HeartBeatsAllDayHistory;
 import lbcy.com.cn.wristband.entity.HeartBeatsAllDayHistoryDao;
@@ -211,16 +211,16 @@ public class MainActivity extends BaseFragmentActivity {
 //            if (scanHelper == null || !scanHelper.isScanning()) blackConnectAction();
 //        }
 
-        // 若进入首页时，蓝牙处于断开状态，则调用连接逻辑
-        if (which_device.equals("2")) {
-            if (BluetoothLeService.getInstance() == null || BluetoothLeService.getInstance().isConnectedDevice()) {
-                connectedThread.start();
-            }
-        } else {
-            if (spUtil.getString("is_connected", "0").equals("0")) {
-                connectedThread.start();
-            }
-        }
+//        // 若进入首页时，蓝牙处于断开状态，则调用连接逻辑
+//        if (which_device.equals("2")) {
+//            if (BluetoothLeService.getInstance() == null || BluetoothLeService.getInstance().isConnectedDevice()) {
+//                connectedThread.start();
+//            }
+//        } else {
+//            if (spUtil.getString("is_connected", "0").equals("0")) {
+//                connectedThread.start();
+//            }
+//        }
 
         llHomeBottomBar.setVisibility(View.VISIBLE);
     }
@@ -303,7 +303,6 @@ public class MainActivity extends BaseFragmentActivity {
         mRxManager.on(Consts.ACTIVITY_MANAGE_LISTENER, new Action1<Message>() {
             @Override
             public void call(Message message) {
-                Intent intent;
                 switch (message.what) {
                     case Consts.CLOSE_ACTIVITY:
                         finish();
@@ -340,6 +339,11 @@ public class MainActivity extends BaseFragmentActivity {
                         if (System.currentTimeMillis() - runningTimeOut > 12000) {
                             Thread thread = new Thread(runnableSaveData);
                             thread.start();
+                        }
+                        break;
+                    case Consts.REFRESH_PAGE:
+                        if (webFragments[prePage].getMyAgentWeb() != null && webFragments[prePage].getMyAgentWeb().getWebCreator() != null){
+                            webFragments[prePage].getMyAgentWeb().getWebCreator().get().reload();
                         }
                         break;
                 }

@@ -50,28 +50,30 @@ public class Consts {
     public static final String ACTIVITY_SEDENTARY_LISTENER = "SedentaryActivityListener";
     public static final String ACTIVITY_SCAN_HEART_RATE_LISTENER = "ScanHeartRateActivityListener";
     public static final String NOTIFICATION_LISTENER = "NotificationListener";
-    //关闭所有activity
+    // 关闭所有activity
     public static final int CLOSE_ALL_ACTIVITY = 1023;
-    //更新编辑闹钟页文本信息
+    // 更新编辑闹钟页文本信息
     public static final int UPDATE_CLOCK_DATA = 1024;
-    //更新闹钟设置页
+    // 更新闹钟设置页
     public static final int UPDATE_ALL_CLOCK_DATA = 1025;
-    //更新编辑闹钟页类型信息
+    // 更新编辑闹钟页类型信息
     public static final int UPDATE_CLOCK_TYPE_DATA = 1026;
-    //关闭Activity
+    // 关闭Activity
     public static final int CLOSE_ACTIVITY = 1027;
-    //连接手环
+    // 连接手环
     public static final int CONNECT_DEVICE = 1028;
-    //更新久坐提醒时间间隔
+    // 更新久坐提醒时间间隔
     public static final int UPDATE_SEDENTARY_SPACE_TIME = 1029;
-    //更新心率监测时间间隔
+    // 更新心率监测时间间隔
     public static final int UPDATE_SCAN_HEART_RATE = 1030;
-    //推送消息通知
+    // 推送消息通知
     public static final int SHOW_MESSAGE_FROM_APPS = 1031;
-    //打开蓝牙请求
+    // 打开蓝牙请求
     public static final int REQUEST_ENABLE_BT = 1032;
-
+    // 刷新页面、数据
     public static final int RELOAD_DATA = 1033;
+    // 刷新页面
+    public static final int REFRESH_PAGE = 1034;
 
     //推送消息包名
     public final static String QQ = "com.tencent.mobileqq";
@@ -127,7 +129,6 @@ public class Consts {
 
     public static final String []WEB_INDEXES = {WEB_INDEX, WEB_HEART_RATE_INDEX, WEB_SLEEP_INDEX,
             WEB_CLASS_TODAY, WEB_CLASS_WEEK, WEB_CLASS_MONTH, WEB_EXPERT, WEB_HEALTH, WEB_STAR};
-
 
 
 }
