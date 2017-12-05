@@ -91,6 +91,9 @@ public class MyNotificationService extends NotificationListenerService {
         if (!pkg.equals(Consts.QQ) && !pkg.equals(Consts.WEIXIN) && !pkg.equals(Consts.MMS) && !pkg.equals(Consts.FACEBOOK) && !pkg.equals(Consts.INCALL) && !pkg.equals(Consts.NOTRECEIVECALL)){
             return;
         }
+
+        title = (title == null ? "" : title);
+        content = (content == null ? "" : content);
         if (lastPkg.equals(pkg) && lastTitle.equals(title) && lastContent.equals(content)){
             if (System.currentTimeMillis() - time < 5000){
                 return;
@@ -124,8 +127,13 @@ public class MyNotificationService extends NotificationListenerService {
 
         title = (title == null ? "" : title);
         content = (content == null ? "" : content);
-        if (lastPkg.equals(pkg) && lastTitle.equals(title) && lastContent.equals(content))
-            return;
+        if (lastPkg.equals(pkg) && lastTitle.equals(title) && lastContent.equals(content)){
+            if (System.currentTimeMillis() - time < 5000){
+                return;
+            }
+        }
+
+        time = System.currentTimeMillis();
 
         lastPkg = pkg;
         lastTitle = title;

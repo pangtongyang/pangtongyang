@@ -1,6 +1,7 @@
 package lbcy.com.cn.wristband.activity;
 
 import android.graphics.Paint;
+import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.AppCompatSeekBar;
@@ -24,7 +25,9 @@ import lbcy.com.cn.wristband.entity.SportStatisticsData;
 import lbcy.com.cn.wristband.entity.SportStatisticsDataDao;
 import lbcy.com.cn.wristband.entity.MessageBean;
 import lbcy.com.cn.wristband.entity.SportStepsTo;
+import lbcy.com.cn.wristband.global.Consts;
 import lbcy.com.cn.wristband.manager.NetManager;
+import lbcy.com.cn.wristband.rx.RxBus;
 import lbcy.com.cn.wristband.utils.HandlerTip;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -160,6 +163,10 @@ public class SportStatisticsActivity extends BaseActivity {
                 } else {
                     Toast.makeText(mActivity, data != null ? data.getMessage() : null, Toast.LENGTH_SHORT).show();
                 }
+
+                Message message = new Message();
+                message.what = Consts.REFRESH_PAGE;
+                RxBus.getInstance().post(Consts.ACTIVITY_MANAGE_LISTENER, message);
             }
 
             @Override
