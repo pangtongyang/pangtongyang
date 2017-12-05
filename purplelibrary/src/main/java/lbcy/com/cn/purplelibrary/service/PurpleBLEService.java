@@ -121,7 +121,7 @@ public class PurpleBLEService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mac_address = intent.getStringExtra("mac_address");
-        if (firstScanning){
+        if (firstScanning) {
             device = mBluetoothAdapter.getRemoteDevice(mac_address);
             if (userSpUtil.getString("is_connected", "0").equals("0")) {
                 connect();
@@ -168,10 +168,10 @@ public class PurpleBLEService extends Service {
     private Thread reconnectThread = new Thread(new Runnable() {
         @Override
         public void run() {
-                if (destroyState) return;
-                if (userSpUtil.getString("is_connected", "0").equals("0")){
-                    connect();
-                }
+            if (destroyState) return;
+            if (userSpUtil.getString("is_connected", "0").equals("0")) {
+                connect();
+            }
         }
     });
 
