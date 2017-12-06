@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.huichenghe.bleControl.Ble.BluetoothLeService;
@@ -23,7 +24,7 @@ import lbcy.com.cn.blacklibrary.ble.DeviceConnectListener;
 public class BlackDeviceConnectManager {
     private Context mContext;
     private DeviceConnectListener mDevice; //广播监听
-    private ConnectThread connectThread = new ConnectThread(); //连接线程
+    private ConnectThread connectThread; //连接线程
     private String macAddress; //mac地址
     private boolean destroyState = false; // 关闭app时置为true，用于关闭重连循环
 
@@ -41,6 +42,7 @@ public class BlackDeviceConnectManager {
                 reconnectListener();
             }
         }, 12000);
+
     }
 
     // 初始化蓝牙连接类
@@ -56,6 +58,9 @@ public class BlackDeviceConnectManager {
         if (BluetoothLeService.getInstance() == null) {
             startService();
         }
+
+        // 线程执行完会被回收，需要重新new一个线程来重新执行
+        connectThread = new ConnectThread();
         connectThread.start();
     }
 

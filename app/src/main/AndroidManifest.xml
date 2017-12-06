@@ -20,6 +20,9 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
 
+    <!-- bugly -->
+    <uses-permission android:name="android.permission.READ_LOGS" />
+
     <uses-feature android:name="android.hardware.location.gps" />
 
     <application

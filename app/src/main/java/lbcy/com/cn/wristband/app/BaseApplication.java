@@ -8,6 +8,7 @@ import android.support.multidex.MultiDex;
 
 import com.liulishuo.filedownloader.FileDownloader;
 import com.liulishuo.filedownloader.connection.FileDownloadUrlConnection;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.net.Proxy;
 import java.util.ArrayList;
@@ -53,6 +54,9 @@ public class BaseApplication extends MyApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        CrashReport.initCrashReport(getApplicationContext(), "4ce5ef1974", true);
+
         baseApplication = this;
         spUtil = new SPUtil(this, CommonConfiguration.SHAREDPREFERENCES_NAME);
         setDatabase();
