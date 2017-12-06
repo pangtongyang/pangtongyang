@@ -109,6 +109,7 @@ public class BlackDeviceConnectManager {
     private BroadcastReceiver myReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
+            if (intent.getAction() == null) return;
             switch (intent.getAction()) {   // 设备已连接的广播
                 case DeviceConfig.DEVICE_CONNECTE_AND_NOTIFY_SUCESSFUL:
                     if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()) {
