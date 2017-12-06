@@ -151,7 +151,7 @@ public class SportStatisticsActivity extends BaseActivity {
         }
     }
 
-    private void setStepsAction(int step){
+    private void setStepsAction(final int step){
         SportStepsTo sportStepsTo = new SportStepsTo();
         sportStepsTo.setSteps(step);
         NetManager.stepsSetAction(token, sportStepsTo, new NetManager.NetCallBack<MessageBean>() {
@@ -163,6 +163,9 @@ public class SportStatisticsActivity extends BaseActivity {
                 } else {
                     Toast.makeText(mActivity, data != null ? data.getMessage() : null, Toast.LENGTH_SHORT).show();
                 }
+
+                // 上传成功，更新目标步数
+                spUtil.putString("goal_steps", String.valueOf(step));
 
                 Message message = new Message();
                 message.what = Consts.REFRESH_PAGE;
