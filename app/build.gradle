@@ -28,7 +28,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             // 设置支持的SO库架构
-            abiFilters 'armeabi' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+            abiFilters 'armeabi' , 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
         }
     }
     sourceSets {
@@ -53,7 +53,7 @@ android {
         variant.outputs.each { output ->
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.apk')) {
-                File outputDirectory = new File(outputFile.parent);
+                File outputDirectory = new File(outputFile.parent)
                 def fileName = "wristband_android_${defaultConfig.versionName}_${buildTime()}_${variant.buildType.name}.apk"
                 output.outputFile = new File(outputDirectory, fileName)
             }
@@ -78,15 +78,17 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    androidTestCompile 'com.android.support:multidex:1.0.2'
+    androidTestCompile 'com.android.support:multidex-instrumentation:1.0.2'
 
     compile project(':blacklibrary')
     compile project(':purplelibrary')
     compile project(':settingitemlibrary')
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:design:26.+'
-    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:multidex:1.0.2'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.jakewharton:butterknife:8.8.0'//Butterknife
+    compile 'com.jakewharton:butterknife:8.8.1'//Butterknife
     compile 'pub.devrel:easypermissions:1.0.0' //权限获取库
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'io.reactivex.rxjava2:rxjava:2.1.3'
@@ -113,6 +115,6 @@ dependencies {
     compile 'com.tencent.bugly:nativecrashreport:3.3.1'
 
     testCompile 'junit:junit:4.12'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
 }

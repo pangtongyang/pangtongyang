@@ -106,7 +106,7 @@ public class PurpleBLEService extends Service {
     // 初始化
     private void init() {
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
+        mBluetoothAdapter = bluetoothManager != null ? bluetoothManager.getAdapter() : null;
         if (mBluetoothAdapter == null) {
             Toast.makeText(MyApplication.getInstances(), "本机没有找到蓝牙硬件或驱动！", Toast.LENGTH_SHORT).show();
         }
@@ -185,10 +185,14 @@ public class PurpleBLEService extends Service {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     userSpUtil.putString("is_connected", "1");
 
-                    isConnecting = false;
-                    if (bluetoothGatt.discoverServices()) {
+                    // 终止未连接超30秒提醒
+                    if (handlerCallback != null){
+                        HandlerTip.getInstance().getHandler().removeCallbacks(handlerCallback);
                     }
-                    Log.e("aaaaaa", Looper.myLooper() == Looper.getMainLooper() ? "1" : "0");
+
+                    isConnecting = false;
+                    bluetoothGatt.discoverServices();
+//                    Log.e("aaaaaa", Looper.myLooper() == Looper.getMainLooper() ? "1" : "0");
                     // 获取连接时长
                     connectDuration = System.currentTimeMillis() - connectDuration;
                     Handler handler = new Handler(Looper.getMainLooper());
@@ -292,7 +296,6 @@ public class PurpleBLEService extends Service {
     /**
      * 启动升级
      *
-     * @param path
      */
     public void startUpdate(String path, final UpdateListener listener) {
         Log.i("TAG", path + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

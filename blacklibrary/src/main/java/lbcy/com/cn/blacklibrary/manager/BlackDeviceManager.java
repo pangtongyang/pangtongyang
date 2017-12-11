@@ -146,7 +146,7 @@ public class BlackDeviceManager implements DeviceController {
 
     @Override
     public void getBattery(final DataCallback<byte[]> callback) {
-        Log.e("aaaaaa", Looper.myLooper() == Looper.getMainLooper() ? "1" : "0");
+//        Log.e("aaaaaa", Looper.myLooper() == Looper.getMainLooper() ? "1" : "0");
         if (BleDataForBattery.getInstance() == null)
             return;
         BleDataForBattery.getInstance().setBatteryListener(new DataSendCallback() {
@@ -210,7 +210,7 @@ public class BlackDeviceManager implements DeviceController {
             @Override
             public void sendSuccess(byte[] receiveData) {
 
-                String dataString = "";
+                StringBuilder dataString = new StringBuilder();
                 for (int i = 4; i < 40; i++)        // 遍历字节数组
                 {
                     byte buffer = receiveData[i];     // 取出一个字节赋值给buffer
@@ -219,15 +219,15 @@ public class BlackDeviceManager implements DeviceController {
                     {
                         byte a = (byte) ((buffer >> (j * 2)) & (byte) 0x03);   // 取出两位
                         int ai = a & (byte) 0x03;
-                        dataString = dataString + String.valueOf(ai);
+                        dataString.append(String.valueOf(ai));
                     }
                 }
 
                 // 截取昨天的数据, 从数据末尾截取12个字符，代表两个小时
                 String y = "";
                 if (dataString.length() > 1) {
-                    String res = dataString.replaceAll("\\d{12}$", "");
-                    y = dataString.replaceAll(res, "");
+                    String res = dataString.toString().replaceAll("\\d{12}$", "");
+                    y = dataString.toString().replaceAll(res, "");
                 }
                 // 截取今天的数据， 从数据开头截取60个字符，代表10小时
                 String t = "";

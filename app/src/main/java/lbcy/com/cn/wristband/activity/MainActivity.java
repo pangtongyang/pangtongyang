@@ -1061,6 +1061,11 @@ public class MainActivity extends BaseFragmentActivity {
             manager.startConnectingCallBack(new DeviceConnectListener() {
                 @Override
                 public void connect() {
+                    // 终止未连接超30秒提醒
+                    if (connectStateHandler != null && connectStateRunnable != null){
+                        connectStateHandler.removeCallbacks(connectStateRunnable);
+                    }
+
                     connectingDuration[0] = System.currentTimeMillis() - connectingDuration[0];
                     // 防止连接过快导致显示过快
                     HandlerTip.getInstance().postDelayed((5000 - connectingDuration[0] > 0 ? (int) (5000 - connectingDuration[0]) : 100), new HandlerTip.HandlerCallback() {
