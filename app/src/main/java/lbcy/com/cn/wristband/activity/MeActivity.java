@@ -191,6 +191,8 @@ public class MeActivity extends TakePhotoActivity {
     private void initView(){
         getState();
 
+        rlFootprint.setVisibility(View.GONE);
+
         loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
         if (loginDataDao.count() == 0){
             return;

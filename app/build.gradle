@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "lbcy.com.cn.wristband"
+        applicationId "lbcy.com.cn.wristband.new"
         minSdkVersion 19
         targetSdkVersion 26
         versionCode 1
