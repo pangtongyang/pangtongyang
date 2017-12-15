@@ -6,7 +6,7 @@ package lbcy.com.cn.wristband.global;
 
 public class Consts {
     //服务器地址
-    public static final String BASE_URL = "http://sportapi.myplat.cn:8866/";
+    public static final String BASE_URL = "http://220.180.54.11:8090";
     //固件升级服务器根地址
     public static final String BASE_HARDWARE_URL = "http://bracelet.cositea.com:8089/bracelet/";
     //token前缀

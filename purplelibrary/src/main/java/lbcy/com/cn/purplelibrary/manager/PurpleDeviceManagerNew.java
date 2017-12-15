@@ -37,6 +37,9 @@ public class PurpleDeviceManagerNew implements DeviceControllerNew {
     private PurpleDeviceManagerNew() {
         mContext = MyApplication.getInstances();
         spUtil = new SPUtil(mContext, CommonConfiguration.SHAREDPREFERENCES_NAME);
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         MyApplication.getInstances().getThread().setNotifyBt(ooo);
     }
 
@@ -249,6 +252,9 @@ public class PurpleDeviceManagerNew implements DeviceControllerNew {
 
     @Override
     public void syncTime() {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         MyApplication.getInstances().getThread().setTime(0,0,0);
     }
 
@@ -256,28 +262,43 @@ public class PurpleDeviceManagerNew implements DeviceControllerNew {
 
     @Override
     public void getBattery(DataListener<Long> dataListener) {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         powerListener = dataListener;
         MyApplication.getInstances().getThread().getSpData();
     }
 
     @Override
     public void setDisturb(boolean disturb) {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         MyApplication.getInstances().getThread().SendVibrateSet(disturb);
     }
 
     @Override
     public void setHandUp(boolean isHandUp) {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         // SendDisplay第一个参数0 -> 英文， 1 -> 中文
         MyApplication.getInstances().getThread().SendDisplaySet(1, isHandUp ? 1 : 0);
     }
 
     @Override
     public void setVibrate(boolean isVibrate) {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         MyApplication.getInstances().getThread().SendViPressSet(isVibrate);
     }
 
     @Override
     public void setAlarm(int id, int hour, int minute, String week, boolean state) {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         int a1 = Integer.valueOf(spUtil.getString("p_a1", "0"));
         int a1H = Integer.valueOf(spUtil.getString("p_a1H", "10"));
         int a1M = Integer.valueOf(spUtil.getString("p_a1M", "0"));
@@ -304,17 +325,26 @@ public class PurpleDeviceManagerNew implements DeviceControllerNew {
 
     @Override
     public void readDeviceConfig() {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         MyApplication.getInstances().getThread().readDeviceConfig();
     }
 
     @Override
     public void sendNotification(String title, String content) {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         MyApplication.getInstances().getThread().AppNotification(title, content);
     }
 
     private DataListener<String> sportListener;
     @Override
     public void getSportData(DataListener<String> listener) {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         sportListener = listener;
         MyApplication.getInstances().getThread().getSpData();
     }
@@ -337,6 +367,9 @@ public class PurpleDeviceManagerNew implements DeviceControllerNew {
     private DataListener<Bundle> sleepListener;
     @Override
     public void getSleepData(DataListener<Bundle> listener) {
+        if(MyApplication.getInstances().getThread() == null) {
+            return;
+        }
         sleepListener = listener;
         MyApplication.getInstances().getThread().GetSleep();
     }
