@@ -219,15 +219,15 @@ public class LoginActivity extends BaseActivity {
         //设置密码
         spUtilUser.putString("password", etPassword.getText().toString().trim());
         //设置设备类型
-        spUtilUser.putString("which_device", "1"); //1 -> 紫色 2 -> 黑色
-//        spUtilUser.putString("which_device", loginBean.getData().getDevice_type()); //1 -> 紫色 2 -> 黑色
+//        spUtilUser.putString("which_device", "1"); //1 -> 紫色 2 -> 黑色
+        spUtilUser.putString("which_device", loginBean.getData().getDevice_type()); //1 -> 紫色 2 -> 黑色
         //设置设备名称
         spUtilUser.putString("deviceName", "wristband");
 //        spUtilUser.putString("deviceAddress", "FE:54:B9:7C:CB:FA"); //紫色test
-        spUtilUser.putString("deviceAddress", "E3:85:C9:36:63:70"); //紫色test
+//        spUtilUser.putString("deviceAddress", "E3:85:C9:36:63:70"); //紫色test
         //设置设备mac地址
 //        spUtilUser.putString("deviceAddress", "CD:96:8C:EC:EE:B3"); //黑色test
-//        spUtilUser.putString("deviceAddress", loginBean.getData().getMac_address());
+        spUtilUser.putString("deviceAddress", loginBean.getData().getMac_address());
         //设置token
         spUtilUser.putString("token", Consts.PRE_TOKEN_STR + loginBean.getData().getToken());
         //添加logo
