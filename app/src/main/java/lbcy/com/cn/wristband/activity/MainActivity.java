@@ -964,7 +964,8 @@ public class MainActivity extends BaseFragmentActivity {
                 if (MyApplication.getInstances().getThread() == null) {
                     return;
                 }
-                while (!MyApplication.getInstances().getThread().canCallBack) {
+                while (MyApplication.getInstances().getThread() != null
+                        &&!MyApplication.getInstances().getThread().canCallBack) {
                     if (MyApplication.getInstances().getThread() == null) {
                         return;
                     }
