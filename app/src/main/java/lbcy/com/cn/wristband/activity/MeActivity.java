@@ -131,7 +131,7 @@ public class MeActivity extends TakePhotoActivity {
 
         itemClick();
 
-        if (which_device.equals("2")){
+        if (which_device.equals("2")) {
             rlDisturb.setVisibility(View.GONE);
 //            b_getSettings();
 
@@ -147,7 +147,7 @@ public class MeActivity extends TakePhotoActivity {
         mRxManager.on(Consts.CLOSE_ALL_ACTIVITY_LISTENER, new Action1<Message>() {
             @Override
             public void call(Message message) {
-                switch (message.what){
+                switch (message.what) {
                     case Consts.CLOSE_ALL_ACTIVITY:
                         finish();
                         break;
@@ -159,7 +159,7 @@ public class MeActivity extends TakePhotoActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (which_device.equals("2")){
+        if (which_device.equals("2")) {
             b_getSettings();
         } else {
             p_getSettings();
@@ -179,7 +179,7 @@ public class MeActivity extends TakePhotoActivity {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            if (which_device.equals("2")){
+            if (which_device.equals("2")) {
                 b_getSettings();
             } else {
                 p_getSettings();
@@ -188,13 +188,13 @@ public class MeActivity extends TakePhotoActivity {
         }
     };
 
-    private void initView(){
+    private void initView() {
         getState();
 
         rlFootprint.setVisibility(View.GONE);
 
         loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
-        if (loginDataDao.count() == 0){
+        if (loginDataDao.count() == 0) {
             return;
         }
         loginData = loginDataDao.loadAll().get(0);
@@ -208,7 +208,7 @@ public class MeActivity extends TakePhotoActivity {
                 .into(ivHeader);
     }
 
-    private void itemClick(){
+    private void itemClick() {
         rlDisturb.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(final boolean state) {
@@ -216,7 +216,7 @@ public class MeActivity extends TakePhotoActivity {
                     @Override
                     public void run() {
                         String is_connected = spUtil.getString("is_connected", "0");
-                        if (is_connected.equals("0")){
+                        if (is_connected.equals("0")) {
                             rlDisturb.setChecked(!state);
                             Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
                             return;
@@ -249,7 +249,7 @@ public class MeActivity extends TakePhotoActivity {
         rlFootprint.setmOnSetItemClick(new SetItemView.OnSetItemClick() {
             @Override
             public void click() {
-                if (footPrintUrl.equals("")){
+                if (footPrintUrl.equals("")) {
                     Toast.makeText(mActivity, "个人足迹尚未获取，请稍后重试", Toast.LENGTH_SHORT).show();
                 } else {
                     Intent intent = new Intent(mActivity, WebActivity.class);
@@ -294,15 +294,15 @@ public class MeActivity extends TakePhotoActivity {
     }
 
     @OnClick({R.id.iv_header, R.id.btn_quit})
-    public void butterOnClick(View v){
+    public void butterOnClick(View v) {
         Intent intent;
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.iv_header:
                 // 已上传头像，不能修改
                 isUploaded = spUtil.getString("is_uploaded", "0");
                 if (isUploaded.equals("1"))
                     return;
-                if (!spUtil.getString("logo", "").equals("")){
+                if (!spUtil.getString("logo", "").equals("")) {
                     return;
                 }
 
@@ -321,7 +321,7 @@ public class MeActivity extends TakePhotoActivity {
 
     }
 
-    BasePopupWindow getPopup(){
+    BasePopupWindow getPopup() {
         return new SlideFromBottomPopup(this, getTakePhoto());
     }
 
@@ -343,7 +343,7 @@ public class MeActivity extends TakePhotoActivity {
         showImg(result.getImages());
     }
 
-    private void showImg(ArrayList<TImage> images){
+    private void showImg(ArrayList<TImage> images) {
         popupWindow.dismiss();
 
         if (images.size() == 1) {
@@ -351,11 +351,11 @@ public class MeActivity extends TakePhotoActivity {
         }
     }
 
-    private void getState(){
+    private void getState() {
         rlDisturb.setChecked(spUtil.getString("rl_disturb", "0").equals("1"));
     }
 
-    private void saveState(){
+    private void saveState() {
         spUtil.putString("rl_disturb", rlDisturb.isChecked() ? "1" : "0");
     }
 
@@ -367,6 +367,7 @@ public class MeActivity extends TakePhotoActivity {
 
     /**
      * 加载本地图片
+     *
      * @param url
      * @return
      */
@@ -385,12 +386,12 @@ public class MeActivity extends TakePhotoActivity {
         finish();
     }
 
-    private void getFootPrintUrl(){
+    private void getFootPrintUrl() {
         NetManager.getUserPathAction(token, new NetManager.NetCallBack<MessageBean>() {
             @Override
             public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
                 MessageBean message = response.body();
-                if ((message != null ? message.getCode() : 0) == 200){
+                if ((message != null ? message.getCode() : 0) == 200) {
                     footPrintUrl = message.getData().toString();
                 } else {
                     Toast.makeText(BaseApplication.getBaseApplication(), "个人足迹获取失败", Toast.LENGTH_SHORT).show();
@@ -405,18 +406,18 @@ public class MeActivity extends TakePhotoActivity {
     }
 
     // 上传头像
-    private void uploadAvatarAction(final String path){
+    private void uploadAvatarAction(final String path) {
         NetManager.uploadAvatarAction(token, path, new NetManager.NetCallBack<MessageBean>() {
             @Override
             public void onResponse(Call<MessageBean> call, Response<MessageBean> response) {
                 final MessageBean message = response.body();
-                if ((message != null ? message.getCode() : 0) == 200){
-                    if (Looper.myLooper() == Looper.getMainLooper()){
+                if ((message != null ? message.getCode() : 0) == 200) {
+                    if (Looper.myLooper() == Looper.getMainLooper()) {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 Glide.get(mActivity).clearDiskCache();
-                                if (loginData == null || loginDataDao == null){
+                                if (loginData == null || loginDataDao == null) {
                                     loginDataDao = BaseApplication.getBaseApplication().getBaseDaoSession().getLoginDataDao();
                                     loginData = loginDataDao.loadAll().get(0);
                                 }
@@ -444,26 +445,26 @@ public class MeActivity extends TakePhotoActivity {
 
     /**************************************************************************/
     //紫色手环连接相关
-    private void p_getSettings(){
+    private void p_getSettings() {
         String is_connected = spUtil.getString("is_connected", "0");
-        if (is_connected.equals("1")){
+        if (is_connected.equals("1")) {
             tvLink.setText("设备已经连接");
-            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_green), null, null, null);
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_green), null, null, null);
         } else {
             tvLink.setText("设备尚未连接");
-            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_red), null, null, null);
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_red), null, null, null);
         }
     }
 
     /**************************************************************************/
     //黑色手环相关
-    private void b_getSettings(){
-        if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()){
+    private void b_getSettings() {
+        if (BluetoothLeService.getInstance() != null && BluetoothLeService.getInstance().isConnectedDevice()) {
             tvLink.setText("设备已经连接");
-            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_green), null, null, null);
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_green), null, null, null);
         } else {
             tvLink.setText("设备尚未连接");
-            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity,R.drawable.app_circle_red), null, null, null);
+            tvLink.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(mActivity, R.drawable.app_circle_red), null, null, null);
         }
 
     }

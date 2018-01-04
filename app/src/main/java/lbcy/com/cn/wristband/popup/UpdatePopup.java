@@ -62,14 +62,15 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
 
     /**
      * 批量更新
-     * @param context 上下文
+     *
+     * @param context    上下文
      * @param updateBean 固件升级相关信息
      */
-    public UpdatePopup(Activity context, HardwareUpdateBean updateBean){
+    public UpdatePopup(Activity context, HardwareUpdateBean updateBean) {
         super(context);
         bindEvent();
         SPUtil spUtil = new SPUtil(context, CommonConfiguration.SHAREDPREFERENCES_NAME);
-        if (spUtil.getString("which_device", "2").equals("2")){
+        if (spUtil.getString("which_device", "2").equals("2")) {
             this.updateBean = updateBean;
             updateNum = updateBean.getParam().size();
             doing();
@@ -81,7 +82,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
 
     }
 
-    private void doing(){
+    private void doing() {
         downloadId = createDownloadTask().start();
     }
 
@@ -126,7 +127,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_cancel:
-                if (downloadStatus == updateNum){
+                if (downloadStatus == updateNum) {
                     Toast.makeText(BaseApplication.getBaseApplication(), "升级过程中，禁止取消", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -135,11 +136,11 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
 
                 break;
             case R.id.btn_pause_cont:
-                if (downloadStatus == updateNum){
+                if (downloadStatus == updateNum) {
                     Toast.makeText(BaseApplication.getBaseApplication(), "升级过程中，禁止暂停", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (btnPauseCont.getText().toString().equals(getContext().getString(R.string.pause))){
+                if (btnPauseCont.getText().toString().equals(getContext().getString(R.string.pause))) {
                     btnPauseCont.setText(getContext().getString(R.string.cont));
                     FileDownloader.getImpl().pause(downloadId);
                 } else {
@@ -195,7 +196,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
     }
 
     // 设置固件本地存储目录
-    private String setFilePath(String type){
+    private String setFilePath(String type) {
         String path;
         // 根据实际情况做更改
         switch (type) {
@@ -220,7 +221,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
     }
 
     // 固件下载
-    private BaseDownloadTask createDownloadTask(){
+    private BaseDownloadTask createDownloadTask() {
         final ViewHolder tag;
         final String url;
         boolean isDir = false;
@@ -252,7 +253,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
                     protected void completed(BaseDownloadTask task) {
                         ((ViewHolder) task.getTag()).updateCompleted(task);
                         downloadStatus++;
-                        if (downloadStatus == updateNum){
+                        if (downloadStatus == updateNum) {
                             pbDoing.setIndeterminate(true);
                             updating();
                         } else {
@@ -283,17 +284,34 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
     }
 
     // 固件升级
-    private void updating(){
+    private void updating() {
         SPUtil spUtil = new SPUtil(getContext(), CommonConfiguration.SHAREDPREFERENCES_NAME);
         String which_device = spUtil.getString("which_device", "2");
 
         updateStatus++;
-        if (updateStatus == updateNum){
+        if (updateStatus == updateNum) {
             pbDoing.setIndeterminate(false);
             pbDoing.setMax(1);
             pbDoing.setProgress(1);
             tvSpeed.setText("固件升级成功！");
             Toast.makeText(BaseApplication.getBaseApplication(), "固件升级成功！", Toast.LENGTH_SHORT).show();
+
+            if (which_device.equals("2") && updateBean != null) {
+                String[] tmp = spUtil.getString("black_version", "").split("/");
+                String type = updateBean.getParam().get(downloadStatus).getType();
+                switch (type) {
+                    case "mcu":
+                        spUtil.putString("black_version", tmp[0] + "/" + tmp[1] + "/" + updateBean.getParam().get(downloadStatus).getNewVersion());
+                        break;
+                    case "bluetooth":
+                        spUtil.putString("black_version", tmp[0] + "/" + updateBean.getParam().get(downloadStatus).getNewVersion() + "/" + tmp[2]);
+                        break;
+                    case "hardware":
+                        spUtil.putString("black_version", updateBean.getParam().get(downloadStatus).getNewVersion() + "/" + tmp[1] + "/" + tmp[2]);
+                        break;
+                }
+            }
+
             HandlerTip.getInstance().postDelayed(2000, new HandlerTip.HandlerCallback() {
                 @Override
                 public void postDelayed() {
@@ -305,8 +323,8 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
             });
             return;
         }
-        if (which_device.equals("2")){
-            tvSpeed.setText(String.format(Locale.getDefault(), "固件升级中.. %d/" + updateNum, (updateStatus+1)));
+        if (which_device.equals("2")) {
+            tvSpeed.setText(String.format(Locale.getDefault(), "固件升级中.. %d/" + updateNum, (updateStatus + 1)));
             String path = setFilePath(updateBean.getParam().get(updateStatus).getType());
 
             BlackDeviceManager.getInstance().updateHardwareVersion(getContext(), path, new UpdateVersionTask.UpdateListener() {
@@ -342,18 +360,18 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
         private TextView speedTv;
         private WeakReference<UpdatePopup> weakReferenceContext;
 
-        private ViewHolder(WeakReference<UpdatePopup> weakReferenceContext, final ProgressBar pb, final TextView speedTv){
+        private ViewHolder(WeakReference<UpdatePopup> weakReferenceContext, final ProgressBar pb, final TextView speedTv) {
             this.weakReferenceContext = weakReferenceContext;
             this.pb = pb;
             this.speedTv = speedTv;
         }
 
-        private void updateSpeed(int speed){
+        private void updateSpeed(int speed) {
             speedTv.setText(String.format(Locale.getDefault(), "%dKB/s", speed));
         }
 
-        private void updateProgress(int sofar, int total, int speed){
-            if (total == -1){
+        private void updateProgress(int sofar, int total, int speed) {
+            if (total == -1) {
                 pb.setIndeterminate(true);
             } else {
                 pb.setMax(total);
@@ -363,7 +381,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
             updateSpeed(speed);
         }
 
-        private void updatePending(BaseDownloadTask task){
+        private void updatePending(BaseDownloadTask task) {
 
         }
 
@@ -397,7 +415,7 @@ public class UpdatePopup extends BasePopupWindow implements View.OnClickListener
             pb.setProgress(task.getSmallFileSoFarBytes());
         }
 
-        private void toast(String msg){
+        private void toast(String msg) {
             Toast.makeText(BaseApplication.getBaseApplication(), msg, Toast.LENGTH_SHORT).show();
 
         }
