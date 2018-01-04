@@ -10,6 +10,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.huichenghe.bleControl.Ble.BluetoothLeService;
+
 import java.util.List;
 
 import butterknife.BindView;
@@ -46,6 +48,7 @@ public class SetMessagePushActivity extends BaseActivity implements EasyPermissi
     SetItemView rlTelephonePush;
 
     SPUtil spUtil;
+    private String which_device;
 
     @Override
     protected int getLayoutId() {
@@ -55,6 +58,7 @@ public class SetMessagePushActivity extends BaseActivity implements EasyPermissi
     @Override
     protected void initData() {
         spUtil = new SPUtil(mActivity, CommonConfiguration.SHAREDPREFERENCES_NAME);
+        which_device = spUtil.getString("which_device", "2");
     }
 
     @Override
@@ -89,12 +93,40 @@ public class SetMessagePushActivity extends BaseActivity implements EasyPermissi
         rlFacebookPush.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
+                if (which_device.equals("2")) {
+                    if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlFacebookPush.setChecked(!state);
+                        return;
+                    }
+                } else {
+                    String is_connected = spUtil.getString("is_connected", "0");
+                    if (is_connected.equals("0")) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlFacebookPush.setChecked(!state);
+                        return;
+                    }
+                }
                 spUtil.putString("facebook_switch", state?"1":"0");
             }
         });
         rlQqPush.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
+                if (which_device.equals("2")) {
+                    if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlQqPush.setChecked(!state);
+                        return;
+                    }
+                } else {
+                    String is_connected = spUtil.getString("is_connected", "0");
+                    if (is_connected.equals("0")) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlQqPush.setChecked(!state);
+                        return;
+                    }
+                }
                 spUtil.putString("qq_switch", state?"1":"0");
             }
         });
@@ -102,18 +134,60 @@ public class SetMessagePushActivity extends BaseActivity implements EasyPermissi
             @Override
             public void change(boolean state) {
 //                read_sms(state);
+                if (which_device.equals("2")) {
+                    if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlSmsPush.setChecked(!state);
+                        return;
+                    }
+                } else {
+                    String is_connected = spUtil.getString("is_connected", "0");
+                    if (is_connected.equals("0")) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlSmsPush.setChecked(!state);
+                        return;
+                    }
+                }
                 spUtil.putString("sms_switch", state?"1":"0");
             }
         });
         rlTelephonePush.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
+                if (which_device.equals("2")) {
+                    if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlTelephonePush.setChecked(!state);
+                        return;
+                    }
+                } else {
+                    String is_connected = spUtil.getString("is_connected", "0");
+                    if (is_connected.equals("0")) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlTelephonePush.setChecked(!state);
+                        return;
+                    }
+                }
                 spUtil.putString("telephone_switch", state?"1":"0");
             }
         });
         rlWechatPush.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
+                if (which_device.equals("2")) {
+                    if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlWechatPush.setChecked(!state);
+                        return;
+                    }
+                } else {
+                    String is_connected = spUtil.getString("is_connected", "0");
+                    if (is_connected.equals("0")) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                        rlWechatPush.setChecked(!state);
+                        return;
+                    }
+                }
                 spUtil.putString("wechat_switch", state?"1":"0");
             }
         });

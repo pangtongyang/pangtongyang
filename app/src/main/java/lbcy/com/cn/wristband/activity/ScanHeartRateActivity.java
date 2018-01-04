@@ -10,6 +10,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.huichenghe.bleControl.Ble.BluetoothLeService;
+
 import butterknife.BindView;
 import butterknife.OnClick;
 import lbcy.com.cn.blacklibrary.manager.BlackDeviceManager;
@@ -67,6 +69,12 @@ public class ScanHeartRateActivity extends BaseActivity {
         rlScanHeartRate.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
+                if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    rlScanHeartRate.setChecked(!state);
+                    return;
+                }
+
                 BlackDeviceManager.getInstance().setHeartRateFreq(state
                         ? StringUtil.getNumFromString(setHeartrateContent.getText().toString())
                         : 1440);
@@ -77,7 +85,13 @@ public class ScanHeartRateActivity extends BaseActivity {
         rlPredictHeartRate.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
-                if (validate()){
+                if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    rlPredictHeartRate.setChecked(!state);
+                    return;
+                }
+
+                if (validate()) {
                     BlackDeviceManager.getInstance().setHeartRateWarning(state
                             ? Integer.valueOf(etMaxHeartRate.getText().toString()) : 200, state
                             ? Integer.valueOf(etMinHeartRate.getText().toString()) : 0);
@@ -85,6 +99,17 @@ public class ScanHeartRateActivity extends BaseActivity {
                     rlPredictHeartRate.setChecked(false);
                 }
 
+            }
+        });
+
+        etMaxHeartRate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
+                    if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
 
@@ -102,8 +127,7 @@ public class ScanHeartRateActivity extends BaseActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 String temp = editable.toString();
-                if (temp.length() > 3)
-                {
+                if (temp.length() > 3) {
                     editable.delete(3, 4);
                 }
             }
@@ -123,9 +147,19 @@ public class ScanHeartRateActivity extends BaseActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 String temp = editable.toString();
-                if (temp.length() > 3)
-                {
+                if (temp.length() > 3) {
                     editable.delete(3, 4);
+                }
+            }
+        });
+
+        etMinHeartRate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
+                    if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                        Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -145,20 +179,20 @@ public class ScanHeartRateActivity extends BaseActivity {
         });
     }
 
-    private boolean validate(){
-        if (etMaxHeartRate.getText().toString().equals("") || etMinHeartRate.getText().toString().equals("")){
+    private boolean validate() {
+        if (etMaxHeartRate.getText().toString().equals("") || etMinHeartRate.getText().toString().equals("")) {
             Toast.makeText(mActivity, "心率预警值为空！", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (Integer.valueOf(etMaxHeartRate.getText().toString()) > 200){
+        if (Integer.valueOf(etMaxHeartRate.getText().toString()) > 200) {
             Toast.makeText(mActivity, "最大心率超限！", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (Integer.valueOf(etMinHeartRate.getText().toString()) < 40){
+        if (Integer.valueOf(etMinHeartRate.getText().toString()) < 40) {
             Toast.makeText(mActivity, "最小心率超限！", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (Integer.valueOf(etMaxHeartRate.getText().toString()) < Integer.valueOf(etMinHeartRate.getText().toString())){
+        if (Integer.valueOf(etMaxHeartRate.getText().toString()) < Integer.valueOf(etMinHeartRate.getText().toString())) {
             Toast.makeText(mActivity, "最大心率小于最小心率！", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -170,6 +204,10 @@ public class ScanHeartRateActivity extends BaseActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.rl_scan_rate:
+                if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 popupWindow.showPopupWindow();
                 break;
         }
@@ -179,6 +217,10 @@ public class ScanHeartRateActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+            return;
+        }
+
         saveData();
 
         BlackDeviceManager.getInstance().setHeartRateFreq(rlScanHeartRate.isChecked()

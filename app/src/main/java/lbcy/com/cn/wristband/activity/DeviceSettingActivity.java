@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -610,33 +611,20 @@ public class DeviceSettingActivity extends TakePhotoActivity {
             Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
             return;
         }
-        BlackDeviceManager.getInstance().getHardwareVersion(new DataCallback<String>() {
-            @Override
-            public void OnSuccess(String data) {
-                final String softVersion = data.split("/")[2];
-                final String hardVersion = data.split("/")[0];
-                final String blueVersion = data.split("/")[1];
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        b_getUpdateListFromNet(softVersion, hardVersion, blueVersion);
-                    }
-                });
-            }
 
-            @Override
-            public void OnFailed() {
+        String version = spUtil.getString("black_version", "");
+        if (TextUtils.isEmpty(version)) {
+            Toast.makeText(mActivity, "未获取版本号", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String softVersion = version.split("/")[2];
+        String hardVersion = version.split("/")[0];
+        String blueVersion = version.split("/")[1];
+        b_getUpdateListFromNet(softVersion, hardVersion, blueVersion);
 
-            }
-
-            @Override
-            public void OnFinished() {
-
-            }
-        });
     }
 
-    private void b_getUpdateListFromNet(String soft, String hard, String blue){
+    private void b_getUpdateListFromNet(final String soft, final String hard, final String blue){
         NetManager.getUpdateListAction("bjhc", soft, hard, blue, "zh-cn", new NetManager.NetCallBack<HardwareUpdateBean>() {
             @Override
             public void onResponse(Call<HardwareUpdateBean> call, Response<HardwareUpdateBean> response) {
@@ -644,9 +632,21 @@ public class DeviceSettingActivity extends TakePhotoActivity {
                 if ((updateBean != null ? updateBean.getResult() : 0) == 1){
                     StringBuilder content = new StringBuilder();
                     for (HardwareUpdateBean.ParamBean param : updateBean.getParam()){
-                        if (param.getNewVersion().compareTo(param.getOldVersion()) <= 0)
+                        String oldVersion = "";
+                        switch (param.getType()) {
+                            case "mcu":
+                                oldVersion = soft;
+                                break;
+                            case "bluetooth":
+                                oldVersion = blue;
+                                break;
+                            case "hardware":
+                                oldVersion = hard;
+                                break;
+                        }
+                        if (param.getNewVersion().compareTo(oldVersion) <= 0)
                             continue;
-                        content.append(String.format(Locale.getDefault(), "发现%s新版本，\n当前版本%s，新版本%s，\n", param.getType(), param.getOldVersion(), param.getNewVersion()));
+                        content.append(String.format(Locale.getDefault(), "发现%s新版本，\n当前版本%s，新版本%s，\n", param.getType(), oldVersion, param.getNewVersion()));
 
                     }
                     if (content.toString().equals(""))

@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.os.Message;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.huichenghe.bleControl.Ble.BluetoothLeService;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -54,7 +57,12 @@ public class SetSedentaryActivity extends BaseActivity {
         rlSedentary.setmOnCheckedChangeListener(new SetItemView.OnmCheckedChange() {
             @Override
             public void change(boolean state) {
-                b_getSettings_setRemind(state?1:0, startSedentary.getText().toString(), endSedentary.getText().toString(),
+                if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    rlSedentary.setChecked(!state);
+                    return;
+                }
+                b_getSettings_setRemind(state ? 1 : 0, startSedentary.getText().toString(), endSedentary.getText().toString(),
                         Integer.valueOf(spaceSedentary.getText().toString().replace("分钟", "")));
             }
         });
@@ -62,7 +70,7 @@ public class SetSedentaryActivity extends BaseActivity {
         mRxManager.on(Consts.ACTIVITY_SEDENTARY_LISTENER, new Action1<Message>() {
             @Override
             public void call(Message message) {
-                switch (message.what){
+                switch (message.what) {
                     case Consts.UPDATE_SEDENTARY_SPACE_TIME:
                         spaceSedentary.setText(message.obj.toString());
                         break;
@@ -77,7 +85,7 @@ public class SetSedentaryActivity extends BaseActivity {
 
     }
 
-    protected void getDataFromSP(){
+    protected void getDataFromSP() {
         startSedentary.setText(spUtil.getString("startSedentary", "09:00"));
         endSedentary.setText(spUtil.getString("endSedentary", "18:00"));
         spaceSedentary.setText(spUtil.getString("spaceSedentary", "30分钟"));
@@ -88,27 +96,42 @@ public class SetSedentaryActivity extends BaseActivity {
     public void onBackPressed() {
         super.onBackPressed();
         saveData();
-        b_getSettings_setRemind(rlSedentary.isChecked()?1:0, startSedentary.getText().toString(), endSedentary.getText().toString(),
+        b_getSettings_setRemind(rlSedentary.isChecked() ? 1 : 0, startSedentary.getText().toString(), endSedentary.getText().toString(),
                 StringUtil.getNumFromString(spaceSedentary.getText().toString()));
     }
 
     @OnClick({R.id.endSedentary, R.id.startSedentary, R.id.spaceSedentary})
-    public void onClick(View v){
+    public void onClick(View v) {
         Intent intent;
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.startSedentary:
+                if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 intent = new Intent(mActivity, SetSedentaryTimeActivity.class);
                 intent.putExtra("time", 0);
                 intent.putExtra("sedentary_time", startSedentary.getText().toString());
                 startActivityForResult(intent, Consts.SEDENTARY_TIME_ACTIVITY_REQUEST);
                 break;
             case R.id.endSedentary:
+                if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 intent = new Intent(mActivity, SetSedentaryTimeActivity.class);
                 intent.putExtra("time", 1);
                 intent.putExtra("sedentary_time", endSedentary.getText().toString());
                 startActivityForResult(intent, Consts.SEDENTARY_TIME_ACTIVITY_REQUEST);
                 break;
             case R.id.spaceSedentary:
+                if (BluetoothLeService.getInstance() == null || !BluetoothLeService.getInstance().isConnectedDevice()) {
+                    Toast.makeText(mActivity, "手环未连接", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 popupWindow = getPopup();
                 popupWindow.showPopupWindow();
                 break;
@@ -123,7 +146,7 @@ public class SetSedentaryActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         String time;
-        switch (resultCode){
+        switch (resultCode) {
             case Consts.SEDENTARY_TIME_ACTIVITY_RESULT_UP:
                 time = data.getStringExtra("time");
                 startSedentary.setText(time);
@@ -135,7 +158,7 @@ public class SetSedentaryActivity extends BaseActivity {
         }
     }
 
-    protected void saveData(){
+    protected void saveData() {
         spUtil.putString("startSedentary", startSedentary.getText().toString());
         spUtil.putString("endSedentary", endSedentary.getText().toString());
         spUtil.putString("spaceSedentary", spaceSedentary.getText().toString());
